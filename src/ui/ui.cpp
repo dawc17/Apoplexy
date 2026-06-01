@@ -25,16 +25,15 @@ void draw(const Game &game) {
   int width = GetScreenWidth();
   int height = GetScreenHeight();
 
-  DrawCircle(width / 2, height / 2, 3.0f, WHITE);
-  DrawLine(width / 2 - 10, height / 2, width / 2 - 4, height / 2, WHITE);
-  DrawLine(width / 2 + 4, height / 2, width / 2 + 10, height / 2, WHITE);
-  DrawLine(width / 2, height / 2 - 10, width / 2, height / 2 - 4, WHITE);
-  DrawLine(width / 2, height / 2 + 4, width / 2, height / 2 + 10, WHITE);
+  DrawCircle(width / 2, height / 2, 3.0f, RED);
+  DrawLine(width / 2 - 10, height / 2, width / 2 - 4, height / 2, RED);
+  DrawLine(width / 2 + 4, height / 2, width / 2 + 10, height / 2, RED);
+  DrawLine(width / 2, height / 2 - 10, width / 2, height / 2 - 4, RED);
+  DrawLine(width / 2, height / 2 + 4, width / 2, height / 2 + 10, RED);
 
-  DrawText(TextFormat("HP: %d", game.getPlayer().getHealth()), 24, 24, 28,
-           WHITE);
+  DrawText(TextFormat("HP: %d", game.getPlayer().getHealth()), 24, 24, 28, RED);
 
-  DrawText(TextFormat("Enemies: %d", aliveEnemyCount(game)), 24, 58, 24, WHITE);
+  DrawText(TextFormat("Enemies: %d", aliveEnemyCount(game)), 24, 58, 24, RED);
 
   if (game.getState() == GameState::Dead) {
     DrawText("DEAD", width / 2 - 60, height / 2 - 40, 48, RED);

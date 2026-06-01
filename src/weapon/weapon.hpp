@@ -1,11 +1,13 @@
 #pragma once
 
+#include "../assets/assetmanager.hpp"
 #include "raylib.h"
 
 #include <vector>
 
 class Player;
 class Enemy;
+class AssetManager;
 
 class Weapon {
 public:
@@ -16,7 +18,7 @@ public:
   void update(float dt, const Player &player, std::vector<Enemy> &enemies,
               const Camera3D camera);
 
-  void drawViewModel() const;
+  void drawViewModel(const Camera3D &camera, const AssetManager &assets) const;
 
 private:
   void tryShoot(const Player &player, std::vector<Enemy> &enemies,

@@ -17,6 +17,6 @@ void drawWorld(const Game &game) {
 
   EndMode3D();
 
-  game.getWeapon().drawViewModel();
+  game.getWeapon().drawViewModel(game.getCamera(), game.getAssets());
 }
 } // namespace Renderer

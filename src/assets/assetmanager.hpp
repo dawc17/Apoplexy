@@ -7,18 +7,11 @@ public:
   void load();
   void unload();
 
-  Texture2D &getEnemyTexture();
-  Texture2D &getWeaponTexture();
-
-  Sound &getShootSound();
-  Sound &getHitSound();
+  const Model &getGunModel() const;
+  Shader getMonoShader() const;
 
 private:
-  Texture2D enemyTexture();
-  Texture2D weaponTexture();
-
-  Sound shootSound();
-  Sound hitSound();
-
+  Model gunModel{};
+  Shader monoShader{};
   bool loaded = false;
 };

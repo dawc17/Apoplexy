@@ -24,6 +24,7 @@ public:
   const Weapon &getWeapon() const;
   const std::vector<Enemy> &getEnemies() const;
   const Camera3D &getCamera() const;
+  const AssetManager &getAssets() const;
 
 private:
   void reset();
@@ -34,6 +35,7 @@ private:
   GameState state = GameState::Menu;
 
   AssetManager assets;
+  RenderTexture2D sceneTarget{};
 
   Level level;
   Player player;

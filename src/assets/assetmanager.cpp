@@ -1,26 +1,41 @@
 #include "assetmanager.hpp"
-#include <raylib.h>
 
-void AssetManager::load() { loaded = true; }
+void AssetManager::load() {
+  if (loaded) {
+    return;
+  }
 
-void AssetManager::unload() { loaded = false; }
+  gunModel = LoadModel("models/gun.glb");
+  monoShader = LoadShader(0, "shaders/monochrome.fs");
 
-Texture2D &AssetManager::getEnemyTexture() {
-  static Texture2D texture{};
-  return texture;
+  const Color gunColors[] = {
+      {28, 30, 32, 255},
+      {54, 57, 60, 255},
+      {16, 17, 18, 255},
+      {88, 84, 78, 255},
+      {120, 118, 110, 255},
+      {8, 8, 9, 255},
+  };
+
+  for (int i = 0; i < gunModel.materialCount; ++i) {
+    gunModel.materials[i].maps[MATERIAL_MAP_DIFFUSE].color =
+        gunColors[i % (sizeof(gunColors) / sizeof(gunColors[0]))];
+  }
+
+  loaded = true;
 }
 
-Texture2D &AssetManager::getWeaponTexture() {
-  static Texture2D texture{};
-  return texture;
+void AssetManager::unload() {
+  if (!loaded) {
+    return;
+  }
+
+  UnloadModel(gunModel);
+  UnloadShader(monoShader);
+
+  loaded = false;
 }
 
-Sound &AssetManager::getShootSound() {
-  static Sound sound{};
-  return sound;
-}
+const Model &AssetManager::getGunModel() const { return gunModel; }
 
-Sound &AssetManager::getHitSound() {
-  static Sound sound{};
-  return sound;
-}
+Shader AssetManager::getMonoShader() const { return monoShader; }

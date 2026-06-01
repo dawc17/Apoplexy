@@ -118,8 +118,28 @@ endif
 GENERATED :=
 OBJECTS :=
 
+GENERATED += $(OBJDIR)/assetmanager.o
+GENERATED += $(OBJDIR)/collision.o
+GENERATED += $(OBJDIR)/enemy.o
+GENERATED += $(OBJDIR)/game.o
+GENERATED += $(OBJDIR)/level.o
 GENERATED += $(OBJDIR)/main.o
+GENERATED += $(OBJDIR)/math.o
+GENERATED += $(OBJDIR)/player.o
+GENERATED += $(OBJDIR)/renderer.o
+GENERATED += $(OBJDIR)/ui.o
+GENERATED += $(OBJDIR)/weapon.o
+OBJECTS += $(OBJDIR)/assetmanager.o
+OBJECTS += $(OBJDIR)/collision.o
+OBJECTS += $(OBJDIR)/enemy.o
+OBJECTS += $(OBJDIR)/game.o
+OBJECTS += $(OBJDIR)/level.o
 OBJECTS += $(OBJDIR)/main.o
+OBJECTS += $(OBJDIR)/math.o
+OBJECTS += $(OBJDIR)/player.o
+OBJECTS += $(OBJDIR)/renderer.o
+OBJECTS += $(OBJDIR)/ui.o
+OBJECTS += $(OBJDIR)/weapon.o
 
 # Rules
 # #############################################
@@ -183,7 +203,37 @@ endif
 # File Rules
 # #############################################
 
+$(OBJDIR)/assetmanager.o: src/assets/assetmanager.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/collision.o: src/collision/collision.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/game.o: src/core/game.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/enemy.o: src/enemy/enemy.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/level.o: src/level/level.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/main.o: src/main.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/player.o: src/player/player.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/renderer.o: src/render/renderer.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/ui.o: src/ui/ui.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/math.o: src/util/math.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/weapon.o: src/weapon/weapon.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 

@@ -91,11 +91,11 @@ void Player::updateMovement(float dt, const Level &level) {
   }
 
   if (IsKeyDown(KEY_D)) {
-    moveDir = Vector3Add(moveDir, right);
+    moveDir = Vector3Subtract(moveDir, right);
   }
 
   if (IsKeyDown(KEY_A)) {
-    moveDir = Vector3Subtract(moveDir, right);
+    moveDir = Vector3Add(moveDir, right);
   }
 
   // stopping the player from moving faster on diagonals, classic

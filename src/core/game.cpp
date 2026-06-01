@@ -89,3 +89,10 @@ void Game::draw() {
   Renderer::drawWorld(*this);
   UI::draw(*this);
 }
+
+GameState Game::getState() const { return state; }
+const Level &Game::getLevel() const { return level; }
+const Player &Game::getPlayer() const { return player; }
+const Weapon &Game::getWeapon() const { return weapon; }
+const std::vector<Enemy> &Game::getEnemies() const { return enemies; }
+const Camera3D &Game::getCamera() const { return camera; }

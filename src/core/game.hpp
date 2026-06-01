@@ -8,6 +8,7 @@
 #include "../player/player.hpp"
 #include "../weapon/weapon.hpp"
 
+#include <raylib.h>
 #include <vector>
 
 class Game {
@@ -17,6 +18,12 @@ public:
 
   void update(float dt);
   void draw();
+  GameState getState() const;
+  const Level &getLevel() const;
+  const Player &getPlayer() const;
+  const Weapon &getWeapon() const;
+  const std::vector<Enemy> &getEnemies() const;
+  const Camera3D &getCamera() const;
 
 private:
   void reset();

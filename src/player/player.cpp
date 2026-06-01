@@ -55,6 +55,7 @@ Vector3 Player::getEyePosition() const {
   return {position.x, position.y + height * 0.85f, position.z};
 }
 
+// getters
 float Player::getYaw() const { return yaw; }
 
 float Player::getPitch() const { return pitch; }
@@ -72,4 +73,38 @@ void Player::updateMouseLook(float dt) {
   pitch -= mouseDelta.y * Constants::MOUSE_SENSITIVITY;
 
   pitch = std::clamp(pitch, -1.5f, 1.5f);
+}
+
+void Player::updateMovement(float dt, const Level &level) {
+  Vector3 moveDir{0.0f, 0.0f, 0.0f};
+
+  Vector3 forward{std::sinf(yaw), 0.0f, std::cosf(yaw)};
+
+  Vector3 right{forward.z, 0.0f, -forward.x};
+
+  if (IsKeyDown(KEY_W)) {
+    moveDir = Vector3Add(moveDir, forward);
+  }
+
+  if (IsKeyDown(KEY_S)) {
+    moveDir = Vector3Subtract(moveDir, forward);
+  }
+
+  if (IsKeyDown(KEY_D)) {
+    moveDir = Vector3Add(moveDir, right);
+  }
+
+  if (IsKeyDown(KEY_A)) {
+    moveDir = Vector3Subtract(moveDir, right);
+  }
+
+  // stopping the player from moving faster on diagonals, classic
+  if (Vector3Length(moveDir) > 0.0f) {
+    moveDir = Vector3Normalize(moveDir);
+  }
+
+  velocity.x = moveDir.x * moveSpeed;
+  velocity.z = moveDir.z * moveSpeed;
+
+  position = Collision::moveSphereLevel(position, velocity, radius, level, dt);
 }

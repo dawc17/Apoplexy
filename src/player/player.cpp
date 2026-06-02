@@ -78,7 +78,7 @@ void Player::updateMouseLook(float dt) {
 void Player::updateMovement(float dt, const Level &level) {
   Vector3 moveDir{0.0f, 0.0f, 0.0f};
 
-  Vector3 forward{std::sinf(yaw), 0.0f, std::cosf(yaw)};
+  Vector3 forward{std::sin(yaw), 0.0f, std::cos(yaw)};
 
   Vector3 right{forward.z, 0.0f, -forward.x};
 

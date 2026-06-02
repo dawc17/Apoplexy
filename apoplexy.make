@@ -42,69 +42,69 @@ endef
 
 ifeq ($(config),debug_x64)
 TARGETDIR = bin/Debug
-TARGET = $(TARGETDIR)/apoplexy
-OBJDIR = obj/x64/Debug/apoplexy
-DEFINES += -DDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_GLFW_X11
+TARGET = $(TARGETDIR)/Apoplexy.exe
+OBJDIR = obj/x64/Debug/Apoplexy
+DEFINES += -DDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_WIN32
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -g -std=c17
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -g -std=c++17
-LIBS += bin/Debug/libraylib.a -lpthread -lm -ldl -lrt -lX11
-LDDEPS += bin/Debug/libraylib.a
-ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64
+LIBS += bin/Debug/raylib.lib -lwinmm -lgdi32 -lopengl32
+LDDEPS += bin/Debug/raylib.lib
+ALL_LDFLAGS += $(LDFLAGS) -Lbin/Debug -L/usr/lib64 -m64
 
 else ifeq ($(config),debug_x86)
 TARGETDIR = bin/Debug
-TARGET = $(TARGETDIR)/apoplexy
-OBJDIR = obj/x86/Debug/apoplexy
-DEFINES += -DDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_GLFW_X11
+TARGET = $(TARGETDIR)/Apoplexy.exe
+OBJDIR = obj/x86/Debug/Apoplexy
+DEFINES += -DDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_WIN32
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -g -std=c17
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -g -std=c++17
-LIBS += bin/Debug/libraylib.a -lpthread -lm -ldl -lrt -lX11
-LDDEPS += bin/Debug/libraylib.a
-ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -m32
+LIBS += bin/Debug/raylib.lib -lwinmm -lgdi32 -lopengl32
+LDDEPS += bin/Debug/raylib.lib
+ALL_LDFLAGS += $(LDFLAGS) -Lbin/Debug -L/usr/lib32 -m32
 
 else ifeq ($(config),debug_arm64)
 TARGETDIR = bin/Debug
-TARGET = $(TARGETDIR)/apoplexy
-OBJDIR = obj/ARM64/Debug/apoplexy
-DEFINES += -DDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_GLFW_X11
+TARGET = $(TARGETDIR)/Apoplexy.exe
+OBJDIR = obj/ARM64/Debug/Apoplexy
+DEFINES += -DDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_WIN32
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -Wshadow -g -std=c17
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -Wshadow -g -std=c++17
-LIBS += bin/Debug/libraylib.a -lpthread -lm -ldl -lrt -lX11
-LDDEPS += bin/Debug/libraylib.a
-ALL_LDFLAGS += $(LDFLAGS)
+LIBS += bin/Debug/raylib.lib -lwinmm -lgdi32 -lopengl32
+LDDEPS += bin/Debug/raylib.lib
+ALL_LDFLAGS += $(LDFLAGS) -Lbin/Debug
 
 else ifeq ($(config),release_x64)
 TARGETDIR = bin/Release
-TARGET = $(TARGETDIR)/apoplexy
-OBJDIR = obj/x64/Release/apoplexy
-DEFINES += -DNDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_GLFW_X11
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -O2 -std=c17
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -O2 -std=c++17
-LIBS += bin/Release/libraylib.a -lpthread -lm -ldl -lrt -lX11
-LDDEPS += bin/Release/libraylib.a
-ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
+TARGET = $(TARGETDIR)/Apoplexy.exe
+OBJDIR = obj/x64/Release/Apoplexy
+DEFINES += -DNDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_WIN32
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -O2 -std=c17 -Wl,--subsystem,windows
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -O2 -std=c++17 -Wl,--subsystem,windows
+LIBS += bin/Release/raylib.lib -lwinmm -lgdi32 -lopengl32
+LDDEPS += bin/Release/raylib.lib
+ALL_LDFLAGS += $(LDFLAGS) -Lbin/Release -L/usr/lib64 -m64 -mwindows -s
 
 else ifeq ($(config),release_x86)
 TARGETDIR = bin/Release
-TARGET = $(TARGETDIR)/apoplexy
-OBJDIR = obj/x86/Release/apoplexy
-DEFINES += -DNDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_GLFW_X11
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -O2 -std=c17
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -O2 -std=c++17
-LIBS += bin/Release/libraylib.a -lpthread -lm -ldl -lrt -lX11
-LDDEPS += bin/Release/libraylib.a
-ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -m32 -s
+TARGET = $(TARGETDIR)/Apoplexy.exe
+OBJDIR = obj/x86/Release/Apoplexy
+DEFINES += -DNDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_WIN32
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -O2 -std=c17 -Wl,--subsystem,windows
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -O2 -std=c++17 -Wl,--subsystem,windows
+LIBS += bin/Release/raylib.lib -lwinmm -lgdi32 -lopengl32
+LDDEPS += bin/Release/raylib.lib
+ALL_LDFLAGS += $(LDFLAGS) -Lbin/Release -L/usr/lib32 -m32 -mwindows -s
 
 else ifeq ($(config),release_arm64)
 TARGETDIR = bin/Release
-TARGET = $(TARGETDIR)/apoplexy
-OBJDIR = obj/ARM64/Release/apoplexy
-DEFINES += -DNDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_GLFW_X11
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -Wshadow -O2 -std=c17
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -Wshadow -O2 -std=c++17
-LIBS += bin/Release/libraylib.a -lpthread -lm -ldl -lrt -lX11
-LDDEPS += bin/Release/libraylib.a
-ALL_LDFLAGS += $(LDFLAGS) -s
+TARGET = $(TARGETDIR)/Apoplexy.exe
+OBJDIR = obj/ARM64/Release/Apoplexy
+DEFINES += -DNDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_WIN32
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -Wshadow -O2 -std=c17 -Wl,--subsystem,windows
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -Wshadow -O2 -std=c++17 -Wl,--subsystem,windows
+LIBS += bin/Release/raylib.lib -lwinmm -lgdi32 -lopengl32
+LDDEPS += bin/Release/raylib.lib
+ALL_LDFLAGS += $(LDFLAGS) -Lbin/Release -mwindows -s
 
 endif
 
@@ -149,7 +149,7 @@ all: $(TARGET)
 
 $(TARGET): $(GENERATED) $(OBJECTS) $(LDDEPS) | $(TARGETDIR)
 	$(PRELINKCMDS)
-	@echo Linking apoplexy
+	@echo Linking Apoplexy
 	$(SILENT) $(LINKCMD)
 	$(POSTBUILDCMDS)
 
@@ -170,14 +170,14 @@ else
 endif
 
 clean:
-	@echo Cleaning apoplexy
+	@echo Cleaning Apoplexy
 ifeq (posix,$(SHELLTYPE))
 	$(SILENT) rm -f  $(TARGET)
 	$(SILENT) rm -rf $(GENERATED)
 	$(SILENT) rm -rf $(OBJDIR)
 else
 	$(SILENT) if exist $(subst /,\\,$(TARGET)) del $(subst /,\\,$(TARGET))
-	$(SILENT) if exist $(subst /,\\,$(GENERATED)) del /s /q $(subst /,\\,$(GENERATED))
+	$(SILENT) $(foreach f,$(subst /,\\,$(GENERATED)),if exist $(f) del /s /q $(f) >nul &)
 	$(SILENT) if exist $(subst /,\\,$(OBJDIR)) rmdir /s /q $(subst /,\\,$(OBJDIR))
 endif
 

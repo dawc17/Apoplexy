@@ -4,17 +4,17 @@
 
 namespace Math {
 Vector3 forwardFromYawPitch(float yaw, float pitch) {
-  float cp = std::cosf(pitch);
+  float cp = std::cos(pitch);
 
   return {
-      std::sinf(yaw) * cp,
-      std::sinf(pitch),
-      std::cosf(yaw) * cp,
+      std::sin(yaw) * cp,
+      std::sin(pitch),
+      std::cos(yaw) * cp,
   };
 }
 
 Vector3 forwardFromYaw(float yaw) {
-  return {std::sinf(yaw), 0.0f, std::cosf(yaw)};
+  return {std::sin(yaw), 0.0f, std::cos(yaw)};
 }
 
 float distanceXZ(Vector3 a, Vector3 b) {
@@ -22,6 +22,6 @@ float distanceXZ(Vector3 a, Vector3 b) {
   float dz = a.z - b.z;
 
   // cursed much?
-  return std::sqrtf(dx * dx + dz * dz);
+  return std::sqrt(dx * dx + dz * dz);
 }
 } // namespace Math

@@ -6,7 +6,7 @@ void AssetManager::load() {
   }
 
   gunModel = LoadModel("models/gun.glb");
-  monoShader = LoadShader(0, "shaders/monochrome.fs");
+  monoShader = LoadShader("shaders/monochrome.vs", "shaders/monochrome.fs");
 
   const Color gunColors[] = {
       {28, 30, 32, 255},
@@ -18,6 +18,7 @@ void AssetManager::load() {
   };
 
   for (int i = 0; i < gunModel.materialCount; ++i) {
+    gunModel.materials[i].shader = monoShader;
     gunModel.materials[i].maps[MATERIAL_MAP_DIFFUSE].color =
         gunColors[i % (sizeof(gunColors) / sizeof(gunColors[0]))];
   }

@@ -35,6 +35,13 @@ void draw(const Game &game) {
 
   DrawText(TextFormat("Enemies: %d", aliveEnemyCount(game)), 24, 58, 24, RED);
 
+  DrawText(TextFormat("Current xPos: %f", game.getPlayer().getPosition().x), 24,
+           100, 28, RED);
+  DrawText(TextFormat("Current zPos: %f", game.getPlayer().getPosition().z), 24,
+           138, 28, RED);
+  DrawText(TextFormat("Current yPos: %f", game.getPlayer().getPosition().y), 24,
+           170, 28, RED);
+
   if (game.getState() == GameState::Dead) {
     DrawText("DEAD", width / 2 - 60, height / 2 - 40, 48, RED);
     DrawText("Press R to restart", width / 2 - 120, height / 2 + 18, 24, WHITE);

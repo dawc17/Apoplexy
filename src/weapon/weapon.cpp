@@ -11,7 +11,7 @@
 
 #include <algorithm>
 #include <cfloat>
-#include <cmath>
+#include <iostream>
 #include <vector>
 
 Weapon::Weapon() { reset(); }
@@ -72,9 +72,12 @@ void Weapon::tryShoot(const Player &, std::vector<Enemy> &enemies,
   Ray ray = makeShootRay(camera);
   int hitEnemyIndex = -1;
   Vector3 enemyHitPoint{};
+  Vector3 levelHitPoint{};
   float enemyHitDistance = FLT_MAX;
+  float levelHitDistance = FLT_MAX;
 
   if (!Collision::rayEnemies(ray, enemies, hitEnemyIndex, enemyHitPoint)) {
+    std::cout << "Hit something else than an enemy" << std::endl;
     return;
   }
 
@@ -83,14 +86,15 @@ void Weapon::tryShoot(const Player &, std::vector<Enemy> &enemies,
     return;
   }
 
-  Vector3 levelHitPoint{};
-  float levelHitDistance = FLT_MAX;
   if (Collision::rayLevel(ray, level, levelHitPoint, levelHitDistance) &&
       levelHitDistance < enemyHitDistance) {
+    std::cout << "Hello";
     return;
   }
 
   if (hitEnemyIndex >= 0) {
+    std::cout << "Hit enemy at index: " << hitEnemyIndex << " at a distance of "
+              << enemyHitDistance << std::endl;
     enemies[hitEnemyIndex].applyDamage(damage);
   }
 }

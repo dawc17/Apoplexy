@@ -6,9 +6,15 @@
 #include "gamestate.hpp"
 #include "raylib.h"
 
+namespace {
+constexpr int PSX_RENDER_WIDTH = 640;
+constexpr int PSX_RENDER_HEIGHT = 320;
+} // namespace
+
 Game::Game() {
   assets.load();
-  sceneTarget = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+  sceneTarget = LoadRenderTexture(PSX_RENDER_WIDTH, PSX_RENDER_HEIGHT);
+  SetTextureFilter(sceneTarget.texture, TEXTURE_FILTER_POINT);
   reset();
 }
 
@@ -93,31 +99,31 @@ void Game::draw() {
   BeginTextureMode(sceneTarget);
   ClearBackground(BLACK);
 
+  Shader monoShader = assets.getMonoShader();
+  Vector2 virtualResolution = {static_cast<float>(PSX_RENDER_WIDTH),
+                               static_cast<float>(PSX_RENDER_HEIGHT)};
+  float colorLevels = 4.0f;
+  float ditherStrength = 0.18f;
+
+  SetShaderValue(monoShader, GetShaderLocation(monoShader, "virtualResolution"),
+                 &virtualResolution, SHADER_UNIFORM_VEC2);
+  SetShaderValue(monoShader, GetShaderLocation(monoShader, "colorLevels"),
+                 &colorLevels, SHADER_UNIFORM_FLOAT);
+  SetShaderValue(monoShader, GetShaderLocation(monoShader, "ditherStrength"),
+                 &ditherStrength, SHADER_UNIFORM_FLOAT);
+
+  BeginShaderMode(monoShader);
   Renderer::drawWorld(*this);
+  EndShaderMode();
 
   EndTextureMode();
 
-  Shader monoShader = assets.getMonoShader();
-  Vector2 resolution = {static_cast<float>(sceneTarget.texture.width),
-                        static_cast<float>(sceneTarget.texture.height)};
-  float pixelSize = 2.0f;
-  float threshold = 0.48f;
-
-  SetShaderValue(monoShader, GetShaderLocation(monoShader, "resolution"),
-                 &resolution, SHADER_UNIFORM_VEC2);
-  SetShaderValue(monoShader, GetShaderLocation(monoShader, "pixelSize"),
-                 &pixelSize, SHADER_UNIFORM_FLOAT);
-  SetShaderValue(monoShader, GetShaderLocation(monoShader, "threshold"),
-                 &threshold, SHADER_UNIFORM_FLOAT);
-
-  BeginShaderMode(monoShader);
   DrawTexturePro(sceneTarget.texture,
                  {0.0f, 0.0f, static_cast<float>(sceneTarget.texture.width),
                   -static_cast<float>(sceneTarget.texture.height)},
                  {0.0f, 0.0f, static_cast<float>(GetScreenWidth()),
                   static_cast<float>(GetScreenHeight())},
                  {0.0f, 0.0f}, 0.0f, WHITE);
-  EndShaderMode();
 
   UI::draw(*this);
 }

@@ -6,6 +6,7 @@
 #include <vector>
 
 class Player;
+class Level;
 class Enemy;
 class AssetManager;
 
@@ -16,13 +17,13 @@ public:
   void reset();
 
   void update(float dt, const Player &player, std::vector<Enemy> &enemies,
-              const Camera3D camera);
+              const Level &level, const Camera3D camera);
 
   void drawViewModel(const Camera3D &camera, const AssetManager &assets) const;
 
 private:
   void tryShoot(const Player &player, std::vector<Enemy> &enemies,
-                const Camera3D &camera);
+                const Level &level, const Camera3D &camera);
   Ray makeShootRay(const Camera3D &camera) const;
 
 private:

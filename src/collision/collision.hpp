@@ -15,4 +15,7 @@ Vector3 moveSphereLevel(Vector3 position, Vector3 velocity, float radius,
 
 bool rayEnemies(Ray ray, std::vector<Enemy> &enemies, int &hitEnemyIndex,
                 Vector3 &hitPoint);
+
+bool rayLevel(Ray ray, const Level &level, Vector3 &hitPoint,
+              float &hitDistance);
 } // namespace Collision

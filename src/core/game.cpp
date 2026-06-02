@@ -65,7 +65,7 @@ void Game::updatePlaying(float dt) {
   player.update(dt, level);
   camera = player.getCamera();
 
-  weapon.update(dt, player, enemies, camera);
+  weapon.update(dt, player, enemies, level, camera);
 
   for (Enemy &enemy : enemies) {
     enemy.update(dt, player, level);

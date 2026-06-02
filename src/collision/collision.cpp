@@ -70,4 +70,33 @@ bool rayEnemies(Ray ray, std::vector<Enemy> &enemies, int &hitEnemyIndex,
 
   return hitEnemyIndex >= 0;
 }
+
+bool rayLevel(Ray ray, const Level &level, Vector3 &hitPoint,
+              float &hitDistance) {
+  bool didHit = false;
+  float closestDistance = FLT_MAX;
+
+  for (const Wall &wall : level.getWalls()) {
+    RayCollision collision = GetRayCollisionBox(ray, wall.bounds);
+
+    if (!collision.hit) {
+      continue;
+    }
+
+    if (collision.distance < 0.0f) {
+      continue;
+    }
+
+    if (collision.distance >= closestDistance) {
+      continue;
+    }
+
+    didHit = true;
+    closestDistance = collision.distance;
+    hitPoint = collision.point;
+  }
+
+  hitDistance = closestDistance;
+  return didHit;
+}
 } // namespace Collision

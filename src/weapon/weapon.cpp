@@ -2,6 +2,7 @@
 
 #include "../collision/collision.hpp"
 #include "../enemy/enemy.hpp"
+#include "../level/level.hpp"
 #include "../player/player.hpp"
 
 #include "raylib.h"
@@ -9,6 +10,7 @@
 #include "rlgl.h"
 
 #include <algorithm>
+#include <cfloat>
 #include <cmath>
 #include <vector>
 
@@ -21,7 +23,7 @@ void Weapon::reset() {
 }
 
 void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
-                    const Camera3D camera) {
+                    const Level &level, const Camera3D camera) {
   // the documentation for std::max() is amazing. "this does what you think it
   // does" - cpp docs, nineteen ninety-unc
   cooldown = std::max(0.0f, cooldown - dt);
@@ -29,7 +31,7 @@ void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
   muzzleFlashTimer = std::max(0.0f, muzzleFlashTimer - dt);
 
   if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && cooldown <= 0.0f) {
-    tryShoot(player, enemies, camera);
+    tryShoot(player, enemies, level, camera);
   }
 }
 
@@ -62,16 +64,33 @@ void Weapon::drawViewModel(const Camera3D &camera,
 }
 
 void Weapon::tryShoot(const Player &, std::vector<Enemy> &enemies,
-                      const Camera3D &camera) {
+                      const Level &level, const Camera3D &camera) {
   cooldown = 1.0f / fireRate;
   recoil = 1.0f;
   muzzleFlashTimer = 0.05f;
 
+  Ray ray = makeShootRay(camera);
   int hitEnemyIndex = -1;
-  Vector3 hitPoint{};
+  Vector3 enemyHitPoint{};
+  float enemyHitDistance = FLT_MAX;
 
-  if (Collision::rayEnemies(makeShootRay(camera), enemies, hitEnemyIndex,
-                            hitPoint)) {
+  if (!Collision::rayEnemies(ray, enemies, hitEnemyIndex, enemyHitPoint)) {
+    return;
+  }
+
+  enemyHitDistance = Vector3Distance(ray.position, enemyHitPoint);
+  if (enemyHitDistance > range) {
+    return;
+  }
+
+  Vector3 levelHitPoint{};
+  float levelHitDistance = FLT_MAX;
+  if (Collision::rayLevel(ray, level, levelHitPoint, levelHitDistance) &&
+      levelHitDistance < enemyHitDistance) {
+    return;
+  }
+
+  if (hitEnemyIndex >= 0) {
     enemies[hitEnemyIndex].applyDamage(damage);
   }
 }

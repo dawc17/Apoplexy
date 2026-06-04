@@ -35,4 +35,8 @@ private:
   float recoil = 0.0f;
   float muzzleFlashTimer = 0.0f;
   float muzzleFlashRotation = 0.0f;
+
+  Vector3 muzzlePoint{0.689f, -0.156f, 0.155f};
+  float muzzleFlashWidth = 1.478f;
+  float muzzleFlashHeight = 0.66f;
 };

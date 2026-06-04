@@ -39,7 +39,7 @@ void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
 void Weapon::drawViewModel(const Camera3D &camera,
                            const AssetManager &assets) const {
   const Model &gun = assets.getGunModel();
-  // const Texture2D &flash = assets.getMuzzleFlashTexture();
+  const Texture2D &flash = assets.getMuzzleFlashTexture();
 
   Camera3D viewCamera{};
   viewCamera.position = {0.0f, 0.0f, 0.0f};
@@ -52,8 +52,10 @@ void Weapon::drawViewModel(const Camera3D &camera,
   Vector3 position = {-0.20f, -0.10f - recoil * 0.025f, 0.31f - kick};
 
   // gun camera
-  rlDisableDepthTest();
+  rlDrawRenderBatchActive();
   BeginMode3D(viewCamera);
+  rlDrawRenderBatchActive();
+  rlDisableDepthTest();
   rlPushMatrix();
   rlTranslatef(position.x, position.y, position.z);
   rlRotatef(-recoil * 14.0f, 1.0f, 0.0f, 0.0f);
@@ -61,45 +63,33 @@ void Weapon::drawViewModel(const Camera3D &camera,
   rlRotatef(-6.0f, 1.0f, 0.0f, 0.0f);
   rlRotatef(-4.0f, 0.0f, 0.0f, 1.0f);
   DrawModel(gun, {0.0f, 0.0f, 0.0f}, 0.80f, WHITE);
+
+  if (muzzleFlashTimer > 0.0f) {
+    float t = muzzleFlashTimer / 0.05f;
+
+    Rectangle source{0.0f, 0.0f, static_cast<float>(flash.width),
+                     static_cast<float>(flash.height)};
+
+    Vector2 size{muzzleFlashWidth * t, muzzleFlashHeight * t};
+
+    Vector2 origin{size.x * 0.5f, size.y * 0.5f};
+
+    BeginBlendMode(BLEND_ADDITIVE);
+    DrawBillboardPro(viewCamera, flash, source, muzzlePoint, {0.0f, 1.0f, 0.0f},
+                     size, origin, muzzleFlashRotation, Fade(WHITE, 0.95f * t));
+    EndBlendMode();
+  }
+
   rlPopMatrix();
   EndMode3D();
   rlEnableDepthTest();
-
-  // my muzzle flashes a lot what about yours
-  // if (muzzleFlashTimer > 0.0f) {
-  //
-  //   float t = muzzleFlashTimer / 0.05f;
-  //
-  //   float screenW = static_cast<float>(GetScreenWidth());
-  //   float screenH = static_cast<float>(GetScreenHeight());
-  //
-  //   Vector2 center{screenW * 0.515f, screenH * 0.615f + recoil * 18.0f};
-  //
-  //   float size = 110.0f * t;
-  //
-  //   float width = 180.0f * t;
-  //   float height = 100.0f * t;
-  //
-  //   Rectangle source{0.0f, 0.0f, static_cast<float>(flash.width),
-  //                    static_cast<float>(flash.height)};
-  //
-  //   Rectangle dest{center.x, center.y, width, height};
-  //
-  //   Vector2 origin{size * 0.5f, size * 0.5f};
-  //
-  //   DrawTexturePro(flash, source, dest, origin, muzzleFlashRotation, WHITE);
-  // }
-  // DrawText(TextFormat("Flash texture: %d x %d", flash.width, flash.height),
-  // 20,
-  //          200, 24, RED);
-  // DrawTextureEx(flash, {20.0f, 150.0f}, 0.0f, 2.0f, WHITE);
 }
 
 void Weapon::tryShoot(const Player &, std::vector<Enemy> &enemies,
                       const Level &level, const Camera3D &camera) {
   cooldown = 1.0f / fireRate;
   recoil = 1.0f;
-  muzzleFlashTimer = 0.05f;
+  muzzleFlashTimer = 0.025f;
   muzzleFlashRotation = static_cast<float>(GetRandomValue(-25, 25));
 
   Ray ray = makeShootRay(camera);

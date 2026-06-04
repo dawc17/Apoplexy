@@ -1,6 +1,7 @@
 #include "weapon.hpp"
 
 #include "../collision/collision.hpp"
+#include "../effects/particles.hpp"
 #include "../enemy/enemy.hpp"
 #include "../level/level.hpp"
 #include "../player/player.hpp"
@@ -24,7 +25,8 @@ void Weapon::reset() {
 }
 
 void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
-                    const Level &level, const Camera3D camera) {
+                    const Level &level, const Camera3D camera,
+                    ParticleSystem &particles) {
   // the documentation for std::max() is amazing. "this does what you think it
   // does" - cpp docs, nineteen ninety-unc
   cooldown = std::max(0.0f, cooldown - dt);
@@ -32,7 +34,7 @@ void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
   muzzleFlashTimer = std::max(0.0f, muzzleFlashTimer - dt);
 
   if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && cooldown <= 0.0f) {
-    tryShoot(player, enemies, level, camera);
+    tryShoot(player, enemies, level, camera, particles);
   }
 }
 
@@ -86,7 +88,8 @@ void Weapon::drawViewModel(const Camera3D &camera,
 }
 
 void Weapon::tryShoot(const Player &, std::vector<Enemy> &enemies,
-                      const Level &level, const Camera3D &camera) {
+                      const Level &level, const Camera3D &camera,
+                      ParticleSystem &particles) {
   cooldown = 1.0f / fireRate;
   recoil = 1.0f;
   muzzleFlashTimer = 0.025f;
@@ -118,6 +121,9 @@ void Weapon::tryShoot(const Player &, std::vector<Enemy> &enemies,
   if (hitEnemyIndex >= 0) {
     std::cout << "Hit enemy at index: " << hitEnemyIndex << " at a distance of "
               << enemyHitDistance << std::endl;
+    Vector3 hitNormal = Vector3Normalize(Vector3Subtract(
+        enemyHitPoint, enemies[hitEnemyIndex].getPosition()));
+    particles.spawnEnemyHit(enemyHitPoint, hitNormal);
     enemies[hitEnemyIndex].applyDamage(damage);
   }
 }

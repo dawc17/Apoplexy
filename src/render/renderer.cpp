@@ -15,6 +15,8 @@ void drawWorld(const Game &game) {
     enemy.draw();
   }
 
+  game.getParticles().draw();
+
   EndMode3D();
 
   game.getWeapon().drawViewModel(game.getCamera(), game.getAssets());

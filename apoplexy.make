@@ -125,6 +125,7 @@ GENERATED += $(OBJDIR)/game.o
 GENERATED += $(OBJDIR)/level.o
 GENERATED += $(OBJDIR)/main.o
 GENERATED += $(OBJDIR)/math.o
+GENERATED += $(OBJDIR)/particles.o
 GENERATED += $(OBJDIR)/player.o
 GENERATED += $(OBJDIR)/renderer.o
 GENERATED += $(OBJDIR)/ui.o
@@ -136,6 +137,7 @@ OBJECTS += $(OBJDIR)/game.o
 OBJECTS += $(OBJDIR)/level.o
 OBJECTS += $(OBJDIR)/main.o
 OBJECTS += $(OBJDIR)/math.o
+OBJECTS += $(OBJDIR)/particles.o
 OBJECTS += $(OBJDIR)/player.o
 OBJECTS += $(OBJDIR)/renderer.o
 OBJECTS += $(OBJDIR)/ui.o
@@ -219,6 +221,9 @@ $(OBJDIR)/level.o: src/level/level.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/main.o: src/main.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/particles.o: src/effects/particles.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/player.o: src/player/player.cpp

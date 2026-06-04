@@ -3,6 +3,7 @@
 #include "gamestate.hpp"
 
 #include "../assets/assetmanager.hpp"
+#include "../effects/particles.hpp"
 #include "../enemy/enemy.hpp"
 #include "../level/level.hpp"
 #include "../player/player.hpp"
@@ -25,6 +26,7 @@ public:
   const std::vector<Enemy> &getEnemies() const;
   const Camera3D &getCamera() const;
   const AssetManager &getAssets() const;
+  const ParticleSystem &getParticles() const;
 
 private:
   void reset();
@@ -40,6 +42,7 @@ private:
   Level level;
   Player player;
   Weapon weapon;
+  ParticleSystem particles;
 
   std::vector<Enemy> enemies;
 

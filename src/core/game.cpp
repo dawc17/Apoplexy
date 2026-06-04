@@ -71,7 +71,9 @@ void Game::updatePlaying(float dt) {
   player.update(dt, level);
   camera = player.getCamera();
 
-  weapon.update(dt, player, enemies, level, camera);
+  weapon.update(dt, player, enemies, level, camera, particles);
+
+  particles.update(dt);
 
   for (Enemy &enemy : enemies) {
     enemy.update(dt, player, level);
@@ -135,3 +137,4 @@ const Weapon &Game::getWeapon() const { return weapon; }
 const std::vector<Enemy> &Game::getEnemies() const { return enemies; }
 const Camera3D &Game::getCamera() const { return camera; }
 const AssetManager &Game::getAssets() const { return assets; }
+const ParticleSystem &Game::getParticles() const { return particles; }

@@ -9,6 +9,7 @@ class Player;
 class Level;
 class Enemy;
 class AssetManager;
+class ParticleSystem;
 
 class Weapon {
 public:
@@ -17,13 +18,15 @@ public:
   void reset();
 
   void update(float dt, const Player &player, std::vector<Enemy> &enemies,
-              const Level &level, const Camera3D camera);
+              const Level &level, const Camera3D camera,
+              ParticleSystem &particles);
 
   void drawViewModel(const Camera3D &camera, const AssetManager &assets) const;
 
 private:
   void tryShoot(const Player &player, std::vector<Enemy> &enemies,
-                const Level &level, const Camera3D &camera);
+                const Level &level, const Camera3D &camera,
+                ParticleSystem &particles);
   Ray makeShootRay(const Camera3D &camera) const;
 
 private:

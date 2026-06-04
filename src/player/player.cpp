@@ -23,6 +23,7 @@ void Player::reset(Vector3 spawnPostion) {
   headBobAmount = 0.0f;
 
   health = maxHealth;
+  damageTaken = false;
 }
 
 void Player::update(float dt, const Level &level) {
@@ -31,7 +32,12 @@ void Player::update(float dt, const Level &level) {
 }
 
 void Player::applyDamage(int damage) {
+  if (damage <= 0 || health <= 0) {
+    return;
+  }
+
   health -= damage;
+  damageTaken = true;
 
   if (health < 0) {
     health = 0;
@@ -77,6 +83,12 @@ float Player::getRadius() const { return radius; }
 int Player::getHealth() const { return health; }
 
 bool Player::isDead() const { return health <= 0; }
+
+bool Player::consumeDamageTaken() {
+  bool taken = damageTaken;
+  damageTaken = false;
+  return taken;
+}
 
 void Player::updateMouseLook(float dt) {
   Vector2 mouseDelta = GetMouseDelta();
@@ -124,10 +136,11 @@ void Player::updateMovement(float dt, const Level &level) {
   if (horizontalSpeed > 0.1f) {
     // bob speed
     headBobTimer += dt * 16.0f;
-    headBobAmount = std::min(1.0f, headBobAmount + dt * 8.0f);
-  } else {
-    headBobAmount = std::max(0.0f, headBobAmount - dt * 8.0f);
   }
+
+  float targetHeadBobAmount = horizontalSpeed > 0.1f ? 1.0f : 0.0f;
+  float headBobEase = 1.0f - std::expf(-8.0f * dt);
+  headBobAmount += (targetHeadBobAmount - headBobAmount) * headBobEase;
 
   position = Collision::moveSphereLevel(position, velocity, radius, level, dt);
 }

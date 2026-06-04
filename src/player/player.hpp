@@ -21,6 +21,7 @@ public:
   float getRadius() const;
   int getHealth() const;
   bool isDead() const;
+  bool consumeDamageTaken();
 
 private:
   void updateMouseLook(float dt);
@@ -42,4 +43,5 @@ private:
 
   int health = 100;
   int maxHealth = 100;
+  bool damageTaken = false;
 };

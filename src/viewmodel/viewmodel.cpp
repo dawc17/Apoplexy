@@ -8,8 +8,60 @@
 #include <algorithm>
 #include <cmath>
 
+namespace {
+float easeOutCubic(float t) {
+  t = std::clamp(t, 0.0f, 1.0f);
+  float inverse = 1.0f - t;
+  return 1.0f - inverse * inverse * inverse;
+}
+
+float easeInOutCubic(float t) {
+  t = std::clamp(t, 0.0f, 1.0f);
+
+  if (t < 0.5f) {
+    return 4.0f * t * t * t;
+  }
+
+  float f = -2.0f * t + 2.0f;
+  return 1.0f - (f * f * f) * 0.5f;
+}
+
+float easeInOutSine(float t) {
+  t = std::clamp(t, 0.0f, 1.0f);
+  return -(std::cosf(3.14159265f * t) - 1.0f) * 0.5f;
+}
+
+float recoilKickCurve(float t) {
+  if (t < 0.10f) {
+    return easeOutCubic(t / 0.10f) * 1.18f;
+  }
+
+  if (t < 0.58f) {
+    float recover = easeInOutSine((t - 0.10f) / 0.48f);
+    return 1.18f + (-0.16f - 1.18f) * recover;
+  }
+
+  float settle = easeInOutSine((t - 0.58f) / 0.42f);
+  return -0.16f + (0.0f - -0.16f) * settle;
+}
+
+float recoilFollowThroughCurve(float t) {
+  if (t < 0.08f) {
+    return 0.0f;
+  }
+
+  if (t < 0.46f) {
+    return easeOutCubic((t - 0.08f) / 0.38f);
+  }
+
+  float recover = easeInOutSine((t - 0.46f) / 0.54f);
+  return 1.0f - recover;
+}
+} // namespace
+
 void Viewmodel::reset() {
-  recoil = 0.0f;
+  recoilTimer = recoilDuration;
+  recoilAmount = 0.0f;
   swayOffset = {0.0f, 0.0f};
   swayRotation = {0.0f, 0.0f};
   walkBobTimer = 0.0f;
@@ -17,7 +69,7 @@ void Viewmodel::reset() {
 }
 
 void Viewmodel::update(float dt) {
-  recoil = std::max(0.0f, recoil - dt * 8.0f);
+  recoilTimer = std::min(recoilDuration, recoilTimer + dt);
 
   Vector2 mouseDelta = GetMouseDelta();
 
@@ -50,13 +102,17 @@ void Viewmodel::update(float dt) {
 
   if (walking) {
     walkBobTimer += dt * 8.0f;
-    walkBobAmount = std::min(1.0f, walkBobAmount + dt * 8.0f);
-  } else {
-    walkBobAmount = std::max(0.0f, walkBobAmount - dt * 8.0f);
   }
+
+  float targetWalkBobAmount = walking ? 1.0f : 0.0f;
+  float walkBobEase = 1.0f - std::expf(-8.0f * dt);
+  walkBobAmount += (targetWalkBobAmount - walkBobAmount) * walkBobEase;
 }
 
-void Viewmodel::addRecoil(float amount) { recoil = amount; }
+void Viewmodel::addRecoil(float amount) {
+  recoilTimer = 0.0f;
+  recoilAmount = amount;
+}
 
 void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
                      const AssetManager &assets, float muzzleFlashTimer,
@@ -71,14 +127,22 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
   viewCamera.fovy = 70;
   viewCamera.projection = CAMERA_PERSPECTIVE;
 
-  float kick = recoil * weapon.recoilKick;
+  float recoilProgress =
+      recoilDuration > 0.0f ? recoilTimer / recoilDuration : 1.0f;
+  float recoilKick = recoilKickCurve(recoilProgress) * recoilAmount;
+  float recoilFollowThrough =
+      recoilFollowThroughCurve(recoilProgress) * recoilAmount;
+
+  float kick = recoilKick * weapon.recoilKick;
   float bobX = std::sinf(walkBobTimer) * 0.035f * walkBobAmount;
   float bobY = std::fabs(std::cosf(walkBobTimer)) * 0.018f * walkBobAmount;
 
   Vector3 position{
-      weapon.holdPosition.x + swayOffset.x + bobX,
-      weapon.holdPosition.y + swayOffset.y - bobY - recoil * 0.025f,
-      weapon.holdPosition.z - kick,
+      weapon.holdPosition.x + swayOffset.x + bobX -
+          recoilFollowThrough * 0.012f,
+      weapon.holdPosition.y + swayOffset.y - bobY - recoilKick * 0.030f +
+          recoilFollowThrough * 0.010f,
+      weapon.holdPosition.z - kick + recoilFollowThrough * 0.020f,
   };
 
   rlDrawRenderBatchActive();
@@ -93,7 +157,13 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
   rlRotatef(swayRotation.x, 0.0f, 1.0f, 0.0f);
   rlRotatef(-swayRotation.x * 0.35f, 0.0f, 0.0f, 1.0f);
 
-  rlRotatef(-recoil * weapon.recoilPitchDegrees, 1.0f, 0.0f, 0.0f);
+  rlRotatef(-recoilKick * weapon.recoilPitchDegrees +
+                recoilFollowThrough * 2.5f,
+            1.0f, 0.0f, 0.0f);
+  rlRotatef(-recoilFollowThrough * 1.6f, 0.0f, 1.0f, 0.0f);
+  rlRotatef(recoilKick * 2.4f - recoilFollowThrough * 1.2f, 0.0f, 0.0f,
+            1.0f);
+
   rlRotatef(weapon.holdRotationDegrees.y, 0.0f, 1.0f, 0.0f);
   rlRotatef(weapon.holdRotationDegrees.x, 1.0f, 0.0f, 0.0f);
   rlRotatef(weapon.holdRotationDegrees.z, 0.0f, 0.0f, 1.0f);

@@ -27,6 +27,7 @@ public:
   const Camera3D &getCamera() const;
   const AssetManager &getAssets() const;
   const ParticleSystem &getParticles() const;
+  bool areEnemiesFrozen() const;
 
 private:
   void reset();
@@ -34,6 +35,7 @@ private:
   void drawPlaying();
   void startCameraShake(float strength, float duration);
   void updateCameraShake(float dt);
+  void drawDamageVignette() const;
 
 private:
   GameState state = GameState::Menu;
@@ -51,6 +53,9 @@ private:
   float cameraShakeTimer = 0.0f;
   float cameraShakeDuration = 0.0f;
   float cameraShakeStrength = 0.0f;
+  float damageVignetteTimer = 0.0f;
+  float damageVignetteDuration = 0.45f;
+  bool enemiesFrozen = false;
 
   Camera3D camera{};
 };

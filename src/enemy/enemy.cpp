@@ -55,14 +55,21 @@ void Enemy::draw() const {
                 radius * 2.0f, height, radius * 2.0f, BLACK);
 }
 
-void Enemy::applyDamage(int damage) {
+bool Enemy::applyDamage(int damage) {
+  if (!isAlive()) {
+    return false;
+  }
+
   health -= damage;
   hitFlashTimer = hitFlashDuration;
 
   if (health <= 0) {
     health = 0;
     state = EnemyState::Dead;
+    return true;
   }
+
+  return false;
 }
 
 bool Enemy::isAlive() const { return health > 0; }

@@ -25,10 +25,10 @@ void draw(const Game &game) {
   int width = GetScreenWidth();
   int height = GetScreenHeight();
 
-  DrawLine(width / 2 - 10, height / 2, width / 2 - 4, height / 2, RED);
-  DrawLine(width / 2 + 4, height / 2, width / 2 + 10, height / 2, RED);
-  DrawLine(width / 2, height / 2 - 10, width / 2, height / 2 - 4, RED);
-  DrawLine(width / 2, height / 2 + 4, width / 2, height / 2 + 10, RED);
+  DrawLine(width / 2 - 10, height / 2, width / 2 - 4, height / 2, BLUE);
+  DrawLine(width / 2 + 4, height / 2, width / 2 + 10, height / 2, BLUE);
+  DrawLine(width / 2, height / 2 - 10, width / 2, height / 2 - 4, BLUE);
+  DrawLine(width / 2, height / 2 + 4, width / 2, height / 2 + 10, BLUE);
 
   DrawText(TextFormat("HP: %d", game.getPlayer().getHealth()), 24, 24, 28, RED);
 
@@ -40,6 +40,10 @@ void draw(const Game &game) {
            138, 28, RED);
   DrawText(TextFormat("Current yPos: %f", game.getPlayer().getPosition().y), 24,
            170, 28, RED);
+
+  if (game.areEnemiesFrozen()) {
+    DrawText("Enemies frozen", 24, 208, 24, GREEN);
+  }
 
   if (game.getState() == GameState::Dead) {
     DrawText("DEAD", width / 2 - 60, height / 2 - 40, 48, RED);

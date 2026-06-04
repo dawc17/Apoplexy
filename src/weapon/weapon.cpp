@@ -83,7 +83,14 @@ void Weapon::tryShoot(const Player &, std::vector<Enemy> &enemies,
     particles.spawnEnemyHit(enemyHitPoint, hitNormal,
                             enemies[hitEnemyIndex].getVelocity());
 
-    enemies[hitEnemyIndex].applyDamage(pistol.damage);
+    Vector3 enemyPosition = enemies[hitEnemyIndex].getPosition();
+    Vector3 enemyVelocity = enemies[hitEnemyIndex].getVelocity();
+
+    if (enemies[hitEnemyIndex].applyDamage(pistol.damage)) {
+      particles.spawnEnemyDeath({enemyPosition.x, enemyPosition.y + 0.75f,
+                                 enemyPosition.z},
+                                enemyVelocity);
+    }
   }
 }
 

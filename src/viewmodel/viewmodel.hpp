@@ -17,7 +17,9 @@ public:
             float muzzleFlashRotation) const;
 
 private:
-  float recoil = 0.0f;
+  float recoilTimer = 1.0f;
+  float recoilDuration = 0.36f;
+  float recoilAmount = 0.0f;
   Vector2 swayOffset{};
   Vector2 swayRotation{};
   float walkBobTimer = 0.0f;

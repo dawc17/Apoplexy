@@ -26,6 +26,7 @@ Game::~Game() {
 
 void Game::reset() {
   state = GameState::Playing;
+  damageVignetteTimer = 0.0f;
 
   level.loadTestArena();
 
@@ -69,6 +70,10 @@ void Game::update(float dt) {
 }
 
 void Game::updatePlaying(float dt) {
+  if (IsKeyPressed(KEY_X)) {
+    enemiesFrozen = !enemiesFrozen;
+  }
+
   player.update(dt, level);
   camera = player.getCamera();
 
@@ -81,9 +86,19 @@ void Game::updatePlaying(float dt) {
 
   particles.update(dt);
 
-  for (Enemy &enemy : enemies) {
-    enemy.update(dt, player, level);
+  if (!enemiesFrozen) {
+    for (Enemy &enemy : enemies) {
+      enemy.update(dt, player, level);
+    }
   }
+
+  if (player.consumeDamageTaken()) {
+    damageVignetteTimer = damageVignetteDuration;
+    startCameraShake(0.22f, 0.18f);
+  }
+
+  damageVignetteTimer = Clamp(damageVignetteTimer - dt, 0.0f,
+                              damageVignetteDuration);
 
   updateCameraShake(dt);
 
@@ -135,7 +150,41 @@ void Game::draw() {
                   static_cast<float>(GetScreenHeight())},
                  {0.0f, 0.0f}, 0.0f, WHITE);
 
+  drawDamageVignette();
+
   UI::draw(*this);
+}
+
+void Game::drawDamageVignette() const {
+  if (damageVignetteTimer <= 0.0f) {
+    return;
+  }
+
+  float t = Clamp(damageVignetteTimer / damageVignetteDuration, 0.0f, 1.0f);
+  int width = GetScreenWidth();
+  int height = GetScreenHeight();
+
+  Color bloodRed{95, 0, 0, 255};
+  DrawRectangle(0, 0, width, height, Fade(bloodRed, 0.12f * t));
+
+  int maxThickness = static_cast<int>(static_cast<float>(height) * 0.26f);
+  constexpr int rings = 10;
+
+  for (int i = 0; i < rings; ++i) {
+    float ringT = static_cast<float>(i + 1) / static_cast<float>(rings);
+    float alpha = t * ringT * ringT * 0.28f;
+    float thickness =
+        static_cast<float>(maxThickness) / static_cast<float>(rings);
+
+    Rectangle edge{
+        thickness * static_cast<float>(i) * 0.5f,
+        thickness * static_cast<float>(i) * 0.5f,
+        static_cast<float>(width) - thickness * static_cast<float>(i),
+        static_cast<float>(height) - thickness * static_cast<float>(i),
+    };
+
+    DrawRectangleLinesEx(edge, thickness, Fade(bloodRed, alpha));
+  }
 }
 
 void Game::startCameraShake(float strength, float duration) {
@@ -176,3 +225,4 @@ const std::vector<Enemy> &Game::getEnemies() const { return enemies; }
 const Camera3D &Game::getCamera() const { return camera; }
 const AssetManager &Game::getAssets() const { return assets; }
 const ParticleSystem &Game::getParticles() const { return particles; }
+bool Game::areEnemiesFrozen() const { return enemiesFrozen; }

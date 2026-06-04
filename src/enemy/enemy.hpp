@@ -14,7 +14,7 @@ public:
   void update(float dt, Player &player, const Level &level);
   void draw() const;
 
-  void applyDamage(int damage);
+  bool applyDamage(int damage);
 
   bool isAlive() const;
   BoundingBox getHitbox() const;

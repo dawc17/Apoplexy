@@ -18,6 +18,7 @@ public:
   void draw() const;
   void spawnEnemyHit(Vector3 position, Vector3 normal,
                      Vector3 inheritedVelocity);
+  void spawnEnemyDeath(Vector3 position, Vector3 inheritedVelocity);
 
 private:
   std::vector<Particle> particles;

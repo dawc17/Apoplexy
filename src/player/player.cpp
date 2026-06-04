@@ -19,6 +19,9 @@ void Player::reset(Vector3 spawnPostion) {
   yaw = 0.0f;
   pitch = 0.0f;
 
+  headBobTimer = 0.0f;
+  headBobAmount = 0.0f;
+
   health = maxHealth;
 }
 
@@ -37,6 +40,15 @@ void Player::applyDamage(int damage) {
 
 Camera3D Player::getCamera() const {
   Vector3 eye = getEyePosition();
+
+  float bobY = std::sinf(headBobTimer) * 0.045f * headBobAmount;
+  float bobX = std::cosf(headBobTimer * 0.5f) * 0.025f * headBobAmount;
+
+  Vector3 right{std::cosf(yaw), 0.0f, -std::sinf(yaw)};
+
+  eye.y += bobY;
+  eye = Vector3Add(eye, Vector3Scale(right, bobX));
+
   Vector3 forward = Math::forwardFromYawPitch(yaw, pitch);
 
   Camera3D camera{};
@@ -105,6 +117,17 @@ void Player::updateMovement(float dt, const Level &level) {
 
   velocity.x = moveDir.x * moveSpeed;
   velocity.z = moveDir.z * moveSpeed;
+
+  float horizontalSpeed =
+      std::sqrtf(velocity.x * velocity.x + velocity.z * velocity.z);
+
+  if (horizontalSpeed > 0.1f) {
+    // bob speed
+    headBobTimer += dt * 16.0f;
+    headBobAmount = std::min(1.0f, headBobAmount + dt * 8.0f);
+  } else {
+    headBobAmount = std::max(0.0f, headBobAmount - dt * 8.0f);
+  }
 
   position = Collision::moveSphereLevel(position, velocity, radius, level, dt);
 }

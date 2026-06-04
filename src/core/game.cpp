@@ -74,8 +74,9 @@ void Game::updatePlaying(float dt) {
 
   weapon.update(dt, player, enemies, level, camera, particles);
 
+  // tune fire shake here
   if (weapon.consumeShotFired()) {
-    startCameraShake(0.095f, 0.08f);
+    startCameraShake(0.15f, 0.12f);
   }
 
   particles.update(dt);

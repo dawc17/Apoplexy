@@ -33,6 +33,9 @@ private:
   float yaw = 0.0f;
   float pitch = 0.0f;
 
+  float headBobTimer = 0.0f;
+  float headBobAmount = 0.0f;
+
   float radius = 0.35f;
   float height = 1.8f;
   float moveSpeed = 6.0f;

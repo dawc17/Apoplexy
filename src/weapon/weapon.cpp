@@ -22,6 +22,7 @@ void Weapon::reset() {
   recoil = 0.0f;
   muzzleFlashTimer = 0.0f;
   muzzleFlashRotation = 0.0f;
+  shotFired = false;
 }
 
 void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
@@ -94,6 +95,7 @@ void Weapon::tryShoot(const Player &, std::vector<Enemy> &enemies,
   recoil = 1.0f;
   muzzleFlashTimer = 0.025f;
   muzzleFlashRotation = static_cast<float>(GetRandomValue(-25, 25));
+  shotFired = true;
 
   Ray ray = makeShootRay(camera);
   int hitEnemyIndex = -1;
@@ -121,8 +123,8 @@ void Weapon::tryShoot(const Player &, std::vector<Enemy> &enemies,
   if (hitEnemyIndex >= 0) {
     std::cout << "Hit enemy at index: " << hitEnemyIndex << " at a distance of "
               << enemyHitDistance << std::endl;
-    Vector3 hitNormal = Vector3Normalize(Vector3Subtract(
-        enemyHitPoint, enemies[hitEnemyIndex].getPosition()));
+    Vector3 hitNormal = Vector3Normalize(
+        Vector3Subtract(enemyHitPoint, enemies[hitEnemyIndex].getPosition()));
     particles.spawnEnemyHit(enemyHitPoint, hitNormal,
                             enemies[hitEnemyIndex].getVelocity());
     enemies[hitEnemyIndex].applyDamage(damage);
@@ -137,4 +139,10 @@ Ray Weapon::makeShootRay(const Camera3D &camera) const {
   ray.position = camera.position;
   ray.direction = direction;
   return ray;
+}
+
+bool Weapon::consumeShotFired() {
+  bool fired = shotFired;
+  shotFired = false;
+  return fired;
 }

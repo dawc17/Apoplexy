@@ -32,6 +32,8 @@ private:
   void reset();
   void updatePlaying(float dt);
   void drawPlaying();
+  void startCameraShake(float strength, float duration);
+  void updateCameraShake(float dt);
 
 private:
   GameState state = GameState::Menu;
@@ -45,6 +47,10 @@ private:
   ParticleSystem particles;
 
   std::vector<Enemy> enemies;
+
+  float cameraShakeTimer = 0.0f;
+  float cameraShakeDuration = 0.0f;
+  float cameraShakeStrength = 0.0f;
 
   Camera3D camera{};
 };

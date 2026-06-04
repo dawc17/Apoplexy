@@ -22,6 +22,7 @@ public:
               ParticleSystem &particles);
 
   void drawViewModel(const Camera3D &camera, const AssetManager &assets) const;
+  bool consumeShotFired();
 
 private:
   void tryShoot(const Player &player, std::vector<Enemy> &enemies,
@@ -42,4 +43,6 @@ private:
   Vector3 muzzlePoint{0.689f, -0.156f, 0.155f};
   float muzzleFlashWidth = 1.478f;
   float muzzleFlashHeight = 0.66f;
+
+  bool shotFired = false;
 };

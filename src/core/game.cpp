@@ -5,6 +5,7 @@
 
 #include "gamestate.hpp"
 #include "raylib.h"
+#include "raymath.h"
 
 namespace {
 constexpr int PSX_RENDER_WIDTH = 640;
@@ -73,11 +74,17 @@ void Game::updatePlaying(float dt) {
 
   weapon.update(dt, player, enemies, level, camera, particles);
 
+  if (weapon.consumeShotFired()) {
+    startCameraShake(0.095f, 0.08f);
+  }
+
   particles.update(dt);
 
   for (Enemy &enemy : enemies) {
     enemy.update(dt, player, level);
   }
+
+  updateCameraShake(dt);
 
   if (player.isDead()) {
     state = GameState::Dead;
@@ -128,6 +135,36 @@ void Game::draw() {
                  {0.0f, 0.0f}, 0.0f, WHITE);
 
   UI::draw(*this);
+}
+
+void Game::startCameraShake(float strength, float duration) {
+  cameraShakeStrength = strength;
+  cameraShakeDuration = duration;
+  cameraShakeTimer = duration;
+}
+
+void Game::updateCameraShake(float dt) {
+  if (cameraShakeTimer <= 0.0f) {
+    return;
+  }
+
+  cameraShakeTimer -= dt;
+
+  float t = cameraShakeTimer / cameraShakeDuration;
+  float strength = cameraShakeStrength * t;
+
+  Vector3 forward =
+      Vector3Normalize(Vector3Subtract(camera.target, camera.position));
+  Vector3 right = Vector3Normalize(Vector3CrossProduct(forward, camera.up));
+  Vector3 up = camera.up;
+
+  float x = static_cast<float>(GetRandomValue(-100, 100)) / 100.0f;
+  float y = static_cast<float>(GetRandomValue(-100, 100)) / 100.0f;
+
+  Vector3 offset = Vector3Add(Vector3Scale(right, x * strength),
+                              Vector3Scale(up, y * strength));
+  camera.position = Vector3Add(camera.position, offset);
+  camera.target = Vector3Add(camera.target, offset);
 }
 
 GameState Game::getState() const { return state; }

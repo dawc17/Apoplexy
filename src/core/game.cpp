@@ -102,7 +102,7 @@ void Game::draw() {
   Shader monoShader = assets.getMonoShader();
   Vector2 virtualResolution = {static_cast<float>(PSX_RENDER_WIDTH),
                                static_cast<float>(PSX_RENDER_HEIGHT)};
-  float colorLevels = 4.0f;
+  float colorLevels = 25.0f;
   float ditherStrength = 0.18f;
 
   SetShaderValue(monoShader, GetShaderLocation(monoShader, "virtualResolution"),

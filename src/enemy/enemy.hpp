@@ -36,6 +36,9 @@ private:
   int health = 30;
   int maxHealth = 30;
 
+  float hitFlashTimer = 0.0f;
+  float hitFlashDuration = 0.10f;
+
   float attackRange = 1.4f;
   float attackCooldown = 0.0f;
 

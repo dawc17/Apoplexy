@@ -21,6 +21,7 @@ void Enemy::update(float dt, Player &player, const Level &level) {
   }
 
   attackCooldown = std::max(0.0f, attackCooldown - dt);
+  hitFlashTimer = std::max(0.0f, hitFlashTimer - dt);
 
   float distance = Math::distanceXZ(position, player.getPosition());
 
@@ -43,6 +44,10 @@ void Enemy::draw() const {
   // woke enemy foid out to kill you (changes color)
   Color color = state == EnemyState::Attack ? RED : MAROON;
 
+  if (hitFlashTimer > 0.0f) {
+    color = WHITE;
+  }
+
   DrawCube({position.x, position.y + height * 0.5f, position.z}, radius * 2.0f,
            height, radius * 2.0f, color);
 
@@ -52,6 +57,7 @@ void Enemy::draw() const {
 
 void Enemy::applyDamage(int damage) {
   health -= damage;
+  hitFlashTimer = hitFlashDuration;
 
   if (health <= 0) {
     health = 0;

@@ -9,9 +9,11 @@ public:
 
   const Model &getGunModel() const;
   Shader getMonoShader() const;
+  const Texture2D &getMuzzleFlashTexture() const;
 
 private:
   Model gunModel{};
   Shader monoShader{};
+  Texture2D muzzleFlashTexture{};
   bool loaded = false;
 };

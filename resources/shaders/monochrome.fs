@@ -36,12 +36,14 @@ float quantize(float value, float levels) {
 void main() {
     vec4 color = texture(texture0, fragTexCoord.xy) * colDiffuse * fragColor;
 
-    float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-
     float dither = bayer4(floor(gl_FragCoord.xy)) * ditherStrength;
 
-    float value = clamp(gray + dither, 0.0, 1.0);
-    float bw = quantize(value, colorLevels);
+    vec3 value = clamp(color.rgb + vec3(dither), 0.0, 1.0);
+    vec3 quantized = vec3(
+        quantize(value.r, colorLevels),
+        quantize(value.g, colorLevels),
+        quantize(value.b, colorLevels)
+    );
 
-    finalColor = vec4(vec3(bw), color.a);
+    finalColor = vec4(quantized, color.a);
 }

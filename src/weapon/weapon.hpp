@@ -34,4 +34,5 @@ private:
 
   float recoil = 0.0f;
   float muzzleFlashTimer = 0.0f;
+  float muzzleFlashRotation = 0.0f;
 };

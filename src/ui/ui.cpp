@@ -25,7 +25,6 @@ void draw(const Game &game) {
   int width = GetScreenWidth();
   int height = GetScreenHeight();
 
-  DrawCircle(width / 2, height / 2, 3.0f, RED);
   DrawLine(width / 2 - 10, height / 2, width / 2 - 4, height / 2, RED);
   DrawLine(width / 2 + 4, height / 2, width / 2 + 10, height / 2, RED);
   DrawLine(width / 2, height / 2 - 10, width / 2, height / 2 - 4, RED);

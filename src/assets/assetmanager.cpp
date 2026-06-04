@@ -1,4 +1,5 @@
 #include "assetmanager.hpp"
+#include <raylib.h>
 
 void AssetManager::load() {
   if (loaded) {
@@ -7,14 +8,11 @@ void AssetManager::load() {
 
   gunModel = LoadModel("models/gun.glb");
   monoShader = LoadShader("shaders/monochrome.vs", "shaders/monochrome.fs");
+  muzzleFlashTexture = LoadTexture("textures/muzzleflash.png");
 
   const Color gunColors[] = {
-      {28, 30, 32, 255},
-      {54, 57, 60, 255},
-      {16, 17, 18, 255},
-      {88, 84, 78, 255},
-      {120, 118, 110, 255},
-      {8, 8, 9, 255},
+      {28, 30, 32, 255}, {54, 57, 60, 255},    {16, 17, 18, 255},
+      {88, 84, 78, 255}, {120, 118, 110, 255}, {8, 8, 9, 255},
   };
 
   for (int i = 0; i < gunModel.materialCount; ++i) {
@@ -33,6 +31,7 @@ void AssetManager::unload() {
 
   UnloadModel(gunModel);
   UnloadShader(monoShader);
+  UnloadTexture(muzzleFlashTexture);
 
   loaded = false;
 }
@@ -40,3 +39,7 @@ void AssetManager::unload() {
 const Model &AssetManager::getGunModel() const { return gunModel; }
 
 Shader AssetManager::getMonoShader() const { return monoShader; }
+
+const Texture2D &AssetManager::getMuzzleFlashTexture() const {
+  return muzzleFlashTexture;
+}

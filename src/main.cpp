@@ -19,6 +19,17 @@ int main() {
   while (!WindowShouldClose()) {
     float dt = GetFrameTime();
 
+    if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_ENTER)) {
+      if (!IsWindowFullscreen()) {
+        int monitor = GetCurrentMonitor();
+        SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
+      } else {
+        SetWindowSize(Constants::SCREEN_WIDTH, Constants::SCREEN_HEIGHT);
+      }
+
+      ToggleFullscreen();
+    }
+
     game.update(dt);
 
     BeginDrawing();

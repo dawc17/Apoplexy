@@ -28,26 +28,38 @@ void ParticleSystem::draw() const {
   }
 }
 
-void ParticleSystem::spawnEnemyHit(Vector3 position, Vector3 normal) {
-  constexpr int count = 10;
+void ParticleSystem::spawnEnemyHit(Vector3 position, Vector3 normal,
+                                   Vector3 inheritedVelocity) {
+  constexpr int count = 14;
+
+  if (Vector3Length(normal) <= 0.001f) {
+    normal = {0.0f, 1.0f, 0.0f};
+  } else {
+    normal = Vector3Normalize(normal);
+  }
+
+  Vector3 spawnPosition = Vector3Add(position, Vector3Scale(normal, 0.08f));
 
   for (int i = 0; i < count; ++i) {
     Vector3 randomDirection{
-        static_cast<float>(GetRandomValue(-100, 100)) / 100.0f,
+        static_cast<float>(GetRandomValue(-50, 50)) / 100.0f,
         static_cast<float>(GetRandomValue(20, 120)) / 100.0f,
-        static_cast<float>(GetRandomValue(-100, 100)) / 100.0f,
+        static_cast<float>(GetRandomValue(-50, 50)) / 100.0f,
     };
 
-    Vector3 direction = Vector3Normalize(Vector3Add(normal, randomDirection));
+    Vector3 direction =
+        Vector3Normalize(Vector3Add(Vector3Scale(normal, 1.8f), randomDirection));
 
     Particle particle{};
-    particle.position = position;
-    particle.velocity = Vector3Scale(
-        direction, static_cast<float>(GetRandomValue(160, 320)) / 100.0f);
-    particle.lifetime = 0.35f;
+    particle.position = spawnPosition;
+    particle.velocity = Vector3Add(
+        inheritedVelocity,
+        Vector3Scale(direction,
+                     static_cast<float>(GetRandomValue(240, 430)) / 100.0f));
+    particle.lifetime = 0.45f;
     particle.maxLifetime = particle.lifetime;
-    particle.size = static_cast<float>(GetRandomValue(3, 6)) / 100.0f;
-    particle.color = {180, 0, 20, 255};
+    particle.size = static_cast<float>(GetRandomValue(4, 8)) / 100.0f;
+    particle.color = {185, 8, 20, 255};
 
     particles.push_back(particle);
   }

@@ -19,6 +19,7 @@ public:
   bool isAlive() const;
   BoundingBox getHitbox() const;
   Vector3 getPosition() const;
+  Vector3 getVelocity() const;
 
 private:
   void updateHitbox();

@@ -123,7 +123,8 @@ void Weapon::tryShoot(const Player &, std::vector<Enemy> &enemies,
               << enemyHitDistance << std::endl;
     Vector3 hitNormal = Vector3Normalize(Vector3Subtract(
         enemyHitPoint, enemies[hitEnemyIndex].getPosition()));
-    particles.spawnEnemyHit(enemyHitPoint, hitNormal);
+    particles.spawnEnemyHit(enemyHitPoint, hitNormal,
+                            enemies[hitEnemyIndex].getVelocity());
     enemies[hitEnemyIndex].applyDamage(damage);
   }
 }

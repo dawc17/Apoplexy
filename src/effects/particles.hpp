@@ -16,7 +16,8 @@ class ParticleSystem {
 public:
   void update(float dt);
   void draw() const;
-  void spawnEnemyHit(Vector3 position, Vector3 normal);
+  void spawnEnemyHit(Vector3 position, Vector3 normal,
+                     Vector3 inheritedVelocity);
 
 private:
   std::vector<Particle> particles;

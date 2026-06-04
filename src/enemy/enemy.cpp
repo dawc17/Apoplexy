@@ -71,6 +71,8 @@ BoundingBox Enemy::getHitbox() const { return hitbox; }
 
 Vector3 Enemy::getPosition() const { return position; }
 
+Vector3 Enemy::getVelocity() const { return velocity; }
+
 void Enemy::updateHitbox() {
   hitbox.min = {position.x - radius, position.y, position.z - radius};
   hitbox.max = {position.x + radius, position.y + height, position.z + radius};

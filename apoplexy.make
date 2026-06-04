@@ -129,6 +129,7 @@ GENERATED += $(OBJDIR)/particles.o
 GENERATED += $(OBJDIR)/player.o
 GENERATED += $(OBJDIR)/renderer.o
 GENERATED += $(OBJDIR)/ui.o
+GENERATED += $(OBJDIR)/viewmodel.o
 GENERATED += $(OBJDIR)/weapon.o
 OBJECTS += $(OBJDIR)/assetmanager.o
 OBJECTS += $(OBJDIR)/collision.o
@@ -141,6 +142,7 @@ OBJECTS += $(OBJDIR)/particles.o
 OBJECTS += $(OBJDIR)/player.o
 OBJECTS += $(OBJDIR)/renderer.o
 OBJECTS += $(OBJDIR)/ui.o
+OBJECTS += $(OBJDIR)/viewmodel.o
 OBJECTS += $(OBJDIR)/weapon.o
 
 # Rules
@@ -236,6 +238,9 @@ $(OBJDIR)/ui.o: src/ui/ui.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/math.o: src/util/math.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/viewmodel.o: src/viewmodel/viewmodel.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/weapon.o: src/weapon/weapon.cpp

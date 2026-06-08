@@ -26,9 +26,6 @@ void draw(const Game &game) {
   int height = GetScreenHeight();
 
   if (game.isEditorEnabled()) {
-    DrawText("EDITOR", 24, 24, 28, GREEN);
-    DrawText("WASD move  Q/R zoom  Space wall  E enemy  P player  F6 save",
-             24, 58, 20, GREEN);
     return;
   }
 

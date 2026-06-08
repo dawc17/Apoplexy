@@ -22,6 +22,7 @@ public:
   void draw();
   GameState getState() const;
   const Level &getLevel() const;
+  Level &getMutableLevel();
   const Player &getPlayer() const;
   const Weapon &getWeapon() const;
   const std::vector<Enemy> &getEnemies() const;
@@ -29,6 +30,7 @@ public:
   const AssetManager &getAssets() const;
   const ParticleSystem &getParticles() const;
   const LevelEditor &getLevelEditor() const;
+  LevelEditor &getMutableLevelEditor();
   bool areEnemiesFrozen() const;
   bool isEditorEnabled() const;
 

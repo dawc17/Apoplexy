@@ -21,6 +21,7 @@ public:
   void draw() const;
 
   void addWall(Vector3 position, Vector3 size);
+  void removeWall(int index);
   void addEnemySpawn(Vector3 position);
   void setPlayerSpawn(Vector3 position);
 

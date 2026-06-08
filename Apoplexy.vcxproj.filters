@@ -99,6 +99,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\raygui\raygui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="include\resource_dir.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -116,6 +119,18 @@
     </ClInclude>
     <ClInclude Include="src\core\gamestate.hpp">
       <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\editor\editorgrid.hpp">
+      <Filter>Header Files\editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\editor\editorselection.hpp">
+      <Filter>Header Files\editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\editor\editorsettings.hpp">
+      <Filter>Header Files\editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\editor\editorui.hpp">
+      <Filter>Header Files\editor</Filter>
     </ClInclude>
     <ClInclude Include="src\editor\leveleditor.hpp">
       <Filter>Header Files\editor</Filter>
@@ -161,6 +176,15 @@
     <ClCompile Include="src\core\game.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
+    <ClCompile Include="src\editor\editorgrid.cpp">
+      <Filter>Source Files\editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\editor\editorselection.cpp">
+      <Filter>Source Files\editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\editor\editorui.cpp">
+      <Filter>Source Files\editor</Filter>
+    </ClCompile>
     <ClCompile Include="src\editor\leveleditor.cpp">
       <Filter>Source Files\editor</Filter>
     </ClCompile>
@@ -181,6 +205,9 @@
     </ClCompile>
     <ClCompile Include="src\render\renderer.cpp">
       <Filter>Source Files\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\raygui_impl.cpp">
+      <Filter>Source Files\ui</Filter>
     </ClCompile>
     <ClCompile Include="src\ui\ui.cpp">
       <Filter>Source Files\ui</Filter>

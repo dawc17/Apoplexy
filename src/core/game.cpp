@@ -1,5 +1,6 @@
 #include "game.hpp"
 
+#include "../editor/editorui.hpp"
 #include "../render/renderer.hpp"
 #include "../ui/ui.hpp"
 
@@ -162,6 +163,8 @@ void Game::draw() {
   drawDamageVignette();
 
   UI::draw(*this);
+
+  EditorUI::draw(levelEditor, level);
 }
 
 void Game::drawDamageVignette() const {
@@ -228,6 +231,7 @@ void Game::updateCameraShake(float dt) {
 
 GameState Game::getState() const { return state; }
 const Level &Game::getLevel() const { return level; }
+Level &Game::getMutableLevel() { return level; }
 const Player &Game::getPlayer() const { return player; }
 const Weapon &Game::getWeapon() const { return weapon; }
 const std::vector<Enemy> &Game::getEnemies() const { return enemies; }
@@ -235,5 +239,6 @@ const Camera3D &Game::getCamera() const { return camera; }
 const AssetManager &Game::getAssets() const { return assets; }
 const ParticleSystem &Game::getParticles() const { return particles; }
 const LevelEditor &Game::getLevelEditor() const { return levelEditor; }
+LevelEditor &Game::getMutableLevelEditor() { return levelEditor; }
 bool Game::areEnemiesFrozen() const { return enemiesFrozen; }
 bool Game::isEditorEnabled() const { return levelEditor.isEnabled(); }

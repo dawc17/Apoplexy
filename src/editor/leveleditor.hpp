@@ -1,5 +1,8 @@
 #pragma once
 
+#include "editorsettings.hpp"
+#include "editorselection.hpp"
+
 #include "../level/level.hpp"
 #include "raylib.h"
 
@@ -11,13 +14,18 @@ public:
   bool isEnabled() const;
   Camera3D getCamera() const;
 
+  EditorSettings &getSettings();
+  const EditorSettings &getSettings() const;
+
 private:
   void updateCamera();
 
 private:
   Vector3 cursor{0.0f, 0.0f, 0.0f};
-  Vector3 wallSize{2.0f, 2.0f, 2.0f};
   Camera3D camera{};
+
+  EditorSelection selection{};
+  EditorSettings settings{};
   float orthoSize = 35.0f;
   bool enabled = false;
 };

@@ -3,6 +3,7 @@
 #include "nlohmann/json.hpp"
 #include "raylib.h"
 
+#include <cstdint>
 #include <fstream>
 
 using json = nlohmann::json;
@@ -145,4 +146,12 @@ void Level::addWall(Vector3 position, Vector3 size) {
   };
 
   walls.push_back(wall);
+}
+
+void Level::removeWall(int index) {
+  if (index < 0 || index >= static_cast<int>(walls.size())) {
+    return;
+  }
+
+  walls.erase(walls.begin() + index);
 }

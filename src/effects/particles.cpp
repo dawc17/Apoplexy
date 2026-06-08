@@ -67,7 +67,7 @@ void ParticleSystem::spawnEnemyHit(Vector3 position, Vector3 normal,
 
 void ParticleSystem::spawnEnemyDeath(Vector3 position,
                                      Vector3 inheritedVelocity) {
-  constexpr int count = 42;
+  constexpr int count = 67;
 
   for (int i = 0; i < count; ++i) {
     Vector3 randomDirection{
@@ -90,10 +90,10 @@ void ParticleSystem::spawnEnemyDeath(Vector3 position,
     particle.velocity = Vector3Add(
         inheritedVelocity,
         Vector3Scale(direction,
-                     static_cast<float>(GetRandomValue(260, 620)) / 100.0f));
+                     static_cast<float>(GetRandomValue(260, 1000)) / 100.0f));
     particle.lifetime = static_cast<float>(GetRandomValue(45, 80)) / 100.0f;
     particle.maxLifetime = particle.lifetime;
-    particle.size = static_cast<float>(GetRandomValue(5, 11)) / 100.0f;
+    particle.size = static_cast<float>(GetRandomValue(5, 10)) / 100.0f;
     particle.color = {190, 8, 24, 255};
 
     particles.push_back(particle);

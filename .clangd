@@ -1,2 +1,8 @@
 CompileFlags:
   CompilationDatabase: build/
+  Add:
+    - -Ibuild/external/raylib-master/src
+    - -Isrc
+    - -Iinclude
+    - -DPLATFORM_DESKTOP
+    - -DGRAPHICS_API_OPENGL_33

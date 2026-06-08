@@ -1,0 +1,202 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{E9C7FDCE-D52A-8D73-7EB0-C5296AF258F6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\assets">
+      <UniqueIdentifier>{CB025AB1-3764-37BF-C0D1-7D712C326E7E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\collision">
+      <UniqueIdentifier>{64D44A99-50CE-73EB-393B-0AFC25D4D957}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{01D2BE0A-6DE8-BCA0-B65F-48C222B58D28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\effects">
+      <UniqueIdentifier>{B8B844F1-A447-CEBA-4D66-E2B539D4DE60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\enemy">
+      <UniqueIdentifier>{F680BC62-E264-7DB8-4BC5-770B37C8673A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\level">
+      <UniqueIdentifier>{50843663-3C68-F7B8-A5C8-F10B91CBE13A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\player">
+      <UniqueIdentifier>{052DCFD3-718E-ACE1-FAFB-F293665CE3A0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\render">
+      <UniqueIdentifier>{589A01D8-C4FB-DEE5-4D69-2598B9C915A5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ui">
+      <UniqueIdentifier>{B6027D37-228E-EAFB-2B9F-6DF097A946FC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\util">
+      <UniqueIdentifier>{F6C4C80A-62DB-C6A0-AB52-52C217A89728}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\viewmodel">
+      <UniqueIdentifier>{C46913B4-B063-3C06-99D0-D2168569A272}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\weapon">
+      <UniqueIdentifier>{E278A4E3-4EDA-81F1-D747-C8A343A8B8B0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{21EB8090-0D4E-1035-B6D3-48EBA215DCB7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\assets">
+      <UniqueIdentifier>{0357FEEF-6FB8-DBFD-F825-22B0648612BD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\collision">
+      <UniqueIdentifier>{9C5D9D33-8857-C685-71C4-5C965D5D2CF2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\core">
+      <UniqueIdentifier>{39B8505D-A5CE-4EF3-EE45-DA145A9B1F7B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\effects">
+      <UniqueIdentifier>{F0937304-DC22-FDCD-8541-11C971AF0D74}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\enemy">
+      <UniqueIdentifier>{2E2E8B07-1A12-4C5D-8372-46B06F7536DF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\level">
+      <UniqueIdentifier>{88310508-7415-C65D-DD75-C0B0C978B0DF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\player">
+      <UniqueIdentifier>{3D817312-A9E2-5020-3250-97D29EB087DF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\render">
+      <UniqueIdentifier>{90EEA516-FC4F-8324-85BD-C9D6F11DBAE3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ui">
+      <UniqueIdentifier>{EEFA6F41-5A86-DD05-6397-60FACFA13906}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\util">
+      <UniqueIdentifier>{2EAB5A5D-9AC1-58F3-E338-E4144F8E297B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\viewmodel">
+      <UniqueIdentifier>{FCF2654E-E8EC-8EA0-D159-25B1BDF2F40C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\weapon">
+      <UniqueIdentifier>{1ACD4822-862E-2630-0F9C-6CE27BFC5CEF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game Resource Files">
+      <UniqueIdentifier>{BAF00917-2652-E724-AFBF-2DD71B201EE4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game Resource Files\models">
+      <UniqueIdentifier>{4D41953A-3951-410B-A20A-A6298E3930A4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game Resource Files\shaders">
+      <UniqueIdentifier>{B3C78F4A-1FD5-BD30-A8BB-B91B14C889E7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game Resource Files\textures">
+      <UniqueIdentifier>{EDCFACD8-D98A-9C84-8242-15CF6EDCE614}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\resource_dir.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\assets\assetmanager.hpp">
+      <Filter>Header Files\assets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\collision\collision.hpp">
+      <Filter>Header Files\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\constants.hpp">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\game.hpp">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\gamestate.hpp">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\effects\particles.hpp">
+      <Filter>Header Files\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\enemy\enemy.hpp">
+      <Filter>Header Files\enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="src\level\level.hpp">
+      <Filter>Header Files\level</Filter>
+    </ClInclude>
+    <ClInclude Include="src\player\player.hpp">
+      <Filter>Header Files\player</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\renderer.hpp">
+      <Filter>Header Files\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\ui.hpp">
+      <Filter>Header Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\math.hpp">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="src\viewmodel\viewmodel.hpp">
+      <Filter>Header Files\viewmodel</Filter>
+    </ClInclude>
+    <ClInclude Include="src\weapon\weapon.hpp">
+      <Filter>Header Files\weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="src\weapon\weapondata.hpp">
+      <Filter>Header Files\weapon</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\assets\assetmanager.cpp">
+      <Filter>Source Files\assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\collision\collision.cpp">
+      <Filter>Source Files\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\game.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\effects\particles.cpp">
+      <Filter>Source Files\effects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\enemy\enemy.cpp">
+      <Filter>Source Files\enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="src\level\level.cpp">
+      <Filter>Source Files\level</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\player\player.cpp">
+      <Filter>Source Files\player</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\renderer.cpp">
+      <Filter>Source Files\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\ui.cpp">
+      <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\math.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="src\viewmodel\viewmodel.cpp">
+      <Filter>Source Files\viewmodel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\weapon\weapon.cpp">
+      <Filter>Source Files\weapon</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\models\gun.glb">
+      <Filter>Game Resource Files\models</Filter>
+    </None>
+    <None Include="resources\shaders\monochrome.fs">
+      <Filter>Game Resource Files\shaders</Filter>
+    </None>
+    <None Include="resources\shaders\monochrome.vs">
+      <Filter>Game Resource Files\shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\textures\muzzleflash.png">
+      <Filter>Game Resource Files\textures</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

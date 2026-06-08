@@ -5,6 +5,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "rlgl.h"
+#include "weapon/weapondata.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -70,19 +71,21 @@ void Viewmodel::reset() {
   sprintAmount = 0.0f;
 }
 
-void Viewmodel::update(float dt, bool playerSprinting) {
+void Viewmodel::update(float dt, bool playerSprinting,
+                       const WeaponProceduralAnimationData &procedural) {
   recoilTimer = std::min(recoilDuration, recoilTimer + dt);
 
   Vector2 mouseDelta = GetMouseDelta();
 
   Vector2 targetOffset{
-      std::clamp(-mouseDelta.x * 0.0008f, -0.035f, 0.035f),
-      std::clamp(mouseDelta.y * 0.0008f, -0.025f, 0.025f),
+      std::clamp(-mouseDelta.x * procedural.swayPositionAmount, -0.035f,
+                 0.035f),
+      std::clamp(mouseDelta.y * procedural.swayPositionAmount, -0.025f, 0.025f),
   };
 
   Vector2 targetRotation{
-      std::clamp(-mouseDelta.x * 0.045f, -4.0f, 4.0f),
-      std::clamp(-mouseDelta.y * 0.035f, -3.0f, 3.0f),
+      std::clamp(-mouseDelta.x * procedural.swayRotationAmount, -4.0f, 4.0f),
+      std::clamp(-mouseDelta.y * procedural.swayRotationAmount, -3.0f, 3.0f),
   };
 
   float follow = std::min(1.0f, dt * 16.0f);
@@ -103,7 +106,7 @@ void Viewmodel::update(float dt, bool playerSprinting) {
                  IsKeyDown(KEY_D);
 
   if (walking) {
-    walkBobTimer += dt * 8.0f;
+    walkBobTimer += dt * procedural.walkBobSpeed;
   }
 
   float targetWalkBobAmount = walking ? 1.0f : 0.0f;
@@ -139,23 +142,28 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
   float recoilFollowThrough =
       recoilFollowThroughCurve(recoilProgress) * recoilAmount;
 
-  float kick = recoilKick * weapon.recoilKick;
+  float kick = recoilKick * weapon.recoil.kick;
 
-  float bobX = std::sinf(walkBobTimer) * 0.035f * walkBobAmount;
-  float bobY = std::fabs(std::cosf(walkBobTimer)) * 0.018f * walkBobAmount;
+  float bobX =
+      std::sinf(walkBobTimer) * weapon.procedural.walkBobX * walkBobAmount;
+  float bobY = std::fabs(std::cosf(walkBobTimer)) * weapon.procedural.walkBobY *
+               walkBobAmount;
 
   bobX += std::sinf(walkBobTimer * 0.75f) * 0.018f * sprintAmount;
   bobY += std::fabs(std::cosf(walkBobTimer * 0.75f)) * 0.020f * sprintAmount;
 
-  Vector3 sprintOffset{0.025f * sprintAmount, -0.090f * sprintAmount,
-                       -0.020f * sprintAmount};
+  Vector3 sprintOffset{
+      weapon.procedural.sprintOffset.x * sprintAmount,
+      weapon.procedural.sprintOffset.y * sprintAmount,
+      weapon.procedural.sprintOffset.z * sprintAmount,
+  };
 
   Vector3 position{
-      weapon.holdPosition.x + sprintOffset.x + swayOffset.x + bobX -
+      weapon.viewModel.holdPosition.x + sprintOffset.x + swayOffset.x + bobX -
           recoilFollowThrough * 0.012f,
-      weapon.holdPosition.y + sprintOffset.y + swayOffset.y - bobY -
+      weapon.viewModel.holdPosition.y + sprintOffset.y + swayOffset.y - bobY -
           recoilKick * 0.030f + recoilFollowThrough * 0.010f,
-      weapon.holdPosition.z + sprintOffset.z - kick +
+      weapon.viewModel.holdPosition.z + sprintOffset.z - kick +
           recoilFollowThrough * 0.020f,
   };
 
@@ -171,21 +179,23 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
   rlRotatef(swayRotation.x, 0.0f, 1.0f, 0.0f);
   rlRotatef(-swayRotation.x * 0.35f, 0.0f, 0.0f, 1.0f);
 
-  rlRotatef(-recoilKick * weapon.recoilPitchDegrees +
+  rlRotatef(-recoilKick * weapon.recoil.pitchDegrees +
                 recoilFollowThrough * 2.5f,
             1.0f, 0.0f, 0.0f);
+
   rlRotatef(-recoilFollowThrough * 1.6f, 0.0f, 1.0f, 0.0f);
   rlRotatef(recoilKick * 2.4f - recoilFollowThrough * 1.2f, 0.0f, 0.0f, 1.0f);
 
-  rlRotatef(weapon.holdRotationDegrees.y, 0.0f, 1.0f, 0.0f);
-  rlRotatef(weapon.holdRotationDegrees.x, 1.0f, 0.0f, 0.0f);
-  rlRotatef(weapon.holdRotationDegrees.z, 0.0f, 0.0f, 1.0f);
+  rlRotatef(weapon.viewModel.holdRotationDegrees.y, 0.0f, 1.0f, 0.0f);
+  rlRotatef(weapon.viewModel.holdRotationDegrees.x, 1.0f, 0.0f, 0.0f);
+  rlRotatef(weapon.viewModel.holdRotationDegrees.z, 0.0f, 0.0f, 1.0f);
 
   rlRotatef(0.0f * sprintAmount, 1.0f, 0.0f, 0.0f);
-  rlRotatef(10.0f * sprintAmount, 0.0f, 1.0f, 0.0f);
-  rlRotatef(-35.0f * sprintAmount, 0.0f, 0.0f, 1.0f);
-
-  DrawModel(gun, {0.0f, 0.0f, 0.0f}, weapon.modelScale, WHITE);
+  rlRotatef(weapon.procedural.spritRotationDegrees.y * sprintAmount, 0.0f, 1.0f,
+            0.0f);
+  rlRotatef(weapon.procedural.spritRotationDegrees.z * sprintAmount, 0.0f, 0.0f,
+            1.0f);
+  DrawModel(gun, {0.0f, 0.0f, 0.0f}, weapon.viewModel.modelScale, WHITE);
 
   if (muzzleFlashTimer > 0.0f) {
     float t = muzzleFlashTimer / 0.05f;
@@ -193,11 +203,12 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
     Rectangle source{0.0f, 0.0f, static_cast<float>(flash.width),
                      static_cast<float>(flash.height)};
 
-    Vector2 size{weapon.muzzleFlashWidth * t, weapon.muzzleFlashHeight * t};
+    Vector2 size{weapon.viewModel.muzzleFlashWidth * t,
+                 weapon.viewModel.muzzleFlashHeight * t};
     Vector2 origin{size.x * 0.5f, size.y * 0.5f};
 
     BeginBlendMode(BLEND_ADDITIVE);
-    DrawBillboardPro(viewCamera, flash, source, weapon.muzzlePoint,
+    DrawBillboardPro(viewCamera, flash, source, weapon.viewModel.muzzlePoint,
                      {0.0f, 1.0f, 0.0f}, size, origin, muzzleFlashRotation,
                      Fade(WHITE, 0.95f * t));
     EndBlendMode();

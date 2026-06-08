@@ -3,6 +3,7 @@
 #include "../core/game.hpp"
 #include "../core/gamestate.hpp"
 #include "../enemy/enemy.hpp"
+#include "../weapon/weapon.hpp"
 
 #include "raylib.h"
 
@@ -37,6 +38,18 @@ void draw(const Game &game) {
   DrawText(TextFormat("HP: %d", game.getPlayer().getHealth()), 24, 24, 28, RED);
 
   DrawText(TextFormat("Enemies: %d", aliveEnemyCount(game)), 24, 58, 24, RED);
+
+  const Weapon &weapon = game.getWeapon();
+
+  DrawText(TextFormat("Ammo: %d / %d", weapon.getAmmoInMagazine(),
+                      weapon.getReserveAmmo()),
+           width - 220, height - 72, 28, RED);
+
+  if (weapon.isReloading()) {
+    DrawText(
+        TextFormat("Reloading %.0f%%", weapon.getReloadProgress() * 100.0f),
+        width - 220, height - 104, 22, GREEN);
+  }
 
   DrawText(TextFormat("Current xPos: %f", game.getPlayer().getPosition().x), 24,
            100, 28, RED);

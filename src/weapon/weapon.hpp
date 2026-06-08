@@ -16,7 +16,7 @@ class ParticleSystem;
 
 class Weapon {
 public:
-  Weapon();
+  explicit Weapon(const WeaponData &data);
 
   void reset();
 
@@ -25,6 +25,15 @@ public:
               ParticleSystem &particles);
 
   void drawViewModel(const Camera3D &camera, const AssetManager &assets) const;
+
+  const WeaponData &getData() const;
+
+  int getAmmoInMagazine() const;
+  int getReserveAmmo() const;
+  int getMagazineSize() const;
+  bool isReloading() const;
+  float getReloadProgress() const;
+
   bool consumeShotFired();
 
 private:
@@ -32,28 +41,23 @@ private:
                 const Level &level, const Camera3D &camera,
                 ParticleSystem &particles);
 
+  void startReload();
+  void finishReload();
+
   Ray makeShootRay(const Camera3D &camera) const;
 
 private:
-  WeaponData pistol{
-      "Pistol",
-      {-0.20f, -0.10f, 0.31f},
-      {-6.0f, -90.0f, -4.0f},
-      0.80f,
-      {0.615f, -0.004f, 0.175f},
-      1.478f,
-      0.657f,
-      15,
-      100.0f,
-      6.0f,
-      0.06f,
-      20.0f,
-  };
+  const WeaponData *data = nullptr;
 
   Viewmodel viewmodel;
 
+  int ammoInMagazine = 0;
+  int reserveAmmo = 0;
+
   float cooldown = 0.0f;
+  float reloadTimer = 0.0f;
   float muzzleFlashTimer = 0.0f;
   float muzzleFlashRotation = 0.0f;
+  bool reloading = false;
   bool shotFired = false;
 };

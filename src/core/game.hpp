@@ -3,12 +3,13 @@
 #include "gamestate.hpp"
 
 #include "../assets/assetmanager.hpp"
+#include "../editor/leveleditor.hpp"
 #include "../effects/particles.hpp"
 #include "../enemy/enemy.hpp"
 #include "../level/level.hpp"
 #include "../player/player.hpp"
 #include "../weapon/weapon.hpp"
-#include "../editor/leveleditor.hpp"
+#include "../weapon/weaponcatalog.hpp"
 
 #include <raylib.h>
 #include <vector>
@@ -51,7 +52,7 @@ private:
   Level level;
   LevelEditor levelEditor;
   Player player;
-  Weapon weapon;
+  Weapon weapon{WeaponCatalog::Pistol};
   ParticleSystem particles;
 
   std::vector<Enemy> enemies;

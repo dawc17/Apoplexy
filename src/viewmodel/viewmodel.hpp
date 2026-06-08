@@ -9,7 +9,8 @@ class AssetManager;
 class Viewmodel {
 public:
   void reset();
-  void update(float dt, bool playerSprinting);
+  void update(float dt, bool playerSprinting,
+              const WeaponProceduralAnimationData &procedural);
   void addRecoil(float amount);
 
   void draw(const Camera3D &camera, const WeaponData &weapon,

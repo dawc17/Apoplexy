@@ -283,6 +283,7 @@
     <ClInclude Include="src\core\constants.hpp" />
     <ClInclude Include="src\core\game.hpp" />
     <ClInclude Include="src\core\gamestate.hpp" />
+    <ClInclude Include="src\editor\leveleditor.hpp" />
     <ClInclude Include="src\effects\particles.hpp" />
     <ClInclude Include="src\enemy\enemy.hpp" />
     <ClInclude Include="src\level\level.hpp" />
@@ -298,6 +299,7 @@
     <ClCompile Include="src\assets\assetmanager.cpp" />
     <ClCompile Include="src\collision\collision.cpp" />
     <ClCompile Include="src\core\game.cpp" />
+    <ClCompile Include="src\editor\leveleditor.cpp" />
     <ClCompile Include="src\effects\particles.cpp" />
     <ClCompile Include="src\enemy\enemy.cpp" />
     <ClCompile Include="src\level\level.cpp" />

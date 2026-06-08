@@ -13,6 +13,9 @@
     <Filter Include="Source Files\core">
       <UniqueIdentifier>{01D2BE0A-6DE8-BCA0-B65F-48C222B58D28}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\editor">
+      <UniqueIdentifier>{3869C518-4D12-43FE-9E4C-1831C4874F22}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Source Files\effects">
       <UniqueIdentifier>{B8B844F1-A447-CEBA-4D66-E2B539D4DE60}</UniqueIdentifier>
     </Filter>
@@ -51,6 +54,9 @@
     </Filter>
     <Filter Include="Header Files\core">
       <UniqueIdentifier>{39B8505D-A5CE-4EF3-EE45-DA145A9B1F7B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\editor">
+      <UniqueIdentifier>{92D9E557-1597-4E7D-947E-B72E05343E6D}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\effects">
       <UniqueIdentifier>{F0937304-DC22-FDCD-8541-11C971AF0D74}</UniqueIdentifier>
@@ -111,6 +117,9 @@
     <ClInclude Include="src\core\gamestate.hpp">
       <Filter>Header Files\core</Filter>
     </ClInclude>
+    <ClInclude Include="src\editor\leveleditor.hpp">
+      <Filter>Header Files\editor</Filter>
+    </ClInclude>
     <ClInclude Include="src\effects\particles.hpp">
       <Filter>Header Files\effects</Filter>
     </ClInclude>
@@ -151,6 +160,9 @@
     </ClCompile>
     <ClCompile Include="src\core\game.cpp">
       <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\editor\leveleditor.cpp">
+      <Filter>Source Files\editor</Filter>
     </ClCompile>
     <ClCompile Include="src\effects\particles.cpp">
       <Filter>Source Files\effects</Filter>

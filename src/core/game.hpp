@@ -8,6 +8,7 @@
 #include "../level/level.hpp"
 #include "../player/player.hpp"
 #include "../weapon/weapon.hpp"
+#include "../editor/leveleditor.hpp"
 
 #include <raylib.h>
 #include <vector>
@@ -27,7 +28,9 @@ public:
   const Camera3D &getCamera() const;
   const AssetManager &getAssets() const;
   const ParticleSystem &getParticles() const;
+  const LevelEditor &getLevelEditor() const;
   bool areEnemiesFrozen() const;
+  bool isEditorEnabled() const;
 
 private:
   void reset();
@@ -44,6 +47,7 @@ private:
   RenderTexture2D sceneTarget{};
 
   Level level;
+  LevelEditor levelEditor;
   Player player;
   Weapon weapon;
   ParticleSystem particles;

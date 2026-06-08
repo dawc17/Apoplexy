@@ -16,9 +16,12 @@ void drawWorld(const Game &game) {
   }
 
   game.getParticles().draw();
+  game.getLevelEditor().draw(game.getLevel());
 
   EndMode3D();
 
-  game.getWeapon().drawViewModel(game.getCamera(), game.getAssets());
+  if (!game.isEditorEnabled()) {
+    game.getWeapon().drawViewModel(game.getCamera(), game.getAssets());
+  }
 }
 } // namespace Renderer

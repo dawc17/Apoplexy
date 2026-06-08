@@ -1,10 +1,9 @@
 #include "level.hpp"
+
 #include "nlohmann/json.hpp"
 #include "raylib.h"
-#include <fstream>
-#include <raylib.h>
-#include <vector>
 
+#include <fstream>
 
 using json = nlohmann::json;
 
@@ -68,6 +67,14 @@ bool Level::saveToFile(const char *path) const {
 
   file << data.dump(2);
   return true;
+}
+
+void Level::addEnemySpawn(Vector3 position) {
+  enemySpawns.push_back(position);
+}
+
+void Level::setPlayerSpawn(Vector3 position) {
+  playerSpawn = position;
 }
 
 void Level::loadTestArena() {

@@ -25,6 +25,13 @@ void draw(const Game &game) {
   int width = GetScreenWidth();
   int height = GetScreenHeight();
 
+  if (game.isEditorEnabled()) {
+    DrawText("EDITOR", 24, 24, 28, GREEN);
+    DrawText("WASD move  Q/R zoom  Space wall  E enemy  P player  F6 save",
+             24, 58, 20, GREEN);
+    return;
+  }
+
   DrawLine(width / 2 - 10, height / 2, width / 2 - 4, height / 2, BLUE);
   DrawLine(width / 2 + 4, height / 2, width / 2 + 10, height / 2, BLUE);
   DrawLine(width / 2, height / 2 - 10, width / 2, height / 2 - 4, BLUE);

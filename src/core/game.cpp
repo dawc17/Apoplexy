@@ -28,7 +28,9 @@ void Game::reset() {
   state = GameState::Playing;
   damageVignetteTimer = 0.0f;
 
-  level.loadTestArena();
+  if (!level.loadFromFile("levels/test_arena.json")) {
+    level.loadTestArena();
+  }
 
   player.reset(level.getPlayerSpawn());
 
@@ -70,6 +72,13 @@ void Game::update(float dt) {
 }
 
 void Game::updatePlaying(float dt) {
+  levelEditor.update(level, dt);
+
+  if (levelEditor.isEnabled()) {
+    camera = levelEditor.getCamera();
+    return;
+  }
+
   if (IsKeyPressed(KEY_X)) {
     enemiesFrozen = !enemiesFrozen;
   }
@@ -97,8 +106,8 @@ void Game::updatePlaying(float dt) {
     startCameraShake(0.22f, 0.18f);
   }
 
-  damageVignetteTimer = Clamp(damageVignetteTimer - dt, 0.0f,
-                              damageVignetteDuration);
+  damageVignetteTimer =
+      Clamp(damageVignetteTimer - dt, 0.0f, damageVignetteDuration);
 
   updateCameraShake(dt);
 
@@ -225,4 +234,6 @@ const std::vector<Enemy> &Game::getEnemies() const { return enemies; }
 const Camera3D &Game::getCamera() const { return camera; }
 const AssetManager &Game::getAssets() const { return assets; }
 const ParticleSystem &Game::getParticles() const { return particles; }
+const LevelEditor &Game::getLevelEditor() const { return levelEditor; }
 bool Game::areEnemiesFrozen() const { return enemiesFrozen; }
+bool Game::isEditorEnabled() const { return levelEditor.isEnabled(); }

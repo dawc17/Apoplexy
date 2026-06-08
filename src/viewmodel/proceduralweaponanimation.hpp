@@ -29,4 +29,8 @@ struct ProceduralWeaponAnimationData {
   Vector3 recoilFollowThroughOffset{-0.012f, 0.010f, 0.020f};
   Vector3 recoilKickRotationDegrees{-20.0f, 0.0f, 2.4f};
   Vector3 recoilFollowThroughRotationDegrees{2.5f, -1.6f, -1.2f};
+
+  Vector3 reloadSpinDegreesPerSecond{0.0f, 0.0f, 0.0f};
+  float reloadSpinEaseInSpeed = 18.0f;
+  float reloadSpinEaseOutSpeed = 12.0f;
 };

@@ -11,7 +11,7 @@ class AssetManager;
 class Viewmodel {
 public:
   void reset();
-  void update(float dt, bool playerSprinting,
+  void update(float dt, bool playerSprinting, bool weaponReloading,
               const ProceduralWeaponAnimationData &procedural);
   void addRecoil(float amount);
 
@@ -28,4 +28,6 @@ private:
   float walkBobTimer = 0.0f;
   float walkBobAmount = 0.0f;
   float sprintAmount = 0.0f;
+  float reloadAmount = 0.0f;
+  Vector3 reloadSpinRotationDegrees{};
 };

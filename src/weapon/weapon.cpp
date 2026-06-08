@@ -49,7 +49,7 @@ void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
     }
   }
 
-  viewmodel.update(dt, player.isSprinting(), *proceduralAnimation);
+  viewmodel.update(dt, player.isSprinting(), reloading, *proceduralAnimation);
 
   if (IsKeyPressed(KEY_R)) {
     startReload();

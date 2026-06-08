@@ -68,9 +68,11 @@ void Viewmodel::reset() {
   walkBobTimer = 0.0f;
   walkBobAmount = 0.0f;
   sprintAmount = 0.0f;
+  reloadAmount = 0.0f;
+  reloadSpinRotationDegrees = {0.0f, 0.0f, 0.0f};
 }
 
-void Viewmodel::update(float dt, bool playerSprinting,
+void Viewmodel::update(float dt, bool playerSprinting, bool weaponReloading,
                        const ProceduralWeaponAnimationData &procedural) {
   recoilTimer = std::min(procedural.recoilDuration, recoilTimer + dt);
 
@@ -122,6 +124,32 @@ void Viewmodel::update(float dt, bool playerSprinting,
   float targetSprintAmount = playerSprinting ? 1.0f : 0.0f;
   float sprintEase = 1.0f - std::expf(-procedural.sprintEaseSpeed * dt);
   sprintAmount += (targetSprintAmount - sprintAmount) * sprintEase;
+
+  float targetReloadAmount = weaponReloading ? 1.0f : 0.0f;
+  float reloadEaseSpeed = weaponReloading ? procedural.reloadSpinEaseInSpeed
+                                          : procedural.reloadSpinEaseOutSpeed;
+  float reloadEase = 1.0f - std::expf(-reloadEaseSpeed * dt);
+  reloadAmount += (targetReloadAmount - reloadAmount) * reloadEase;
+
+  if (weaponReloading) {
+    float spinAmount = reloadAmount * reloadAmount;
+
+    reloadSpinRotationDegrees.x =
+        std::fmod(reloadSpinRotationDegrees.x +
+                      procedural.reloadSpinDegreesPerSecond.x * dt * spinAmount,
+                  360.0f);
+    reloadSpinRotationDegrees.y =
+        std::fmod(reloadSpinRotationDegrees.y +
+                      procedural.reloadSpinDegreesPerSecond.y * dt * spinAmount,
+                  360.0f);
+    reloadSpinRotationDegrees.z =
+        std::fmod(reloadSpinRotationDegrees.z +
+                      procedural.reloadSpinDegreesPerSecond.z * dt * spinAmount,
+                  360.0f);
+  } else if (reloadAmount < 0.001f) {
+    reloadAmount = 0.0f;
+    reloadSpinRotationDegrees = {0.0f, 0.0f, 0.0f};
+  }
 }
 
 void Viewmodel::addRecoil(float amount) {
@@ -166,6 +194,8 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
       procedural.sprintOffset.z * sprintAmount,
   };
 
+  float reloadPose = easeInOutCubic(reloadAmount);
+
   Vector3 position{
       weapon.viewModel.holdPosition.x + sprintOffset.x + swayOffset.x + bobX -
           recoilKick * procedural.recoilKickOffset.x +
@@ -206,6 +236,10 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
   rlRotatef(weapon.viewModel.holdRotationDegrees.y, 0.0f, 1.0f, 0.0f);
   rlRotatef(weapon.viewModel.holdRotationDegrees.x, 1.0f, 0.0f, 0.0f);
   rlRotatef(weapon.viewModel.holdRotationDegrees.z, 0.0f, 0.0f, 1.0f);
+
+  rlRotatef(reloadSpinRotationDegrees.y * reloadPose, 0.0f, 1.0f, 0.0f);
+  rlRotatef(reloadSpinRotationDegrees.x * reloadPose, 1.0f, 0.0f, 0.0f);
+  rlRotatef(reloadSpinRotationDegrees.z * reloadPose, 0.0f, 0.0f, 1.0f);
 
   rlRotatef(procedural.sprintRotationDegrees.x * sprintAmount, 1.0f, 0.0f,
             0.0f);

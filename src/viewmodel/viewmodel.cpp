@@ -1,9 +1,9 @@
 #include "viewmodel.hpp"
 
 #include "../assets/assetmanager.hpp"
-
 #include "raylib.h"
 #include "rlgl.h"
+#include "external/glad.h"
 #include "weapon/weapondata.hpp"
 
 #include <algorithm>
@@ -163,6 +163,32 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
                      float muzzleFlashRotation) const {
   const Model &gun = assets.getGunModel();
   const Texture2D &flash = assets.getMuzzleFlashTexture();
+  Shader viewmodelShader = assets.getViewmodelShader();
+
+  Vector2 virtualResolution{320.0f, 180.0f};
+  Vector3 lightDirection = {-0.20f, 0.65f, 0.70f};
+  float ambientStrength = 0.72f;
+  float diffuseStrength = 0.36f;
+  float colorLevels = 25.0f;
+  float ditherStrength = 0.14f;
+
+  SetShaderValue(viewmodelShader,
+                 GetShaderLocation(viewmodelShader, "virtualResolution"),
+                 &virtualResolution, SHADER_UNIFORM_VEC2);
+  SetShaderValue(viewmodelShader,
+                 GetShaderLocation(viewmodelShader, "lightDirection"),
+                 &lightDirection, SHADER_UNIFORM_VEC3);
+  SetShaderValue(viewmodelShader,
+                 GetShaderLocation(viewmodelShader, "ambientStrength"),
+                 &ambientStrength, SHADER_UNIFORM_FLOAT);
+  SetShaderValue(viewmodelShader,
+                 GetShaderLocation(viewmodelShader, "diffuseStrength"),
+                 &diffuseStrength, SHADER_UNIFORM_FLOAT);
+  SetShaderValue(viewmodelShader, GetShaderLocation(viewmodelShader, "colorLevels"),
+                 &colorLevels, SHADER_UNIFORM_FLOAT);
+  SetShaderValue(viewmodelShader,
+                 GetShaderLocation(viewmodelShader, "ditherStrength"),
+                 &ditherStrength, SHADER_UNIFORM_FLOAT);
 
   Camera3D viewCamera{};
   viewCamera.position = {0.0f, 0.0f, 0.0f};
@@ -211,7 +237,8 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
   rlDrawRenderBatchActive();
   BeginMode3D(viewCamera);
   rlDrawRenderBatchActive();
-  rlDisableDepthTest();
+  glClear(GL_DEPTH_BUFFER_BIT);
+  rlEnableDepthTest();
 
   rlPushMatrix();
   rlTranslatef(position.x, position.y, position.z);

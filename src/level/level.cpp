@@ -1,5 +1,7 @@
 #include "level.hpp"
 
+#include "../render/lighting.hpp"
+
 #include "nlohmann/json.hpp"
 #include "raylib.h"
 
@@ -112,11 +114,11 @@ void Level::unload() {
 }
 
 void Level::draw() const {
-  DrawPlane({0.0f, 0.0f, 0.0f}, {28.0f, 28.0f}, LIGHTGRAY);
+  Lighting::drawPlane({0.0f, 0.0f, 0.0f}, {28.0f, 28.0f}, LIGHTGRAY);
 
   // true nophono subfoid graybox
   for (const Wall &wall : walls) {
-    DrawCube(wall.position, wall.size.x, wall.size.y, wall.size.z, GRAY);
+    Lighting::drawCube(wall.position, wall.size, GRAY);
     DrawCubeWires(wall.position, wall.size.x, wall.size.y, wall.size.z,
                   DARKGRAY);
   }

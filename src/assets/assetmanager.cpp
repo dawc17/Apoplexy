@@ -8,15 +8,17 @@ void AssetManager::load() {
 
   gunModel = LoadModel("models/gun.glb");
   monoShader = LoadShader("shaders/monochrome.vs", "shaders/monochrome.fs");
+  viewmodelShader =
+      LoadShader("shaders/viewmodel.vs", "shaders/viewmodel.fs");
   muzzleFlashTexture = LoadTexture("textures/muzzleflash.png");
 
   const Color gunColors[] = {
-      {28, 30, 32, 255}, {54, 57, 60, 255},    {16, 17, 18, 255},
-      {88, 84, 78, 255}, {120, 118, 110, 255}, {8, 8, 9, 255},
+      {52, 55, 58, 255},   {78, 82, 86, 255},    {34, 36, 38, 255},
+      {112, 108, 100, 255}, {145, 142, 132, 255}, {24, 25, 27, 255},
   };
 
   for (int i = 0; i < gunModel.materialCount; ++i) {
-    gunModel.materials[i].shader = monoShader;
+    gunModel.materials[i].shader = viewmodelShader;
     gunModel.materials[i].maps[MATERIAL_MAP_DIFFUSE].color =
         gunColors[i % (sizeof(gunColors) / sizeof(gunColors[0]))];
   }
@@ -31,6 +33,7 @@ void AssetManager::unload() {
 
   UnloadModel(gunModel);
   UnloadShader(monoShader);
+  UnloadShader(viewmodelShader);
   UnloadTexture(muzzleFlashTexture);
 
   loaded = false;
@@ -39,6 +42,8 @@ void AssetManager::unload() {
 const Model &AssetManager::getGunModel() const { return gunModel; }
 
 Shader AssetManager::getMonoShader() const { return monoShader; }
+
+Shader AssetManager::getViewmodelShader() const { return viewmodelShader; }
 
 const Texture2D &AssetManager::getMuzzleFlashTexture() const {
   return muzzleFlashTexture;

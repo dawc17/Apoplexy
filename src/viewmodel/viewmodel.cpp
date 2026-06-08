@@ -3,7 +3,6 @@
 #include "../assets/assetmanager.hpp"
 
 #include "raylib.h"
-#include "raymath.h"
 #include "rlgl.h"
 #include "weapon/weapondata.hpp"
 
@@ -62,7 +61,7 @@ float recoilFollowThroughCurve(float t) {
 } // namespace
 
 void Viewmodel::reset() {
-  recoilTimer = recoilDuration;
+  recoilTimer = 1.0f;
   recoilAmount = 0.0f;
   swayOffset = {0.0f, 0.0f};
   swayRotation = {0.0f, 0.0f};
@@ -72,24 +71,31 @@ void Viewmodel::reset() {
 }
 
 void Viewmodel::update(float dt, bool playerSprinting,
-                       const WeaponProceduralAnimationData &procedural) {
-  recoilTimer = std::min(recoilDuration, recoilTimer + dt);
+                       const ProceduralWeaponAnimationData &procedural) {
+  recoilTimer = std::min(procedural.recoilDuration, recoilTimer + dt);
 
   Vector2 mouseDelta = GetMouseDelta();
 
   Vector2 targetOffset{
-      std::clamp(-mouseDelta.x * procedural.swayPositionAmount, -0.035f,
-                 0.035f),
-      std::clamp(mouseDelta.y * procedural.swayPositionAmount, -0.025f, 0.025f),
+      std::clamp(-mouseDelta.x * procedural.swayPositionAmount,
+                 -procedural.swayPositionClamp.x,
+                 procedural.swayPositionClamp.x),
+      std::clamp(mouseDelta.y * procedural.swayPositionAmount,
+                 -procedural.swayPositionClamp.y,
+                 procedural.swayPositionClamp.y),
   };
 
   Vector2 targetRotation{
-      std::clamp(-mouseDelta.x * procedural.swayRotationAmount, -4.0f, 4.0f),
-      std::clamp(-mouseDelta.y * procedural.swayRotationAmount, -3.0f, 3.0f),
+      std::clamp(-mouseDelta.x * procedural.swayRotationAmount,
+                 -procedural.swayRotationClamp.x,
+                 procedural.swayRotationClamp.x),
+      std::clamp(-mouseDelta.y * procedural.swayRotationAmount,
+                 -procedural.swayRotationClamp.y,
+                 procedural.swayRotationClamp.y),
   };
 
-  float follow = std::min(1.0f, dt * 16.0f);
-  float settle = std::min(1.0f, dt * 10.0f);
+  float follow = std::min(1.0f, dt * procedural.swayFollowSpeed);
+  float settle = std::min(1.0f, dt * procedural.swaySettleSpeed);
 
   swayOffset.x += (targetOffset.x - swayOffset.x) * follow;
   swayOffset.y += (targetOffset.y - swayOffset.y) * follow;
@@ -110,11 +116,11 @@ void Viewmodel::update(float dt, bool playerSprinting,
   }
 
   float targetWalkBobAmount = walking ? 1.0f : 0.0f;
-  float walkBobEase = 1.0f - std::expf(-8.0f * dt);
+  float walkBobEase = 1.0f - std::expf(-procedural.walkBobEaseSpeed * dt);
   walkBobAmount += (targetWalkBobAmount - walkBobAmount) * walkBobEase;
 
   float targetSprintAmount = playerSprinting ? 1.0f : 0.0f;
-  float sprintEase = 1.0f - std::expf(-10.0f * dt);
+  float sprintEase = 1.0f - std::expf(-procedural.sprintEaseSpeed * dt);
   sprintAmount += (targetSprintAmount - sprintAmount) * sprintEase;
 }
 
@@ -124,6 +130,7 @@ void Viewmodel::addRecoil(float amount) {
 }
 
 void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
+                     const ProceduralWeaponAnimationData &procedural,
                      const AssetManager &assets, float muzzleFlashTimer,
                      float muzzleFlashRotation) const {
   const Model &gun = assets.getGunModel();
@@ -137,34 +144,38 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
   viewCamera.projection = CAMERA_PERSPECTIVE;
 
   float recoilProgress =
-      recoilDuration > 0.0f ? recoilTimer / recoilDuration : 1.0f;
+      procedural.recoilDuration > 0.0f
+          ? recoilTimer / procedural.recoilDuration
+          : 1.0f;
   float recoilKick = recoilKickCurve(recoilProgress) * recoilAmount;
   float recoilFollowThrough =
       recoilFollowThroughCurve(recoilProgress) * recoilAmount;
 
-  float kick = recoilKick * weapon.recoil.kick;
+  float bobX = std::sinf(walkBobTimer) * procedural.walkBobX * walkBobAmount;
+  float bobY =
+      std::fabs(std::cosf(walkBobTimer)) * procedural.walkBobY * walkBobAmount;
 
-  float bobX =
-      std::sinf(walkBobTimer) * weapon.procedural.walkBobX * walkBobAmount;
-  float bobY = std::fabs(std::cosf(walkBobTimer)) * weapon.procedural.walkBobY *
-               walkBobAmount;
-
-  bobX += std::sinf(walkBobTimer * 0.75f) * 0.018f * sprintAmount;
-  bobY += std::fabs(std::cosf(walkBobTimer * 0.75f)) * 0.020f * sprintAmount;
+  bobX += std::sinf(walkBobTimer * procedural.sprintBobSpeedScale) *
+          procedural.sprintBobX * sprintAmount;
+  bobY += std::fabs(std::cosf(walkBobTimer * procedural.sprintBobSpeedScale)) *
+          procedural.sprintBobY * sprintAmount;
 
   Vector3 sprintOffset{
-      weapon.procedural.sprintOffset.x * sprintAmount,
-      weapon.procedural.sprintOffset.y * sprintAmount,
-      weapon.procedural.sprintOffset.z * sprintAmount,
+      procedural.sprintOffset.x * sprintAmount,
+      procedural.sprintOffset.y * sprintAmount,
+      procedural.sprintOffset.z * sprintAmount,
   };
 
   Vector3 position{
       weapon.viewModel.holdPosition.x + sprintOffset.x + swayOffset.x + bobX -
-          recoilFollowThrough * 0.012f,
+          recoilKick * procedural.recoilKickOffset.x +
+          recoilFollowThrough * procedural.recoilFollowThroughOffset.x,
       weapon.viewModel.holdPosition.y + sprintOffset.y + swayOffset.y - bobY -
-          recoilKick * 0.030f + recoilFollowThrough * 0.010f,
-      weapon.viewModel.holdPosition.z + sprintOffset.z - kick +
-          recoilFollowThrough * 0.020f,
+          recoilKick * procedural.recoilKickOffset.y +
+          recoilFollowThrough * procedural.recoilFollowThroughOffset.y,
+      weapon.viewModel.holdPosition.z + sprintOffset.z +
+          recoilKick * procedural.recoilKickOffset.z +
+          recoilFollowThrough * procedural.recoilFollowThroughOffset.z,
   };
 
   rlDrawRenderBatchActive();
@@ -177,23 +188,30 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
 
   rlRotatef(swayRotation.y, 1.0f, 0.0f, 0.0f);
   rlRotatef(swayRotation.x, 0.0f, 1.0f, 0.0f);
-  rlRotatef(-swayRotation.x * 0.35f, 0.0f, 0.0f, 1.0f);
+  rlRotatef(swayRotation.x * procedural.swayRollAmount, 0.0f, 0.0f, 1.0f);
 
-  rlRotatef(-recoilKick * weapon.recoil.pitchDegrees +
-                recoilFollowThrough * 2.5f,
+  rlRotatef(recoilKick * procedural.recoilKickRotationDegrees.x +
+                recoilFollowThrough *
+                    procedural.recoilFollowThroughRotationDegrees.x,
             1.0f, 0.0f, 0.0f);
-
-  rlRotatef(-recoilFollowThrough * 1.6f, 0.0f, 1.0f, 0.0f);
-  rlRotatef(recoilKick * 2.4f - recoilFollowThrough * 1.2f, 0.0f, 0.0f, 1.0f);
+  rlRotatef(recoilKick * procedural.recoilKickRotationDegrees.y +
+                recoilFollowThrough *
+                    procedural.recoilFollowThroughRotationDegrees.y,
+            0.0f, 1.0f, 0.0f);
+  rlRotatef(recoilKick * procedural.recoilKickRotationDegrees.z +
+                recoilFollowThrough *
+                    procedural.recoilFollowThroughRotationDegrees.z,
+            0.0f, 0.0f, 1.0f);
 
   rlRotatef(weapon.viewModel.holdRotationDegrees.y, 0.0f, 1.0f, 0.0f);
   rlRotatef(weapon.viewModel.holdRotationDegrees.x, 1.0f, 0.0f, 0.0f);
   rlRotatef(weapon.viewModel.holdRotationDegrees.z, 0.0f, 0.0f, 1.0f);
 
-  rlRotatef(0.0f * sprintAmount, 1.0f, 0.0f, 0.0f);
-  rlRotatef(weapon.procedural.spritRotationDegrees.y * sprintAmount, 0.0f, 1.0f,
+  rlRotatef(procedural.sprintRotationDegrees.x * sprintAmount, 1.0f, 0.0f,
             0.0f);
-  rlRotatef(weapon.procedural.spritRotationDegrees.z * sprintAmount, 0.0f, 0.0f,
+  rlRotatef(procedural.sprintRotationDegrees.y * sprintAmount, 0.0f, 1.0f,
+            0.0f);
+  rlRotatef(procedural.sprintRotationDegrees.z * sprintAmount, 0.0f, 0.0f,
             1.0f);
   DrawModel(gun, {0.0f, 0.0f, 0.0f}, weapon.viewModel.modelScale, WHITE);
 

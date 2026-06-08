@@ -31,22 +31,5 @@ inline const WeaponData Pistol{
         1.478f,                    // muzzleFlashWidth
         0.657f,                    // muzzleFlashHeight
     },
-
-    // Recoil
-    {
-        0.06f, // kick
-        20.0f, // pitchDegrees
-    },
-
-    // Procedural animation
-    {
-        0.0008f,                  // swayPositionAmount
-        0.045f,                   // swayRotationAmount
-        8.0f,                     // walkBobSpeed
-        0.035f,                   // walkBobX
-        0.018f,                   // walkBobY
-        {0.025f, -0.09f, -0.02f}, // sprintOffset
-        {0.0f, 10.0f, -35.0f},    // sprintRotationDegrees
-    },
 };
 } // namespace WeaponCatalog

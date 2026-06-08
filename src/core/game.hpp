@@ -8,6 +8,7 @@
 #include "../enemy/enemy.hpp"
 #include "../level/level.hpp"
 #include "../player/player.hpp"
+#include "../viewmodel/proceduralweaponanimationcatalog.hpp"
 #include "../weapon/weapon.hpp"
 #include "../weapon/weaponcatalog.hpp"
 
@@ -52,7 +53,7 @@ private:
   Level level;
   LevelEditor levelEditor;
   Player player;
-  Weapon weapon{WeaponCatalog::Pistol};
+  Weapon weapon{WeaponCatalog::Pistol, ProceduralWeaponAnimationCatalog::Pistol};
   ParticleSystem particles;
 
   std::vector<Enemy> enemies;

@@ -14,7 +14,11 @@
 #include <iostream>
 #include <vector>
 
-Weapon::Weapon(const WeaponData &weaponData) : data(&weaponData) { reset(); }
+Weapon::Weapon(const WeaponData &weaponData,
+               const ProceduralWeaponAnimationData &weaponProceduralAnimation)
+    : data(&weaponData), proceduralAnimation(&weaponProceduralAnimation) {
+  reset();
+}
 
 void Weapon::reset() {
   ammoInMagazine = data->ammo.magazineSize;
@@ -45,7 +49,7 @@ void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
     }
   }
 
-  viewmodel.update(dt, player.isSprinting(), data->procedural);
+  viewmodel.update(dt, player.isSprinting(), *proceduralAnimation);
 
   if (IsKeyPressed(KEY_R)) {
     startReload();
@@ -67,7 +71,8 @@ void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
 
 void Weapon::drawViewModel(const Camera3D &camera,
                            const AssetManager &assets) const {
-  viewmodel.draw(camera, *data, assets, muzzleFlashTimer, muzzleFlashRotation);
+  viewmodel.draw(camera, *data, *proceduralAnimation, assets, muzzleFlashTimer,
+                 muzzleFlashRotation);
 }
 
 const WeaponData &Weapon::getData() const { return *data; }

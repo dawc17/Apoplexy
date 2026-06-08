@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../assets/assetmanager.hpp"
+#include "../viewmodel/proceduralweaponanimation.hpp"
 #include "../viewmodel/viewmodel.hpp"
 #include "weapondata.hpp"
 
@@ -16,7 +17,8 @@ class ParticleSystem;
 
 class Weapon {
 public:
-  explicit Weapon(const WeaponData &data);
+  Weapon(const WeaponData &data,
+         const ProceduralWeaponAnimationData &proceduralAnimation);
 
   void reset();
 
@@ -48,6 +50,7 @@ private:
 
 private:
   const WeaponData *data = nullptr;
+  const ProceduralWeaponAnimationData *proceduralAnimation = nullptr;
 
   Viewmodel viewmodel;
 

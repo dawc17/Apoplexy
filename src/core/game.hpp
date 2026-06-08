@@ -11,6 +11,7 @@
 #include "../viewmodel/proceduralweaponanimationcatalog.hpp"
 #include "../weapon/weapon.hpp"
 #include "../weapon/weaponcatalog.hpp"
+#include "../weapon/weaponinventory.hpp"
 
 #include <raylib.h>
 #include <vector>
@@ -27,6 +28,7 @@ public:
   Level &getMutableLevel();
   const Player &getPlayer() const;
   const Weapon &getWeapon() const;
+  const WeaponInventory &getWeaponInventory() const;
   const std::vector<Enemy> &getEnemies() const;
   const Camera3D &getCamera() const;
   const AssetManager &getAssets() const;
@@ -53,7 +55,7 @@ private:
   Level level;
   LevelEditor levelEditor;
   Player player;
-  Weapon weapon{WeaponCatalog::Pistol, ProceduralWeaponAnimationCatalog::Pistol};
+  WeaponInventory weapons;
   ParticleSystem particles;
 
   std::vector<Enemy> enemies;

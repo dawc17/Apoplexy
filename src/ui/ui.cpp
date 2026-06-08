@@ -4,6 +4,7 @@
 #include "../core/gamestate.hpp"
 #include "../enemy/enemy.hpp"
 #include "../weapon/weapon.hpp"
+#include "../weapon/weaponinventory.hpp"
 
 #include "raylib.h"
 
@@ -50,6 +51,13 @@ void draw(const Game &game) {
         TextFormat("Reloading %.0f%%", weapon.getReloadProgress() * 100.0f),
         width - 220, height - 104, 22, GREEN);
   }
+
+  const WeaponInventory &inventory = game.getWeaponInventory();
+
+  DrawText(TextFormat("Weapon: %s [%d/%d]", weapon.getData().name,
+                      inventory.getActiveWeaponIndex() + 1,
+                      inventory.getWeaponCount()),
+           width - 260, height - 136, 22, RED);
 
   DrawText(TextFormat("Current xPos: %f", game.getPlayer().getPosition().x), 24,
            100, 28, RED);

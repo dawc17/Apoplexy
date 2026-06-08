@@ -7,6 +7,9 @@
 #include "gamestate.hpp"
 #include "raylib.h"
 #include "raymath.h"
+#include "viewmodel/proceduralweaponanimationcatalog.hpp"
+#include "weapon/weaponcatalog.hpp"
+#include "weapon/weaponinventory.hpp"
 
 namespace {
 constexpr int PSX_RENDER_WIDTH = 640;
@@ -17,6 +20,8 @@ Game::Game() {
   assets.load();
   sceneTarget = LoadRenderTexture(PSX_RENDER_WIDTH, PSX_RENDER_HEIGHT);
   SetTextureFilter(sceneTarget.texture, TEXTURE_FILTER_POINT);
+  weapons.addWeapon(WeaponCatalog::Pistol,
+                    ProceduralWeaponAnimationCatalog::Pistol);
   reset();
 }
 
@@ -35,7 +40,7 @@ void Game::reset() {
 
   player.reset(level.getPlayerSpawn());
 
-  weapon.reset();
+  weapons.reset();
 
   enemies.clear();
 
@@ -87,10 +92,10 @@ void Game::updatePlaying(float dt) {
   player.update(dt, level);
   camera = player.getCamera();
 
-  weapon.update(dt, player, enemies, level, camera, particles);
+  weapons.update(dt, player, enemies, level, camera, particles);
 
   // tune fire shake here
-  if (weapon.consumeShotFired()) {
+  if (weapons.getActiveWeapon().consumeShotFired()) {
     startCameraShake(0.15f, 0.12f);
   }
 
@@ -241,7 +246,8 @@ GameState Game::getState() const { return state; }
 const Level &Game::getLevel() const { return level; }
 Level &Game::getMutableLevel() { return level; }
 const Player &Game::getPlayer() const { return player; }
-const Weapon &Game::getWeapon() const { return weapon; }
+const Weapon &Game::getWeapon() const { return weapons.getActiveWeapon(); }
+const WeaponInventory &Game::getWeaponInventory() const { return weapons; }
 const std::vector<Enemy> &Game::getEnemies() const { return enemies; }
 const Camera3D &Game::getCamera() const { return camera; }
 const AssetManager &Game::getAssets() const { return assets; }

@@ -136,6 +136,7 @@ GENERATED += $(OBJDIR)/renderer.o
 GENERATED += $(OBJDIR)/ui.o
 GENERATED += $(OBJDIR)/viewmodel.o
 GENERATED += $(OBJDIR)/weapon.o
+GENERATED += $(OBJDIR)/weaponinventory.o
 OBJECTS += $(OBJDIR)/assetmanager.o
 OBJECTS += $(OBJDIR)/collision.o
 OBJECTS += $(OBJDIR)/editorgrid.o
@@ -154,6 +155,7 @@ OBJECTS += $(OBJDIR)/renderer.o
 OBJECTS += $(OBJDIR)/ui.o
 OBJECTS += $(OBJDIR)/viewmodel.o
 OBJECTS += $(OBJDIR)/weapon.o
+OBJECTS += $(OBJDIR)/weaponinventory.o
 
 # Rules
 # #############################################
@@ -269,6 +271,9 @@ $(OBJDIR)/viewmodel.o: src/viewmodel/viewmodel.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/weapon.o: src/weapon/weapon.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/weaponinventory.o: src/weapon/weaponinventory.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 

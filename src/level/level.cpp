@@ -74,6 +74,14 @@ void Level::addEnemySpawn(Vector3 position) {
   enemySpawns.push_back(position);
 }
 
+void Level::removeEnemySpawn(int index) {
+  if (index < 0 || index >= static_cast<int>(enemySpawns.size())) {
+    return;
+  }
+
+  enemySpawns.erase(enemySpawns.begin() + index);
+}
+
 void Level::setPlayerSpawn(Vector3 position) {
   playerSpawn = position;
 }

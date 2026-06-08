@@ -131,6 +131,14 @@ void Game::updatePlaying(float dt) {
 }
 
 void Game::draw() {
+  if (levelEditor.isEnabled()) {
+    ClearBackground(BLACK);
+    Renderer::drawWorld(*this);
+    UI::draw(*this);
+    EditorUI::draw(levelEditor, level);
+    return;
+  }
+
   BeginTextureMode(sceneTarget);
   ClearBackground(BLACK);
 

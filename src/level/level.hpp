@@ -23,6 +23,7 @@ public:
   void addWall(Vector3 position, Vector3 size);
   void removeWall(int index);
   void addEnemySpawn(Vector3 position);
+  void removeEnemySpawn(int index);
   void setPlayerSpawn(Vector3 position);
 
   const std::vector<Wall> &getWalls() const;

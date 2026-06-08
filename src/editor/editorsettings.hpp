@@ -13,4 +13,5 @@ struct EditorSettings {
   bool showGrid = true;
   bool showSpawns = true;
   bool showHelp = true;
+  bool toolDropdownOpen = false;
 };

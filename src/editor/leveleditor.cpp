@@ -2,16 +2,18 @@
 #include "editorgrid.hpp"
 #include "editorsettings.hpp"
 #include "raylib.h"
+#include "raymath.h"
 
 #include <algorithm>
 #include <cmath>
 
 namespace {
-constexpr float EDITOR_ZOOM_SPEED = 24.0f;
-constexpr float MOUSE_WHEEL_ZOOM_SPEED = 3.0f;
+constexpr float EDITOR_ZOOM_SPEED = 18.0f;
+constexpr float MOUSE_WHEEL_ZOOM_SPEED = 2.0f;
+constexpr float EDITOR_ROTATE_SPEED = 0.008f;
 constexpr const char *LEVEL_PATH = "levels/test_arena.json";
 
-constexpr Rectangle EDITOR_PANEL_BOUNDS{16.0f, 16.0f, 280.0f, 382.0f};
+constexpr Rectangle EDITOR_PANEL_BOUNDS{16.0f, 16.0f, 280.0f, 400.0f};
 
 bool isMouseOverEditorPanel() {
   return CheckCollisionPointRec(GetMousePosition(), EDITOR_PANEL_BOUNDS);
@@ -55,11 +57,33 @@ bool raycastGround(Camera3D camera, Vector3 &hitPoint) {
 Ray mouseRay(Camera3D camera) {
   return GetMouseRay(GetMousePosition(), camera);
 }
+
+Vector3 normalizedGroundVector(Vector3 value) {
+  value.y = 0.0f;
+
+  if (Vector3Length(value) <= 0.0001f) {
+    return {0.0f, 0.0f, 0.0f};
+  }
+
+  return Vector3Normalize(value);
+}
+
+bool isRotateDragDown() {
+  return IsMouseButtonDown(MOUSE_BUTTON_MIDDLE) ||
+         (IsKeyDown(KEY_LEFT_ALT) && IsMouseButtonDown(MOUSE_BUTTON_LEFT));
+}
 } // namespace
 
 void LevelEditor::update(Level &level, float dt) {
   if (IsKeyPressed(KEY_F1)) {
     enabled = !enabled;
+
+    if (enabled) {
+      EnableCursor();
+    } else {
+      DisableCursor();
+    }
+
     updateCamera();
   }
 
@@ -82,7 +106,48 @@ void LevelEditor::update(Level &level, float dt) {
     cursor.x += step;
   }
 
-  if (!isMouseOverEditorPanel()) {
+  if (IsKeyDown(KEY_Q)) {
+    cameraDistance += EDITOR_ZOOM_SPEED * dt;
+  }
+  if (IsKeyDown(KEY_R)) {
+    cameraDistance -= EDITOR_ZOOM_SPEED * dt;
+  }
+
+  float mouseWheel = GetMouseWheelMove();
+  if (mouseWheel != 0.0f) {
+    cameraDistance -= mouseWheel * MOUSE_WHEEL_ZOOM_SPEED;
+  }
+
+  cameraDistance = std::clamp(cameraDistance, 5.0f, 80.0f);
+
+  if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT) && !isMouseOverEditorPanel()) {
+    Vector2 mouseDelta = GetMouseDelta();
+    float panScale = cameraDistance / static_cast<float>(GetScreenHeight());
+
+    Vector3 forward =
+        Vector3Normalize(Vector3Subtract(camera.target, camera.position));
+    Vector3 right =
+        normalizedGroundVector(Vector3CrossProduct(forward, camera.up));
+    Vector3 forwardGround = normalizedGroundVector(forward);
+
+    cameraTarget =
+        Vector3Subtract(cameraTarget, Vector3Scale(right, mouseDelta.x * panScale));
+    cameraTarget = Vector3Add(cameraTarget,
+                              Vector3Scale(forwardGround,
+                                           mouseDelta.y * panScale));
+  }
+
+  if (isRotateDragDown() && !isMouseOverEditorPanel()) {
+    Vector2 mouseDelta = GetMouseDelta();
+
+    cameraYaw -= mouseDelta.x * EDITOR_ROTATE_SPEED;
+    cameraPitch += mouseDelta.y * EDITOR_ROTATE_SPEED;
+    cameraPitch = std::clamp(cameraPitch, 0.15f, 1.45f);
+  }
+
+  updateCamera();
+
+  if (!IsMouseButtonDown(MOUSE_BUTTON_RIGHT) && !isMouseOverEditorPanel()) {
     Vector3 mouseHit{};
     if (raycastGround(camera, mouseHit)) {
       cursor = snapCursor(mouseHit, settings.snapSize);
@@ -90,20 +155,6 @@ void LevelEditor::update(Level &level, float dt) {
   }
 
   cursor = snapCursor(cursor, settings.snapSize);
-
-  if (IsKeyDown(KEY_Q)) {
-    orthoSize += EDITOR_ZOOM_SPEED * dt;
-  }
-  if (IsKeyDown(KEY_R)) {
-    orthoSize -= EDITOR_ZOOM_SPEED * dt;
-  }
-
-  float mouseWheel = GetMouseWheelMove();
-  if (mouseWheel != 0.0f) {
-    orthoSize -= mouseWheel * MOUSE_WHEEL_ZOOM_SPEED;
-  }
-
-  orthoSize = std::clamp(orthoSize, 8.0f, 60.0f);
 
   if (IsKeyPressed(KEY_ONE)) {
     settings.wallSize = {2.0f, 2.0f, 2.0f};
@@ -133,7 +184,7 @@ void LevelEditor::update(Level &level, float dt) {
 
   if (primaryPressed) {
     if (settings.tool == EditorTool::Select) {
-      selection.pickWall(level, mouseRay(camera));
+      selection.pick(level, mouseRay(camera));
     } else if (settings.tool == EditorTool::Wall) {
       level.addWall(wallCenterFromCursor(cursor, settings.wallSize),
                     settings.wallSize);
@@ -144,8 +195,13 @@ void LevelEditor::update(Level &level, float dt) {
     }
   }
 
-  if (IsKeyPressed(KEY_DELETE) && selection.hasWall()) {
-    level.removeWall(selection.getWallIndex());
+  if (IsKeyPressed(KEY_DELETE)) {
+    if (selection.hasWall()) {
+      level.removeWall(selection.getWallIndex());
+    } else if (selection.hasEnemySpawn()) {
+      level.removeEnemySpawn(selection.getEnemySpawnIndex());
+    }
+
     selection.clear();
   }
 
@@ -180,6 +236,15 @@ void LevelEditor::draw(const Level &level) const {
     }
   }
 
+  if (selection.hasEnemySpawn()) {
+    const std::vector<Vector3> &enemySpawns = level.getEnemySpawns();
+    int index = selection.getEnemySpawnIndex();
+
+    if (index >= 0 && index < static_cast<int>(enemySpawns.size())) {
+      DrawSphereWires(enemySpawns[index], 0.55f, 12, 12, YELLOW);
+    }
+  }
+
   if (settings.tool == EditorTool::Wall) {
     Vector3 previewCenter = wallCenterFromCursor(cursor, settings.wallSize);
     DrawCubeWires(previewCenter, settings.wallSize.x, settings.wallSize.y,
@@ -207,16 +272,15 @@ EditorSettings &LevelEditor::getSettings() { return settings; }
 const EditorSettings &LevelEditor::getSettings() const { return settings; }
 
 void LevelEditor::updateCamera() {
-  Vector3 target{cursor.x, 0.0f, cursor.z};
-  constexpr float cameraDistance = 18.0f;
+  float horizontalDistance = std::cosf(cameraPitch) * cameraDistance;
 
   camera.position = {
-      target.x + cameraDistance,
-      target.y + cameraDistance * 1.15f,
-      target.z + cameraDistance,
+      cameraTarget.x + std::sinf(cameraYaw) * horizontalDistance,
+      cameraTarget.y + std::sinf(cameraPitch) * cameraDistance,
+      cameraTarget.z + std::cosf(cameraYaw) * horizontalDistance,
   };
-  camera.target = target;
+  camera.target = cameraTarget;
   camera.up = {0.0f, 1.0f, 0.0f};
-  camera.fovy = orthoSize;
-  camera.projection = CAMERA_ORTHOGRAPHIC;
+  camera.fovy = 55.0f;
+  camera.projection = CAMERA_PERSPECTIVE;
 }

@@ -22,10 +22,13 @@ private:
 
 private:
   Vector3 cursor{0.0f, 0.0f, 0.0f};
+  Vector3 cameraTarget{0.0f, 0.0f, 0.0f};
   Camera3D camera{};
 
   EditorSelection selection{};
   EditorSettings settings{};
-  float orthoSize = 35.0f;
+  float cameraDistance = 24.0f;
+  float cameraYaw = 0.78f;
+  float cameraPitch = 0.85f;
   bool enabled = false;
 };

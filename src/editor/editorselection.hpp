@@ -1,9 +1,14 @@
 #pragma once
 
-#include "level/level.hpp"
 class Level;
 
 #include "raylib.h"
+
+enum class EditorSelectionType {
+  None,
+  Wall,
+  EnemySpawn,
+};
 
 class EditorSelection {
 public:
@@ -12,8 +17,12 @@ public:
   bool hasWall() const;
   int getWallIndex() const;
 
-  bool pickWall(const Level &level, Ray ray);
+  bool hasEnemySpawn() const;
+  int getEnemySpawnIndex() const;
+
+  bool pick(const Level &level, Ray ray);
 
 private:
-  int selectedWallIndex = -1;
+  EditorSelectionType type = EditorSelectionType::None;
+  int selectedIndex = -1;
 };

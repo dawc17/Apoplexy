@@ -58,12 +58,6 @@ void draw(LevelEditor &editor, Level &level) {
   DrawText("Editor", 28, 28, 24, GREEN);
   DrawText("Select walls, Delete removes", 28, 50, 14, GREEN);
 
-  int toolIndex = toolToIndex(settings.tool);
-  if (GuiDropdownBox({28.0f, 76.0f, 240.0f, 28.0f},
-                     "Select;Wall;Enemy;Player", &toolIndex, false)) {
-    settings.tool = indexToTool(toolIndex);
-  }
-
   DrawText("Wall Size", 28, 120, 18, GREEN);
 
   GuiSliderBar({88.0f, 144.0f, 180.0f, 20.0f}, "X", nullptr,
@@ -110,6 +104,14 @@ void draw(LevelEditor &editor, Level &level) {
 
   if (GuiButton({156.0f, 360.0f, 112.0f, 28.0f}, "Save")) {
     level.saveToFile(LEVEL_PATH);
+  }
+
+  int toolIndex = toolToIndex(settings.tool);
+  if (GuiDropdownBox({28.0f, 76.0f, 240.0f, 28.0f},
+                     "Select;Wall;Enemy;Player", &toolIndex,
+                     settings.toolDropdownOpen)) {
+    settings.toolDropdownOpen = !settings.toolDropdownOpen;
+    settings.tool = indexToTool(toolIndex);
   }
 }
 } // namespace EditorUI

@@ -206,6 +206,7 @@ if (downloadRaylib) then
         
         includedirs { "../src" }
         includedirs { "../include" }
+        includedirs { "../include/raygui" }
 
         links {"raylib"}
 

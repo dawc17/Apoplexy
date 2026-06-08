@@ -28,7 +28,7 @@ ifeq ($(origin AR), default)
   AR = ar
 endif
 RESCOMP = windres
-INCLUDES += -Isrc -Iinclude -Ibuild/external/raylib-master/src
+INCLUDES += -Isrc -Iinclude -Iinclude/raygui -Ibuild/external/raylib-master/src
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
@@ -120,26 +120,36 @@ OBJECTS :=
 
 GENERATED += $(OBJDIR)/assetmanager.o
 GENERATED += $(OBJDIR)/collision.o
+GENERATED += $(OBJDIR)/editorgrid.o
+GENERATED += $(OBJDIR)/editorselection.o
+GENERATED += $(OBJDIR)/editorui.o
 GENERATED += $(OBJDIR)/enemy.o
 GENERATED += $(OBJDIR)/game.o
 GENERATED += $(OBJDIR)/level.o
+GENERATED += $(OBJDIR)/leveleditor.o
 GENERATED += $(OBJDIR)/main.o
 GENERATED += $(OBJDIR)/math.o
 GENERATED += $(OBJDIR)/particles.o
 GENERATED += $(OBJDIR)/player.o
+GENERATED += $(OBJDIR)/raygui_impl.o
 GENERATED += $(OBJDIR)/renderer.o
 GENERATED += $(OBJDIR)/ui.o
 GENERATED += $(OBJDIR)/viewmodel.o
 GENERATED += $(OBJDIR)/weapon.o
 OBJECTS += $(OBJDIR)/assetmanager.o
 OBJECTS += $(OBJDIR)/collision.o
+OBJECTS += $(OBJDIR)/editorgrid.o
+OBJECTS += $(OBJDIR)/editorselection.o
+OBJECTS += $(OBJDIR)/editorui.o
 OBJECTS += $(OBJDIR)/enemy.o
 OBJECTS += $(OBJDIR)/game.o
 OBJECTS += $(OBJDIR)/level.o
+OBJECTS += $(OBJDIR)/leveleditor.o
 OBJECTS += $(OBJDIR)/main.o
 OBJECTS += $(OBJDIR)/math.o
 OBJECTS += $(OBJDIR)/particles.o
 OBJECTS += $(OBJDIR)/player.o
+OBJECTS += $(OBJDIR)/raygui_impl.o
 OBJECTS += $(OBJDIR)/renderer.o
 OBJECTS += $(OBJDIR)/ui.o
 OBJECTS += $(OBJDIR)/viewmodel.o
@@ -213,7 +223,19 @@ $(OBJDIR)/assetmanager.o: src/assets/assetmanager.cpp
 $(OBJDIR)/collision.o: src/collision/collision.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/editorgrid.o: src/editor/editorgrid.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/editorselection.o: src/editor/editorselection.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/editorui.o: src/editor/editorui.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/game.o: src/core/game.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/particles.o: src/effects/particles.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/enemy.o: src/enemy/enemy.cpp
@@ -222,13 +244,16 @@ $(OBJDIR)/enemy.o: src/enemy/enemy.cpp
 $(OBJDIR)/level.o: src/level/level.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/leveleditor.o: src/editor/leveleditor.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/main.o: src/main.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/particles.o: src/effects/particles.cpp
+$(OBJDIR)/player.o: src/player/player.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/player.o: src/player/player.cpp
+$(OBJDIR)/raygui_impl.o: src/ui/raygui_impl.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/renderer.o: src/render/renderer.cpp

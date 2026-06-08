@@ -9,7 +9,7 @@ class AssetManager;
 class Viewmodel {
 public:
   void reset();
-  void update(float dt);
+  void update(float dt, bool playerSprinting);
   void addRecoil(float amount);
 
   void draw(const Camera3D &camera, const WeaponData &weapon,
@@ -24,4 +24,5 @@ private:
   Vector2 swayRotation{};
   float walkBobTimer = 0.0f;
   float walkBobAmount = 0.0f;
+  float sprintAmount = 0.0f;
 };

@@ -21,6 +21,7 @@ public:
   float getRadius() const;
   int getHealth() const;
   bool isDead() const;
+  bool isSprinting() const;
   bool consumeDamageTaken();
 
 private:
@@ -34,6 +35,8 @@ private:
   float yaw = 0.0f;
   float pitch = 0.0f;
 
+  float sprintFovAmount = 0.0f;
+
   float headBobTimer = 0.0f;
   float headBobAmount = 0.0f;
 
@@ -44,4 +47,6 @@ private:
   int health = 100;
   int maxHealth = 100;
   bool damageTaken = false;
+  bool sprintBlockedByShot = false;
+  bool sprinting = false;
 };

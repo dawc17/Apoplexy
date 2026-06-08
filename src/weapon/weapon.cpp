@@ -29,7 +29,7 @@ void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
                     ParticleSystem &particles) {
   cooldown = std::max(0.0f, cooldown - dt);
   muzzleFlashTimer = std::max(0.0f, muzzleFlashTimer - dt);
-  viewmodel.update(dt);
+  viewmodel.update(dt, player.isSprinting());
 
   if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && cooldown <= 0.0f) {
     tryShoot(player, enemies, level, camera, particles);

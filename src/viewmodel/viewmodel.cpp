@@ -2,6 +2,7 @@
 
 #include "../assets/assetmanager.hpp"
 
+#include "raylib.h"
 #include "raymath.h"
 #include "rlgl.h"
 
@@ -66,9 +67,10 @@ void Viewmodel::reset() {
   swayRotation = {0.0f, 0.0f};
   walkBobTimer = 0.0f;
   walkBobAmount = 0.0f;
+  sprintAmount = 0.0f;
 }
 
-void Viewmodel::update(float dt) {
+void Viewmodel::update(float dt, bool playerSprinting) {
   recoilTimer = std::min(recoilDuration, recoilTimer + dt);
 
   Vector2 mouseDelta = GetMouseDelta();
@@ -107,6 +109,10 @@ void Viewmodel::update(float dt) {
   float targetWalkBobAmount = walking ? 1.0f : 0.0f;
   float walkBobEase = 1.0f - std::expf(-8.0f * dt);
   walkBobAmount += (targetWalkBobAmount - walkBobAmount) * walkBobEase;
+
+  float targetSprintAmount = playerSprinting ? 1.0f : 0.0f;
+  float sprintEase = 1.0f - std::expf(-10.0f * dt);
+  sprintAmount += (targetSprintAmount - sprintAmount) * sprintEase;
 }
 
 void Viewmodel::addRecoil(float amount) {
@@ -134,15 +140,23 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
       recoilFollowThroughCurve(recoilProgress) * recoilAmount;
 
   float kick = recoilKick * weapon.recoilKick;
+
   float bobX = std::sinf(walkBobTimer) * 0.035f * walkBobAmount;
   float bobY = std::fabs(std::cosf(walkBobTimer)) * 0.018f * walkBobAmount;
 
+  bobX += std::sinf(walkBobTimer * 0.75f) * 0.018f * sprintAmount;
+  bobY += std::fabs(std::cosf(walkBobTimer * 0.75f)) * 0.020f * sprintAmount;
+
+  Vector3 sprintOffset{0.025f * sprintAmount, -0.090f * sprintAmount,
+                       -0.020f * sprintAmount};
+
   Vector3 position{
-      weapon.holdPosition.x + swayOffset.x + bobX -
+      weapon.holdPosition.x + sprintOffset.x + swayOffset.x + bobX -
           recoilFollowThrough * 0.012f,
-      weapon.holdPosition.y + swayOffset.y - bobY - recoilKick * 0.030f +
-          recoilFollowThrough * 0.010f,
-      weapon.holdPosition.z - kick + recoilFollowThrough * 0.020f,
+      weapon.holdPosition.y + sprintOffset.y + swayOffset.y - bobY -
+          recoilKick * 0.030f + recoilFollowThrough * 0.010f,
+      weapon.holdPosition.z + sprintOffset.z - kick +
+          recoilFollowThrough * 0.020f,
   };
 
   rlDrawRenderBatchActive();
@@ -161,12 +175,15 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
                 recoilFollowThrough * 2.5f,
             1.0f, 0.0f, 0.0f);
   rlRotatef(-recoilFollowThrough * 1.6f, 0.0f, 1.0f, 0.0f);
-  rlRotatef(recoilKick * 2.4f - recoilFollowThrough * 1.2f, 0.0f, 0.0f,
-            1.0f);
+  rlRotatef(recoilKick * 2.4f - recoilFollowThrough * 1.2f, 0.0f, 0.0f, 1.0f);
 
   rlRotatef(weapon.holdRotationDegrees.y, 0.0f, 1.0f, 0.0f);
   rlRotatef(weapon.holdRotationDegrees.x, 1.0f, 0.0f, 0.0f);
   rlRotatef(weapon.holdRotationDegrees.z, 0.0f, 0.0f, 1.0f);
+
+  rlRotatef(0.0f * sprintAmount, 1.0f, 0.0f, 0.0f);
+  rlRotatef(10.0f * sprintAmount, 0.0f, 1.0f, 0.0f);
+  rlRotatef(-35.0f * sprintAmount, 0.0f, 0.0f, 1.0f);
 
   DrawModel(gun, {0.0f, 0.0f, 0.0f}, weapon.modelScale, WHITE);
 

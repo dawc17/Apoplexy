@@ -21,9 +21,12 @@ void Player::reset(Vector3 spawnPostion) {
 
   headBobTimer = 0.0f;
   headBobAmount = 0.0f;
+  sprintFovAmount = 0.0f;
 
   health = maxHealth;
   damageTaken = false;
+  sprintBlockedByShot = false;
+  sprinting = false;
 }
 
 void Player::update(float dt, const Level &level) {
@@ -47,8 +50,8 @@ void Player::applyDamage(int damage) {
 Camera3D Player::getCamera() const {
   Vector3 eye = getEyePosition();
 
-  float bobY = std::sinf(headBobTimer) * 0.045f * headBobAmount;
-  float bobX = std::cosf(headBobTimer * 0.5f) * 0.025f * headBobAmount;
+  float bobY = std::sinf(headBobTimer) * 0.06f * headBobAmount;
+  float bobX = std::cosf(headBobTimer * 0.5f) * 0.032f * headBobAmount;
 
   Vector3 right{std::cosf(yaw), 0.0f, -std::sinf(yaw)};
 
@@ -61,7 +64,7 @@ Camera3D Player::getCamera() const {
   camera.position = eye;
   camera.target = Vector3Add(eye, forward);
   camera.up = {0.0f, 1.0f, 0.0f};
-  camera.fovy = 90.0f;
+  camera.fovy = 90.0f + 10.0f * sprintFovAmount;
   camera.projection = CAMERA_PERSPECTIVE;
 
   return camera;
@@ -83,6 +86,8 @@ float Player::getRadius() const { return radius; }
 int Player::getHealth() const { return health; }
 
 bool Player::isDead() const { return health <= 0; }
+
+bool Player::isSprinting() const { return sprinting; }
 
 bool Player::consumeDamageTaken() {
   bool taken = damageTaken;
@@ -127,18 +132,48 @@ void Player::updateMovement(float dt, const Level &level) {
     moveDir = Vector3Normalize(moveDir);
   }
 
-  velocity.x = moveDir.x * moveSpeed;
-  velocity.z = moveDir.z * moveSpeed;
+  float targetSpeed = moveSpeed;
+  bool shooting = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
+  bool holdingSprint = IsKeyDown(KEY_LEFT_SHIFT);
+
+  if (!holdingSprint) {
+    sprintBlockedByShot = false;
+  } else if (shooting) {
+    sprintBlockedByShot = true;
+  }
+
+  sprinting =
+      holdingSprint && !sprintBlockedByShot && Vector3Length(moveDir) > 0.0f;
+
+  if (sprinting) {
+    targetSpeed = moveSpeed * 1.45f;
+  }
+
+  float targetSprintFovAmount = sprinting ? 1.0f : 0.0f;
+  float sprintFovEase = 1.0f - std::expf(-7.0 * dt);
+  sprintFovAmount += (targetSprintFovAmount - sprintFovAmount) * sprintFovEase;
+
+  Vector3 targetVelocity{moveDir.x * targetSpeed, 0.0f,
+                         moveDir.z * targetSpeed};
+
+  float acceleration = Vector3Length(moveDir) > 0.0f ? 32.0f : 42.0f;
+  float velocityEase = 1.0f - std::expf(-acceleration * dt);
+
+  velocity.x += (targetVelocity.x - velocity.x) * velocityEase;
+  velocity.z += (targetVelocity.z - velocity.z) * velocityEase;
 
   float horizontalSpeed =
       std::sqrtf(velocity.x * velocity.x + velocity.z * velocity.z);
 
+  float speedPercent = std::clamp(horizontalSpeed / targetSpeed, 0.0f, 1.0f);
+
   if (horizontalSpeed > 0.1f) {
     // bob speed
-    headBobTimer += dt * 16.0f;
+    headBobTimer += dt * (10.0f + 8.0f * speedPercent);
   }
 
-  float targetHeadBobAmount = horizontalSpeed > 0.1f ? 1.0f : 0.0f;
+  float sprintBobBoost = sprinting ? 1.18f : 1.0f;
+  float targetHeadBobAmount = speedPercent * sprintBobBoost;
   float headBobEase = 1.0f - std::expf(-8.0f * dt);
   headBobAmount += (targetHeadBobAmount - headBobAmount) * headBobEase;
 

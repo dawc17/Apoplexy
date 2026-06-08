@@ -12,17 +12,21 @@ struct Wall {
 
 class Level {
 public:
+  bool loadFromFile(const char *path);
+  bool saveToFile(const char *path) const;
+
   void loadTestArena();
   void unload();
 
   void draw() const;
 
+  void addWall(Vector3 position, Vector3 size);
+  void addEnemySpawn(Vector3 position);
+  void setPlayerSpawn(Vector3 position);
+
   const std::vector<Wall> &getWalls() const;
   const std::vector<Vector3> &getEnemySpawns() const;
   Vector3 getPlayerSpawn() const;
-
-private:
-  void addWall(Vector3 position, Vector3 size);
 
 private:
   std::vector<Wall> walls;

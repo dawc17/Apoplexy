@@ -1,6 +1,74 @@
 #include "level.hpp"
+#include "nlohmann/json.hpp"
+#include "raylib.h"
+#include <fstream>
 #include <raylib.h>
 #include <vector>
+
+
+using json = nlohmann::json;
+
+namespace {
+Vector3 readVec3(const json &value) {
+  return {value.at(0).get<float>(), value.at(1).get<float>(),
+          value.at(2).get<float>()};
+}
+json writeVec3(Vector3 value) {
+  return json::array({value.x, value.y, value.z});
+}
+} // namespace
+
+bool Level::loadFromFile(const char *path) {
+  std::ifstream file(path);
+  if (!file) {
+    return false;
+  }
+
+  json data = json::parse(file, nullptr, false);
+  if (data.is_discarded()) {
+    return false;
+  }
+
+  unload();
+
+  playerSpawn = readVec3(data.at("playerSpawn"));
+
+  for (const json &wall : data.at("walls")) {
+    addWall((readVec3(wall.at("position"))), readVec3(wall.at("size")));
+  }
+
+  for (const json &spawn : data.at("enemySpawns")) {
+    enemySpawns.push_back(readVec3(spawn));
+  }
+
+  return true;
+}
+
+bool Level::saveToFile(const char *path) const {
+  json data;
+  data["playerSpawn"] = writeVec3(playerSpawn);
+  data["walls"] = json::array();
+  data["enemySpawns"] = json::array();
+
+  for (const Wall &wall : walls) {
+    data["walls"].push_back({
+      {"position", writeVec3(wall.position)},
+      {"size", writeVec3(wall.size)},
+    });
+  }
+
+  for (Vector3 spawn : enemySpawns) {
+    data["enemySpawns"].push_back(writeVec3(spawn));
+  }
+
+  std::ofstream file(path);
+  if (!file) {
+    return false;
+  }
+
+  file << data.dump(2);
+  return true;
+}
 
 void Level::loadTestArena() {
   unload();

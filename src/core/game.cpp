@@ -3,6 +3,7 @@
 #include "../editor/editorui.hpp"
 #include "../render/renderer.hpp"
 #include "../ui/ui.hpp"
+#include "../viewmodel/viewmodeldebug.hpp"
 
 #include "gamestate.hpp"
 #include "raylib.h"
@@ -82,6 +83,21 @@ void Game::updatePlaying(float dt) {
 
   if (levelEditor.isEnabled()) {
     camera = levelEditor.getCamera();
+    return;
+  }
+
+  if (IsKeyPressed(KEY_F2)) {
+    ViewmodelDebug::panelOpen = !ViewmodelDebug::panelOpen;
+
+    if (ViewmodelDebug::panelOpen) {
+      EnableCursor();
+    } else {
+      DisableCursor();
+    }
+  }
+
+  if (ViewmodelDebug::panelOpen) {
+    camera = player.getCamera();
     return;
   }
 

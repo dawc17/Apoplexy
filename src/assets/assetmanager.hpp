@@ -22,8 +22,10 @@ private:
   Shader viewmodelShader{};
   Shader worldLitShader{};
   Shader skyboxShader{};
+  Texture2D gunTexture{};
   Texture2D muzzleFlashTexture{};
   TextureCubemap skyboxCubemap{};
+  bool gunTextureLoaded = false;
   bool skyboxLoaded = false;
   bool loaded = false;
 };

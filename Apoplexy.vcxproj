@@ -301,6 +301,7 @@
     <ClInclude Include="src\viewmodel\proceduralweaponanimation.hpp" />
     <ClInclude Include="src\viewmodel\proceduralweaponanimationcatalog.hpp" />
     <ClInclude Include="src\viewmodel\viewmodel.hpp" />
+    <ClInclude Include="src\viewmodel\viewmodeldebug.hpp" />
     <ClInclude Include="src\weapon\weapon.hpp" />
     <ClInclude Include="src\weapon\weaponcatalog.hpp" />
     <ClInclude Include="src\weapon\weapondata.hpp" />
@@ -330,6 +331,8 @@
   <ItemGroup>
     <None Include="resources\levels\test_arena.json" />
     <None Include="resources\models\gun.glb" />
+    <None Include="resources\models\USP-S.mtl" />
+    <None Include="resources\models\USP-S.obj" />
     <None Include="resources\shaders\monochrome.fs" />
     <None Include="resources\shaders\monochrome.vs" />
     <None Include="resources\shaders\skybox.fs" />
@@ -341,6 +344,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\textures\muzzleflash.png" />
+    <Image Include="resources\textures\USP-S.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="raylib.vcxproj">

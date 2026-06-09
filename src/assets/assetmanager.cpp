@@ -1,4 +1,5 @@
 #include "assetmanager.hpp"
+#include "raylib.h"
 #include <raylib.h>
 
 void AssetManager::load() {
@@ -6,13 +7,18 @@ void AssetManager::load() {
     return;
   }
 
-  gunModel = LoadModel("models/gun.glb");
+  gunModel = LoadModel("models/USP-S.obj");
   monoShader = LoadShader("shaders/monochrome.vs", "shaders/monochrome.fs");
   viewmodelShader =
       LoadShader("shaders/viewmodel.vs", "shaders/viewmodel.fs");
   worldLitShader =
       LoadShader("shaders/world_lit.vs", "shaders/world_lit.fs");
   muzzleFlashTexture = LoadTexture("textures/muzzleflash.png");
+
+  if (FileExists("textures/USP-S.png")) {
+    gunTexture = LoadTexture("textures/USP-S.png");
+    gunTextureLoaded = true;
+  }
 
   if (FileExists("textures/skybox.png")) {
     skyboxShader = LoadShader("shaders/skybox.vs", "shaders/skybox.fs");
@@ -35,17 +41,14 @@ void AssetManager::load() {
     skyboxLoaded = true;
   }
 
-  const Color gunColors[] = {
-      {52, 55, 58, 255},   {78, 82, 86, 255},    {34, 36, 38, 255},
-      {112, 108, 100, 255}, {145, 142, 132, 255}, {24, 25, 27, 255},
-  };
-
   for (int i = 0; i < gunModel.materialCount; ++i) {
     gunModel.materials[i].shader = viewmodelShader;
-    gunModel.materials[i].maps[MATERIAL_MAP_DIFFUSE].color =
-        gunColors[i % (sizeof(gunColors) / sizeof(gunColors[0]))];
-  }
+    gunModel.materials[i].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
 
+    if (gunTextureLoaded) {
+      gunModel.materials[i].maps[MATERIAL_MAP_DIFFUSE].texture = gunTexture;
+    }
+  }
   loaded = true;
 }
 
@@ -59,6 +62,10 @@ void AssetManager::unload() {
   UnloadShader(viewmodelShader);
   UnloadShader(worldLitShader);
   UnloadTexture(muzzleFlashTexture);
+  if (gunTextureLoaded) {
+    UnloadTexture(gunTexture);
+    gunTextureLoaded = false;
+  }
   if (skyboxLoaded) {
     UnloadShader(skyboxShader);
     UnloadTexture(skyboxCubemap);

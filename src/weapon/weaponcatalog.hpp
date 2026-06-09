@@ -24,9 +24,9 @@ inline const WeaponData Pistol{
 
     // Viewmodel
     {
-        {-0.20f, -0.10f, 0.31f},   // holdPosition
-        {-6.0f, -90.0f, -4.0f},    // holdRotationDegrees
-        0.80f,                     // modelScale
+        {-0.247f, -0.147f, 0.381f}, // holdPosition
+        {-2.8f, -7.4f, -1.9f},     // holdRotationDegrees
+        0.104f,                     // modelScale
         {0.615f, -0.004f, 0.175f}, // muzzlePoint
         1.478f,                    // muzzleFlashWidth
         0.657f,                    // muzzleFlashHeight

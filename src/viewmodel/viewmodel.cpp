@@ -2,6 +2,7 @@
 
 #include "../assets/assetmanager.hpp"
 #include "../render/lighting.hpp"
+#include "viewmodeldebug.hpp"
 #include "raylib.h"
 #include "rlgl.h"
 #include "external/glad.h"
@@ -239,6 +240,9 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
           recoilKick * procedural.recoilKickOffset.z +
           recoilFollowThrough * procedural.recoilFollowThroughOffset.z,
   };
+  position.x += ViewmodelDebug::positionOffset.x;
+  position.y += ViewmodelDebug::positionOffset.y;
+  position.z += ViewmodelDebug::positionOffset.z;
 
   rlDrawRenderBatchActive();
   BeginMode3D(viewCamera);
@@ -270,6 +274,10 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
   rlRotatef(weapon.viewModel.holdRotationDegrees.x, 1.0f, 0.0f, 0.0f);
   rlRotatef(weapon.viewModel.holdRotationDegrees.z, 0.0f, 0.0f, 1.0f);
 
+  rlRotatef(ViewmodelDebug::rotationOffsetDegrees.y, 0.0f, 1.0f, 0.0f);
+  rlRotatef(ViewmodelDebug::rotationOffsetDegrees.x, 1.0f, 0.0f, 0.0f);
+  rlRotatef(ViewmodelDebug::rotationOffsetDegrees.z, 0.0f, 0.0f, 1.0f);
+
   rlRotatef(reloadSpinRotationDegrees.y * reloadPose, 0.0f, 1.0f, 0.0f);
   rlRotatef(reloadSpinRotationDegrees.x * reloadPose, 1.0f, 0.0f, 0.0f);
   rlRotatef(reloadSpinRotationDegrees.z * reloadPose, 0.0f, 0.0f, 1.0f);
@@ -280,7 +288,9 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
             0.0f);
   rlRotatef(procedural.sprintRotationDegrees.z * sprintAmount, 0.0f, 0.0f,
             1.0f);
-  DrawModel(gun, {0.0f, 0.0f, 0.0f}, weapon.viewModel.modelScale, WHITE);
+  DrawModel(gun, {0.0f, 0.0f, 0.0f},
+            weapon.viewModel.modelScale * ViewmodelDebug::scaleMultiplier,
+            WHITE);
 
   if (muzzleFlashTimer > 0.0f) {
     float t = muzzleFlashTimer / 0.05f;

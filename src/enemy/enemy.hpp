@@ -33,6 +33,8 @@ private:
   float radius = 0.4f;
   float height = 1.5f;
   float speed = 2.5f;
+  float gravity = 24.0f;
+  bool grounded = false;
 
   int health = 30;
   int maxHealth = 30;

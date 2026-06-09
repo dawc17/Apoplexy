@@ -33,6 +33,18 @@ void Enemy::update(float dt, Player &player, const Level &level) {
     chasePlayer(dt, player, level);
   }
 
+  if (!grounded || velocity.y > 0.0f) {
+    velocity.y -= gravity * dt;
+  } else {
+    velocity.y = 0.0f;
+  }
+
+  Collision::MoveResult move =
+      Collision::moveCylinderLevel(position, velocity, radius, height, level, dt);
+  position = move.position;
+  velocity = move.velocity;
+  grounded = move.grounded;
+
   updateHitbox();
 }
 
@@ -90,18 +102,19 @@ void Enemy::chasePlayer(float dt, const Player &player, const Level &level) {
   toPlayer.y = 0.0f;
 
   if (Vector3Length(toPlayer) <= 0.001f) {
-    velocity = {0.0f, 0.0f, 0.0f};
+    velocity.x = 0.0f;
+    velocity.z = 0.0f;
     return;
   }
 
   Vector3 direction = Vector3Normalize(toPlayer);
-  velocity = {direction.x * speed, 0.0f, direction.z * speed};
-
-  position = Collision::moveSphereLevel(position, velocity, radius, level, dt);
+  velocity.x = direction.x * speed;
+  velocity.z = direction.z * speed;
 }
 
 void Enemy::attackPlayer(float, Player &player) {
-  velocity = {0.0f, 0.0f, 0.0f};
+  velocity.x = 0.0f;
+  velocity.z = 0.0f;
 
   if (attackCooldown <= 0.0f) {
     player.applyDamage(10);

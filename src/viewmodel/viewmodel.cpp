@@ -173,8 +173,6 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
   Vector3 lightDirection = lighting.sun.direction;
   float ambientStrength = Lighting::clampIntensity(lighting.ambientIntensity);
   float diffuseStrength = Lighting::clampIntensity(lighting.sun.intensity);
-  float colorLevels = 25.0f;
-  float ditherStrength = 0.14f;
 
   SetShaderValue(viewmodelShader,
                  GetShaderLocation(viewmodelShader, "virtualResolution"),
@@ -191,11 +189,6 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
   SetShaderValue(viewmodelShader,
                  GetShaderLocation(viewmodelShader, "pointLightContribution"),
                  &pointLightContribution, SHADER_UNIFORM_VEC3);
-  SetShaderValue(viewmodelShader, GetShaderLocation(viewmodelShader, "colorLevels"),
-                 &colorLevels, SHADER_UNIFORM_FLOAT);
-  SetShaderValue(viewmodelShader,
-                 GetShaderLocation(viewmodelShader, "ditherStrength"),
-                 &ditherStrength, SHADER_UNIFORM_FLOAT);
 
   Camera3D viewCamera{};
   viewCamera.position = {0.0f, 0.0f, 0.0f};

@@ -176,18 +176,18 @@ void Game::draw() {
   SetShaderValue(monoShader, GetShaderLocation(monoShader, "ditherStrength"),
                  &ditherStrength, SHADER_UNIFORM_FLOAT);
 
-  BeginShaderMode(monoShader);
   Renderer::drawWorld(*this);
-  EndShaderMode();
 
   EndTextureMode();
 
+  BeginShaderMode(monoShader);
   DrawTexturePro(sceneTarget.texture,
                  {0.0f, 0.0f, static_cast<float>(sceneTarget.texture.width),
                   -static_cast<float>(sceneTarget.texture.height)},
                  {0.0f, 0.0f, static_cast<float>(GetScreenWidth()),
                   static_cast<float>(GetScreenHeight())},
                  {0.0f, 0.0f}, 0.0f, WHITE);
+  EndShaderMode();
 
   drawDamageVignette();
 

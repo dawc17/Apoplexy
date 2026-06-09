@@ -27,6 +27,7 @@ void Player::reset(Vector3 spawnPostion) {
   damageTaken = false;
   sprintBlockedByShot = false;
   sprinting = false;
+  grounded = false;
 }
 
 void Player::update(float dt, const Level &level) {
@@ -153,7 +154,7 @@ void Player::updateMovement(float dt, const Level &level) {
   float sprintFovEase = 1.0f - std::expf(-7.0 * dt);
   sprintFovAmount += (targetSprintFovAmount - sprintFovAmount) * sprintFovEase;
 
-  Vector3 targetVelocity{moveDir.x * targetSpeed, 0.0f,
+  Vector3 targetVelocity{moveDir.x * targetSpeed, velocity.y,
                          moveDir.z * targetSpeed};
 
   float acceleration = Vector3Length(moveDir) > 0.0f ? 32.0f : 42.0f;
@@ -161,6 +162,12 @@ void Player::updateMovement(float dt, const Level &level) {
 
   velocity.x += (targetVelocity.x - velocity.x) * velocityEase;
   velocity.z += (targetVelocity.z - velocity.z) * velocityEase;
+
+  if (!grounded || velocity.y > 0.0f) {
+    velocity.y -= gravity * dt;
+  } else {
+    velocity.y = 0.0f;
+  }
 
   float horizontalSpeed =
       std::sqrtf(velocity.x * velocity.x + velocity.z * velocity.z);
@@ -177,5 +184,9 @@ void Player::updateMovement(float dt, const Level &level) {
   float headBobEase = 1.0f - std::expf(-8.0f * dt);
   headBobAmount += (targetHeadBobAmount - headBobAmount) * headBobEase;
 
-  position = Collision::moveSphereLevel(position, velocity, radius, level, dt);
+  Collision::MoveResult move =
+      Collision::moveCylinderLevel(position, velocity, radius, height, level, dt);
+  position = move.position;
+  velocity = move.velocity;
+  grounded = move.grounded;
 }

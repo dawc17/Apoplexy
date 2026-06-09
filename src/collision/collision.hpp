@@ -8,10 +8,17 @@ class Enemy;
 #include <vector>
 
 namespace Collision {
-bool sphereLevel(Vector3 position, float radius, const Level &level);
+struct MoveResult {
+  Vector3 position{};
+  Vector3 velocity{};
+  bool grounded = false;
+};
 
-Vector3 moveSphereLevel(Vector3 position, Vector3 velocity, float radius,
-                        const Level &level, float dt);
+bool cylinderLevel(Vector3 position, float radius, float height,
+                   const Level &level);
+
+MoveResult moveCylinderLevel(Vector3 position, Vector3 velocity, float radius,
+                             float height, const Level &level, float dt);
 
 bool rayEnemies(Ray ray, std::vector<Enemy> &enemies, int &hitEnemyIndex,
                 Vector3 &hitPoint);

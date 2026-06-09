@@ -9,7 +9,18 @@
 #include <raylib.h>
 
 namespace {
-bool sphereAabbXZ(Vector3 position, float radius, BoundingBox box) {
+constexpr float GROUND_Y = 0.0f;
+constexpr float SURFACE_EPSILON = 0.001f;
+
+bool cylinderAabb(Vector3 position, float radius, float height,
+                  BoundingBox box) {
+  float bodyMinY = position.y;
+  float bodyMaxY = position.y + height;
+
+  if (bodyMaxY <= box.min.y || bodyMinY >= box.max.y) {
+    return false;
+  }
+
   float closestX = Clamp(position.x, box.min.x, box.max.x);
   float closestZ = Clamp(position.z, box.min.z, box.max.z);
 
@@ -19,12 +30,23 @@ bool sphereAabbXZ(Vector3 position, float radius, BoundingBox box) {
   // seriously, what even is math?
   return dx * dx + dz * dz < radius * radius;
 }
+
+bool cylinderOverlapsAabbXZ(Vector3 position, float radius, BoundingBox box) {
+  float closestX = Clamp(position.x, box.min.x, box.max.x);
+  float closestZ = Clamp(position.z, box.min.z, box.max.z);
+
+  float dx = position.x - closestX;
+  float dz = position.z - closestZ;
+
+  return dx * dx + dz * dz < radius * radius;
+}
 } // namespace
 
 namespace Collision {
-bool sphereLevel(Vector3 position, float radius, const Level &level) {
+bool cylinderLevel(Vector3 position, float radius, float height,
+                   const Level &level) {
   for (const Wall &wall : level.getWalls()) {
-    if (sphereAabbXZ(position, radius, wall.bounds)) {
+    if (cylinderAabb(position, radius, height, wall.bounds)) {
       return true;
     }
   }
@@ -32,21 +54,58 @@ bool sphereLevel(Vector3 position, float radius, const Level &level) {
   return false;
 }
 
-Vector3 moveSphereLevel(Vector3 position, Vector3 velocity, float radius,
-                        const Level &level, float dt) {
+MoveResult moveCylinderLevel(Vector3 position, Vector3 velocity, float radius,
+                             float height, const Level &level, float dt) {
   Vector3 next = position;
+  Vector3 nextVelocity = velocity;
+  bool grounded = false;
 
   next.x += velocity.x * dt;
-  if (sphereLevel(next, radius, level)) {
+  if (cylinderLevel(next, radius, height, level)) {
     next.x = position.x;
+    nextVelocity.x = 0.0f;
   }
 
   next.z += velocity.z * dt;
-  if (sphereLevel(next, radius, level)) {
+  if (cylinderLevel(next, radius, height, level)) {
     next.z = position.z;
+    nextVelocity.z = 0.0f;
   }
 
-  return next;
+  next.y += velocity.y * dt;
+
+  if (next.y <= GROUND_Y) {
+    next.y = GROUND_Y;
+    nextVelocity.y = 0.0f;
+    grounded = true;
+  }
+
+  for (const Wall &wall : level.getWalls()) {
+    if (!cylinderOverlapsAabbXZ(next, radius, wall.bounds)) {
+      continue;
+    }
+
+    float previousBottom = position.y;
+    float previousTop = position.y + height;
+    float nextBottom = next.y;
+    float nextTop = next.y + height;
+
+    if (velocity.y <= 0.0f && previousBottom >= wall.bounds.max.y &&
+        nextBottom <= wall.bounds.max.y + SURFACE_EPSILON) {
+      next.y = wall.bounds.max.y + SURFACE_EPSILON;
+      nextVelocity.y = 0.0f;
+      grounded = true;
+      continue;
+    }
+
+    if (velocity.y > 0.0f && previousTop <= wall.bounds.min.y &&
+        nextTop >= wall.bounds.min.y) {
+      next.y = wall.bounds.min.y - height - SURFACE_EPSILON;
+      nextVelocity.y = 0.0f;
+    }
+  }
+
+  return {next, nextVelocity, grounded};
 }
 
 bool rayEnemies(Ray ray, std::vector<Enemy> &enemies, int &hitEnemyIndex,

@@ -14,7 +14,7 @@
       <UniqueIdentifier>{01D2BE0A-6DE8-BCA0-B65F-48C222B58D28}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\editor">
-      <UniqueIdentifier>{3869C518-4D12-43FE-9E4C-1831C4874F22}</UniqueIdentifier>
+      <UniqueIdentifier>{1FF999B9-8B5A-77C7-14C8-BD798028AE86}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\effects">
       <UniqueIdentifier>{B8B844F1-A447-CEBA-4D66-E2B539D4DE60}</UniqueIdentifier>
@@ -56,7 +56,7 @@
       <UniqueIdentifier>{39B8505D-A5CE-4EF3-EE45-DA145A9B1F7B}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\editor">
-      <UniqueIdentifier>{92D9E557-1597-4E7D-947E-B72E05343E6D}</UniqueIdentifier>
+      <UniqueIdentifier>{574D3EF8-C3AE-1B06-4C1C-62B8B87C52C5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\effects">
       <UniqueIdentifier>{F0937304-DC22-FDCD-8541-11C971AF0D74}</UniqueIdentifier>
@@ -67,8 +67,14 @@
     <Filter Include="Header Files\level">
       <UniqueIdentifier>{88310508-7415-C65D-DD75-C0B0C978B0DF}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\nlohmann">
+      <UniqueIdentifier>{4BDC4DC4-B748-09BF-803C-A11CEC672B27}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Header Files\player">
       <UniqueIdentifier>{3D817312-A9E2-5020-3250-97D29EB087DF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\raygui">
+      <UniqueIdentifier>{81A36316-ED04-4124-7672-87D6E2D277E3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\render">
       <UniqueIdentifier>{90EEA516-FC4F-8324-85BD-C9D6F11DBAE3}</UniqueIdentifier>
@@ -88,6 +94,9 @@
     <Filter Include="Game Resource Files">
       <UniqueIdentifier>{BAF00917-2652-E724-AFBF-2DD71B201EE4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Game Resource Files\levels">
+      <UniqueIdentifier>{74029537-6012-4108-C9CB-A526B5FA2FA1}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Game Resource Files\models">
       <UniqueIdentifier>{4D41953A-3951-410B-A20A-A6298E3930A4}</UniqueIdentifier>
     </Filter>
@@ -99,8 +108,11 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\nlohmann\json.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
     <ClInclude Include="include\raygui\raygui.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\raygui</Filter>
     </ClInclude>
     <ClInclude Include="include\resource_dir.h">
       <Filter>Header Files</Filter>
@@ -147,6 +159,9 @@
     <ClInclude Include="src\player\player.hpp">
       <Filter>Header Files\player</Filter>
     </ClInclude>
+    <ClInclude Include="src\render\lighting.hpp">
+      <Filter>Header Files\render</Filter>
+    </ClInclude>
     <ClInclude Include="src\render\renderer.hpp">
       <Filter>Header Files\render</Filter>
     </ClInclude>
@@ -156,13 +171,25 @@
     <ClInclude Include="src\util\math.hpp">
       <Filter>Header Files\util</Filter>
     </ClInclude>
+    <ClInclude Include="src\viewmodel\proceduralweaponanimation.hpp">
+      <Filter>Header Files\viewmodel</Filter>
+    </ClInclude>
+    <ClInclude Include="src\viewmodel\proceduralweaponanimationcatalog.hpp">
+      <Filter>Header Files\viewmodel</Filter>
+    </ClInclude>
     <ClInclude Include="src\viewmodel\viewmodel.hpp">
       <Filter>Header Files\viewmodel</Filter>
     </ClInclude>
     <ClInclude Include="src\weapon\weapon.hpp">
       <Filter>Header Files\weapon</Filter>
     </ClInclude>
+    <ClInclude Include="src\weapon\weaponcatalog.hpp">
+      <Filter>Header Files\weapon</Filter>
+    </ClInclude>
     <ClInclude Include="src\weapon\weapondata.hpp">
+      <Filter>Header Files\weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="src\weapon\weaponinventory.hpp">
       <Filter>Header Files\weapon</Filter>
     </ClInclude>
   </ItemGroup>
@@ -221,8 +248,14 @@
     <ClCompile Include="src\weapon\weapon.cpp">
       <Filter>Source Files\weapon</Filter>
     </ClCompile>
+    <ClCompile Include="src\weapon\weaponinventory.cpp">
+      <Filter>Source Files\weapon</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\levels\test_arena.json">
+      <Filter>Game Resource Files\levels</Filter>
+    </None>
     <None Include="resources\models\gun.glb">
       <Filter>Game Resource Files\models</Filter>
     </None>
@@ -230,6 +263,24 @@
       <Filter>Game Resource Files\shaders</Filter>
     </None>
     <None Include="resources\shaders\monochrome.vs">
+      <Filter>Game Resource Files\shaders</Filter>
+    </None>
+    <None Include="resources\shaders\skybox.fs">
+      <Filter>Game Resource Files\shaders</Filter>
+    </None>
+    <None Include="resources\shaders\skybox.vs">
+      <Filter>Game Resource Files\shaders</Filter>
+    </None>
+    <None Include="resources\shaders\viewmodel.fs">
+      <Filter>Game Resource Files\shaders</Filter>
+    </None>
+    <None Include="resources\shaders\viewmodel.vs">
+      <Filter>Game Resource Files\shaders</Filter>
+    </None>
+    <None Include="resources\shaders\world_lit.fs">
+      <Filter>Game Resource Files\shaders</Filter>
+    </None>
+    <None Include="resources\shaders\world_lit.vs">
       <Filter>Game Resource Files\shaders</Filter>
     </None>
   </ItemGroup>

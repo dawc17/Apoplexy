@@ -8,7 +8,6 @@
 #include <vector>
 
 class AssetManager;
-class Camera3D;
 class Enemy;
 class Level;
 class ParticleSystem;

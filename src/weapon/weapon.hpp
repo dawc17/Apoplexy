@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../assets/assetmanager.hpp"
+#include "../render/lighting.hpp"
 #include "../viewmodel/proceduralweaponanimation.hpp"
 #include "../viewmodel/viewmodel.hpp"
 #include "weapondata.hpp"
@@ -26,7 +27,9 @@ public:
               const Level &level, const Camera3D camera,
               ParticleSystem &particles);
 
-  void drawViewModel(const Camera3D &camera, const AssetManager &assets) const;
+  void drawViewModel(const Camera3D &camera, const AssetManager &assets,
+                     const Lighting::SceneLighting &lighting,
+                     Vector3 pointLightContribution) const;
 
   const WeaponData &getData() const;
 

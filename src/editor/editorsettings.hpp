@@ -2,7 +2,7 @@
 
 #include "raylib.h"
 
-enum class EditorTool { Select, Wall, EnemySpawn, PlayerSpawn };
+enum class EditorTool { Select, Wall, EnemySpawn, PlayerSpawn, Light };
 
 struct EditorSettings {
   EditorTool tool = EditorTool::Wall;

@@ -3,7 +3,6 @@
 #include "../collision/collision.hpp"
 #include "../level/level.hpp"
 #include "../player/player.hpp"
-#include "../render/lighting.hpp"
 #include "../util/math.hpp"
 
 #include "raylib.h"
@@ -49,8 +48,8 @@ void Enemy::draw() const {
     color = WHITE;
   }
 
-  Lighting::drawCube({position.x, position.y + height * 0.5f, position.z},
-                     {radius * 2.0f, height, radius * 2.0f}, color);
+  DrawCube({position.x, position.y + height * 0.5f, position.z},
+           radius * 2.0f, height, radius * 2.0f, color);
 
   DrawCubeWires({position.x, position.y + height * 0.5f, position.z},
                 radius * 2.0f, height, radius * 2.0f, BLACK);

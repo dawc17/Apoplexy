@@ -277,6 +277,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\nlohmann\json.hpp" />
     <ClInclude Include="include\raygui\raygui.h" />
     <ClInclude Include="include\resource_dir.h" />
     <ClInclude Include="src\assets\assetmanager.hpp" />
@@ -293,12 +294,17 @@
     <ClInclude Include="src\enemy\enemy.hpp" />
     <ClInclude Include="src\level\level.hpp" />
     <ClInclude Include="src\player\player.hpp" />
+    <ClInclude Include="src\render\lighting.hpp" />
     <ClInclude Include="src\render\renderer.hpp" />
     <ClInclude Include="src\ui\ui.hpp" />
     <ClInclude Include="src\util\math.hpp" />
+    <ClInclude Include="src\viewmodel\proceduralweaponanimation.hpp" />
+    <ClInclude Include="src\viewmodel\proceduralweaponanimationcatalog.hpp" />
     <ClInclude Include="src\viewmodel\viewmodel.hpp" />
     <ClInclude Include="src\weapon\weapon.hpp" />
+    <ClInclude Include="src\weapon\weaponcatalog.hpp" />
     <ClInclude Include="src\weapon\weapondata.hpp" />
+    <ClInclude Include="src\weapon\weaponinventory.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\assets\assetmanager.cpp" />
@@ -319,11 +325,19 @@
     <ClCompile Include="src\util\math.cpp" />
     <ClCompile Include="src\viewmodel\viewmodel.cpp" />
     <ClCompile Include="src\weapon\weapon.cpp" />
+    <ClCompile Include="src\weapon\weaponinventory.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\levels\test_arena.json" />
     <None Include="resources\models\gun.glb" />
     <None Include="resources\shaders\monochrome.fs" />
     <None Include="resources\shaders\monochrome.vs" />
+    <None Include="resources\shaders\skybox.fs" />
+    <None Include="resources\shaders\skybox.vs" />
+    <None Include="resources\shaders\viewmodel.fs" />
+    <None Include="resources\shaders\viewmodel.vs" />
+    <None Include="resources\shaders\world_lit.fs" />
+    <None Include="resources\shaders\world_lit.vs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\textures\muzzleflash.png" />

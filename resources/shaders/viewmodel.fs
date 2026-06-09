@@ -9,6 +9,7 @@ uniform vec4 colDiffuse;
 uniform vec3 lightDirection;
 uniform float ambientStrength;
 uniform float diffuseStrength;
+uniform vec3 pointLightContribution;
 uniform float colorLevels;
 uniform float ditherStrength;
 
@@ -43,7 +44,8 @@ void main() {
     vec3 normal = normalize(fragNormal);
     vec3 light = normalize(lightDirection);
     float diffuse = max(dot(normal, light), 0.0);
-    float lighting = ambientStrength + diffuseStrength * diffuse;
+    vec3 lighting = vec3(ambientStrength + diffuseStrength * diffuse) +
+                    pointLightContribution;
 
     float dither = bayer4(floor(gl_FragCoord.xy)) * ditherStrength;
     vec3 value = clamp(color.rgb * lighting + vec3(dither), 0.0, 1.0);

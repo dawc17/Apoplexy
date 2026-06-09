@@ -8,6 +8,8 @@ enum class EditorSelectionType {
   None,
   Wall,
   EnemySpawn,
+  PlayerSpawn,
+  Light,
 };
 
 class EditorSelection {
@@ -19,6 +21,14 @@ public:
 
   bool hasEnemySpawn() const;
   int getEnemySpawnIndex() const;
+
+  bool hasPlayerSpawn() const;
+
+  bool hasLight() const;
+  int getLightIndex() const;
+
+  EditorSelectionType getType() const;
+  bool hasAny() const;
 
   bool pick(const Level &level, Ray ray);
 

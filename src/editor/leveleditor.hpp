@@ -8,6 +8,8 @@
 
 class LevelEditor {
 public:
+  enum class GizmoAxis { None, X, Y, Z };
+
   void update(Level &level, float dt);
   void draw(const Level &level) const;
 
@@ -16,9 +18,13 @@ public:
 
   EditorSettings &getSettings();
   const EditorSettings &getSettings() const;
+  EditorSelection &getSelection();
+  const EditorSelection &getSelection() const;
 
 private:
   void updateCamera();
+  bool updateGizmo(Level &level);
+  void drawMoveGizmo(const Level &level) const;
 
 private:
   Vector3 cursor{0.0f, 0.0f, 0.0f};
@@ -30,5 +36,8 @@ private:
   float cameraDistance = 24.0f;
   float cameraYaw = 0.78f;
   float cameraPitch = 0.85f;
+  Vector3 gizmoDragStartPosition{};
+  Vector3 gizmoDragStartObjectPosition{};
+  GizmoAxis activeGizmoAxis = GizmoAxis::None;
   bool enabled = false;
 };

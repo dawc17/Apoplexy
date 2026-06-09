@@ -2,6 +2,7 @@
 
 #include "proceduralweaponanimation.hpp"
 
+#include "../render/lighting.hpp"
 #include "../weapon/weapondata.hpp"
 
 #include "raylib.h"
@@ -18,7 +19,8 @@ public:
   void draw(const Camera3D &camera, const WeaponData &weapon,
             const ProceduralWeaponAnimationData &procedural,
             const AssetManager &assets, float muzzleFlashTimer,
-            float muzzleFlashRotation) const;
+            float muzzleFlashRotation, const Lighting::SceneLighting &lighting,
+            Vector3 pointLightContribution) const;
 
 private:
   float recoilTimer = 1.0f;

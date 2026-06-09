@@ -24,6 +24,22 @@ bool EditorSelection::hasEnemySpawn() const {
 
 int EditorSelection::getEnemySpawnIndex() const { return selectedIndex; }
 
+bool EditorSelection::hasPlayerSpawn() const {
+  return type == EditorSelectionType::PlayerSpawn;
+}
+
+bool EditorSelection::hasLight() const {
+  return type == EditorSelectionType::Light && selectedIndex >= 0;
+}
+
+int EditorSelection::getLightIndex() const { return selectedIndex; }
+
+EditorSelectionType EditorSelection::getType() const { return type; }
+
+bool EditorSelection::hasAny() const {
+  return type != EditorSelectionType::None && selectedIndex >= 0;
+}
+
 bool EditorSelection::pick(const Level &level, Ray ray) {
   clear();
 
@@ -68,6 +84,37 @@ bool EditorSelection::pick(const Level &level, Ray ray) {
     }
 
     type = EditorSelectionType::EnemySpawn;
+    selectedIndex = i;
+    closestDistance = hit.distance;
+  }
+
+  RayCollision playerHit =
+      GetRayCollisionSphere(ray, level.getPlayerSpawn(), 0.45f);
+  if (playerHit.hit && playerHit.distance >= 0.0f &&
+      playerHit.distance < closestDistance) {
+    type = EditorSelectionType::PlayerSpawn;
+    selectedIndex = 0;
+    closestDistance = playerHit.distance;
+  }
+
+  const std::vector<Lighting::PointLight> &lights = level.getLights();
+
+  for (int i = 0; i < static_cast<int>(lights.size()); ++i) {
+    RayCollision hit = GetRayCollisionSphere(ray, lights[i].position, 0.45f);
+
+    if (!hit.hit) {
+      continue;
+    }
+
+    if (hit.distance < 0.0f) {
+      continue;
+    }
+
+    if (hit.distance >= closestDistance) {
+      continue;
+    }
+
+    type = EditorSelectionType::Light;
     selectedIndex = i;
     closestDistance = hit.distance;
   }

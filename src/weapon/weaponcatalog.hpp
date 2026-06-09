@@ -18,7 +18,7 @@ inline const WeaponData Pistol{
     {
         12,   // magazineSize
         48,   // maxReserveAmmo
-        1.1f, // reloadDuration
+        1.8f, // reloadDuration
         true, // autoReloadWhenEmpty
     },
 

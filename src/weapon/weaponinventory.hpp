@@ -1,6 +1,7 @@
 #pragma once
 
 #include "raylib.h"
+#include "audio/audiosystem.hpp"
 #include "viewmodel/proceduralweaponanimation.hpp"
 #include "weapon.hpp"
 
@@ -22,7 +23,7 @@ public:
 
   void update(float dt, const Player &player, std::vector<Enemy> &enemies,
               const Level &level, const Camera3D camera,
-              ParticleSystem &particles);
+              ParticleSystem &particles, AudioSystem &audio);
 
   Weapon &getActiveWeapon();
   const Weapon &getActiveWeapon() const;

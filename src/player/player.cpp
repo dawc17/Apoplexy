@@ -84,9 +84,15 @@ float Player::getPitch() const { return pitch; }
 
 float Player::getRadius() const { return radius; }
 
+float Player::getHorizontalSpeed() const {
+  return std::sqrtf(velocity.x * velocity.x + velocity.z * velocity.z);
+}
+
 int Player::getHealth() const { return health; }
 
 bool Player::isDead() const { return health <= 0; }
+
+bool Player::isGrounded() const { return grounded; }
 
 bool Player::isSprinting() const { return sprinting; }
 

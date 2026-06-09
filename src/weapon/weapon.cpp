@@ -37,15 +37,17 @@ void Weapon::reset() {
 
 void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
                     const Level &level, const Camera3D camera,
-                    ParticleSystem &particles) {
+                    ParticleSystem &particles, AudioSystem &audio) {
   cooldown = std::max(0.0f, cooldown - dt);
   muzzleFlashTimer = std::max(0.0f, muzzleFlashTimer - dt);
 
   if (reloading) {
+    audio.playLooping(AudioId::PistolReloadStart);
+
     reloadTimer = std::max(0.0f, reloadTimer - dt);
 
     if (reloadTimer <= 0.0f) {
-      finishReload();
+      finishReload(audio);
     }
   }
 
@@ -60,7 +62,7 @@ void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
                          : IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
   if (wantsToFire && cooldown <= 0.0f) {
-    tryShoot(player, enemies, level, camera, particles);
+    tryShoot(player, enemies, level, camera, particles, audio);
   }
 
   if (!reloading && data->ammo.autoReloadWhenEmpty && ammoInMagazine <= 0 &&
@@ -69,8 +71,7 @@ void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
   }
 }
 
-void Weapon::drawViewModel(const Camera3D &camera,
-                           const AssetManager &assets,
+void Weapon::drawViewModel(const Camera3D &camera, const AssetManager &assets,
                            const Lighting::SceneLighting &lighting,
                            Vector3 pointLightContribution) const {
   viewmodel.draw(camera, *data, *proceduralAnimation, assets, muzzleFlashTimer,
@@ -97,12 +98,16 @@ float Weapon::getReloadProgress() const {
 
 void Weapon::tryShoot(const Player &, std::vector<Enemy> &enemies,
                       const Level &level, const Camera3D &camera,
-                      ParticleSystem &particles) {
+                      ParticleSystem &particles, AudioSystem &audio) {
   if (reloading) {
     return;
   }
 
   if (ammoInMagazine <= 0) {
+    audio.play(AudioId::PistolDryFire,
+               {0.75f,
+                0.96f + static_cast<float>(GetRandomValue(0, 8)) / 100.0f,
+                0.0f});
     startReload();
     return;
   }
@@ -114,6 +119,10 @@ void Weapon::tryShoot(const Player &, std::vector<Enemy> &enemies,
   muzzleFlashRotation = static_cast<float>(GetRandomValue(-25, 25));
   shotFired = true;
   viewmodel.addRecoil(1.0f);
+  audio.play(AudioId::PistolFire,
+             {1.0f,
+              0.96f + static_cast<float>(GetRandomValue(0, 8)) / 100.0f,
+              0.0f});
 
   Ray ray = makeShootRay(camera);
   int hitEnemyIndex = -1;
@@ -159,24 +168,25 @@ void Weapon::tryShoot(const Player &, std::vector<Enemy> &enemies,
   }
 }
 
-void Weapon::startReload() {
+bool Weapon::startReload() {
   if (reloading) {
-    return;
+    return false;
   }
 
   if (ammoInMagazine >= data->ammo.magazineSize) {
-    return;
+    return false;
   }
 
   if (reserveAmmo <= 0) {
-    return;
+    return false;
   }
 
   reloading = true;
   reloadTimer = data->ammo.reloadDuration;
+  return true;
 }
 
-void Weapon::finishReload() {
+void Weapon::finishReload(AudioSystem &audio) {
   int neededAmmo = data->ammo.magazineSize - ammoInMagazine;
   int ammoToLoad = std::min(neededAmmo, reserveAmmo);
 
@@ -185,6 +195,8 @@ void Weapon::finishReload() {
 
   reloading = false;
   reloadTimer = 0.0f;
+  audio.stop(AudioId::PistolReloadStart);
+  audio.play(AudioId::PistolReloadEnd);
 }
 
 Ray Weapon::makeShootRay(const Camera3D &camera) const {

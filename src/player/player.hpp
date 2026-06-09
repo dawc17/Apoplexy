@@ -19,8 +19,10 @@ public:
   float getYaw() const;
   float getPitch() const;
   float getRadius() const;
+  float getHorizontalSpeed() const;
   int getHealth() const;
   bool isDead() const;
+  bool isGrounded() const;
   bool isSprinting() const;
   bool consumeDamageTaken();
 

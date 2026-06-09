@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../assets/assetmanager.hpp"
+#include "../audio/audiosystem.hpp"
 #include "../render/lighting.hpp"
 #include "../viewmodel/proceduralweaponanimation.hpp"
 #include "../viewmodel/viewmodel.hpp"
@@ -25,7 +26,7 @@ public:
 
   void update(float dt, const Player &player, std::vector<Enemy> &enemies,
               const Level &level, const Camera3D camera,
-              ParticleSystem &particles);
+              ParticleSystem &particles, AudioSystem &audio);
 
   void drawViewModel(const Camera3D &camera, const AssetManager &assets,
                      const Lighting::SceneLighting &lighting,
@@ -44,10 +45,10 @@ public:
 private:
   void tryShoot(const Player &player, std::vector<Enemy> &enemies,
                 const Level &level, const Camera3D &camera,
-                ParticleSystem &particles);
+                ParticleSystem &particles, AudioSystem &audio);
 
-  void startReload();
-  void finishReload();
+  bool startReload();
+  void finishReload(AudioSystem &audio);
 
   Ray makeShootRay(const Camera3D &camera) const;
 

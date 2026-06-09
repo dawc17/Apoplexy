@@ -166,6 +166,7 @@ if (downloadRaylib) then
     project (workspaceName)
         kind "ConsoleApp"
         location "../"
+        targetname "apoplexy"
         targetdir "../bin/%{cfg.buildcfg}"
 
         filter {"system:windows", "configurations:Release", "action:gmake*"}

@@ -30,14 +30,16 @@ void WeaponInventory::reset() {
 
 void WeaponInventory::update(float dt, const Player &player,
                              std::vector<Enemy> &enemies, const Level &level,
-                             const Camera3D camera, ParticleSystem &particles) {
+                             const Camera3D camera, ParticleSystem &particles,
+                             AudioSystem &audio) {
   updateSwitchInput();
 
   if (weapons.empty()) {
     return;
   }
 
-  getActiveWeapon().update(dt, player, enemies, level, camera, particles);
+  getActiveWeapon().update(dt, player, enemies, level, camera, particles,
+                           audio);
 }
 
 Weapon &WeaponInventory::getActiveWeapon() {

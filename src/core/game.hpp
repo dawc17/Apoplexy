@@ -3,6 +3,7 @@
 #include "gamestate.hpp"
 
 #include "../assets/assetmanager.hpp"
+#include "../audio/audiosystem.hpp"
 #include "../editor/leveleditor.hpp"
 #include "../effects/particles.hpp"
 #include "../enemy/enemy.hpp"
@@ -32,6 +33,8 @@ public:
   const std::vector<Enemy> &getEnemies() const;
   const Camera3D &getCamera() const;
   const AssetManager &getAssets() const;
+  AudioSystem &getAudio();
+  const AudioSystem &getAudio() const;
   const ParticleSystem &getParticles() const;
   const LevelEditor &getLevelEditor() const;
   LevelEditor &getMutableLevelEditor();
@@ -42,6 +45,7 @@ private:
   void reset();
   void updatePlaying(float dt);
   void drawPlaying();
+  void updateFootsteps(float dt);
   void startCameraShake(float strength, float duration);
   void updateCameraShake(float dt);
   void drawDamageVignette() const;
@@ -50,6 +54,7 @@ private:
   GameState state = GameState::Menu;
 
   AssetManager assets;
+  AudioSystem audio;
   RenderTexture2D sceneTarget{};
 
   Level level;
@@ -63,6 +68,7 @@ private:
   float cameraShakeTimer = 0.0f;
   float cameraShakeDuration = 0.0f;
   float cameraShakeStrength = 0.0f;
+  float footstepStopGraceTimer = 0.0f;
   float damageVignetteTimer = 0.0f;
   float damageVignetteDuration = 0.45f;
   bool enemiesFrozen = false;

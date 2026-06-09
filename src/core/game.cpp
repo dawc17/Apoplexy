@@ -5,6 +5,7 @@
 #include "../ui/ui.hpp"
 #include "../viewmodel/viewmodeldebug.hpp"
 
+#include "audio/audiosystem.hpp"
 #include "gamestate.hpp"
 #include "raylib.h"
 #include "raymath.h"
@@ -19,6 +20,7 @@ constexpr int PSX_RENDER_HEIGHT = 320;
 
 Game::Game() {
   assets.load();
+  audio.load();
   sceneTarget = LoadRenderTexture(PSX_RENDER_WIDTH, PSX_RENDER_HEIGHT);
   SetTextureFilter(sceneTarget.texture, TEXTURE_FILTER_POINT);
   weapons.addWeapon(WeaponCatalog::Pistol,
@@ -28,12 +30,16 @@ Game::Game() {
 
 Game::~Game() {
   UnloadRenderTexture(sceneTarget);
+  audio.unload();
   assets.unload();
 }
 
 void Game::reset() {
   state = GameState::Playing;
   damageVignetteTimer = 0.0f;
+  footstepStopGraceTimer = 0.0f;
+  audio.stop(AudioId::PistolReloadStart);
+  audio.stop(AudioId::PlayerFootstep);
 
   if (!level.loadFromFile("levels/test_arena.json")) {
     level.loadTestArena();
@@ -83,6 +89,8 @@ void Game::updatePlaying(float dt) {
 
   if (levelEditor.isEnabled()) {
     camera = levelEditor.getCamera();
+    audio.stop(AudioId::PistolReloadStart);
+    audio.stop(AudioId::PlayerFootstep);
     return;
   }
 
@@ -98,6 +106,8 @@ void Game::updatePlaying(float dt) {
 
   if (ViewmodelDebug::panelOpen) {
     camera = player.getCamera();
+    audio.stop(AudioId::PistolReloadStart);
+    audio.stop(AudioId::PlayerFootstep);
     return;
   }
 
@@ -108,7 +118,13 @@ void Game::updatePlaying(float dt) {
   player.update(dt, level);
   camera = player.getCamera();
 
-  weapons.update(dt, player, enemies, level, camera, particles);
+  audio.setListener({
+      camera.position,
+      Vector3Normalize(Vector3Subtract(camera.target, camera.position)),
+  });
+  updateFootsteps(dt);
+
+  weapons.update(dt, player, enemies, level, camera, particles, audio);
 
   // tune fire shake here
   if (weapons.getActiveWeapon().consumeShotFired()) {
@@ -134,6 +150,8 @@ void Game::updatePlaying(float dt) {
   updateCameraShake(dt);
 
   if (player.isDead()) {
+    audio.stop(AudioId::PistolReloadStart);
+    audio.stop(AudioId::PlayerFootstep);
     state = GameState::Dead;
   }
 
@@ -147,6 +165,8 @@ void Game::updatePlaying(float dt) {
   }
 
   if (allEnemiesDead) {
+    audio.stop(AudioId::PistolReloadStart);
+    audio.stop(AudioId::PlayerFootstep);
     state = GameState::Win;
   }
 }
@@ -228,6 +248,38 @@ void Game::drawDamageVignette() const {
   }
 }
 
+void Game::updateFootsteps(float dt) {
+  constexpr float startStepSpeed = 1.2f;
+  constexpr float keepStepSpeed = 0.35f;
+  constexpr float stopGraceDuration = 0.16f;
+
+  float speed = player.getHorizontalSpeed();
+  bool shouldStart = player.isGrounded() && speed >= startStepSpeed;
+  bool shouldKeepPlaying = player.isGrounded() && speed >= keepStepSpeed;
+
+  if (!shouldKeepPlaying) {
+    footstepStopGraceTimer -= dt;
+
+    if (footstepStopGraceTimer <= 0.0f) {
+      audio.stop(AudioId::PlayerFootstep);
+    }
+
+    return;
+  }
+
+  if (!shouldStart && footstepStopGraceTimer <= 0.0f) {
+    audio.stop(AudioId::PlayerFootstep);
+    return;
+  }
+
+  footstepStopGraceTimer = stopGraceDuration;
+
+  float pitch = player.isSprinting() ? 1.08f : 1.0f;
+  float volume = player.isSprinting() ? 0.85f : 0.68f;
+
+  audio.playLooping(AudioId::PlayerFootstep, {volume, pitch, 0.0f});
+}
+
 void Game::startCameraShake(float strength, float duration) {
   cameraShakeStrength = strength;
   cameraShakeDuration = duration;
@@ -267,6 +319,8 @@ const WeaponInventory &Game::getWeaponInventory() const { return weapons; }
 const std::vector<Enemy> &Game::getEnemies() const { return enemies; }
 const Camera3D &Game::getCamera() const { return camera; }
 const AssetManager &Game::getAssets() const { return assets; }
+AudioSystem &Game::getAudio() { return audio; }
+const AudioSystem &Game::getAudio() const { return audio; }
 const ParticleSystem &Game::getParticles() const { return particles; }
 const LevelEditor &Game::getLevelEditor() const { return levelEditor; }
 LevelEditor &Game::getMutableLevelEditor() { return levelEditor; }

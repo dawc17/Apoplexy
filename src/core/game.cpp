@@ -141,6 +141,7 @@ void Game::updatePlaying(float dt) {
 
   if (player.consumeDamageTaken()) {
     damageVignetteTimer = damageVignetteDuration;
+    audio.play(AudioId::PlayerHurt);
     startCameraShake(0.22f, 0.18f);
   }
 

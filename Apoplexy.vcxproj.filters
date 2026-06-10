@@ -7,6 +7,9 @@
     <Filter Include="Source Files\assets">
       <UniqueIdentifier>{CB025AB1-3764-37BF-C0D1-7D712C326E7E}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\audio">
+      <UniqueIdentifier>{CAF07762-B6D4-38B8-1F35-330B0B38233A}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Source Files\collision">
       <UniqueIdentifier>{64D44A99-50CE-73EB-393B-0AFC25D4D957}</UniqueIdentifier>
     </Filter>
@@ -48,6 +51,9 @@
     </Filter>
     <Filter Include="Header Files\assets">
       <UniqueIdentifier>{0357FEEF-6FB8-DBFD-F825-22B0648612BD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\audio">
+      <UniqueIdentifier>{029E4607-EE81-075D-57E2-01B043E5F1DE}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\collision">
       <UniqueIdentifier>{9C5D9D33-8857-C685-71C4-5C965D5D2CF2}</UniqueIdentifier>
@@ -94,6 +100,12 @@
     <Filter Include="Game Resource Files">
       <UniqueIdentifier>{BAF00917-2652-E724-AFBF-2DD71B201EE4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Game Resource Files\audio">
+      <UniqueIdentifier>{5BB24D75-C774-81FF-1025-108C7C265ADD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game Resource Files\audio\weapons">
+      <UniqueIdentifier>{07D2377C-7340-8DFB-BC29-48FB28D78297}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Game Resource Files\levels">
       <UniqueIdentifier>{74029537-6012-4108-C9CB-A526B5FA2FA1}</UniqueIdentifier>
     </Filter>
@@ -119,6 +131,9 @@
     </ClInclude>
     <ClInclude Include="src\assets\assetmanager.hpp">
       <Filter>Header Files\assets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\audio\audiosystem.hpp">
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="src\collision\collision.hpp">
       <Filter>Header Files\collision</Filter>
@@ -200,6 +215,9 @@
     <ClCompile Include="src\assets\assetmanager.cpp">
       <Filter>Source Files\assets</Filter>
     </ClCompile>
+    <ClCompile Include="src\audio\audiosystem.cpp">
+      <Filter>Source Files\audio</Filter>
+    </ClCompile>
     <ClCompile Include="src\collision\collision.cpp">
       <Filter>Source Files\collision</Filter>
     </ClCompile>
@@ -256,16 +274,31 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\audio\footsteps.wav">
+      <Filter>Game Resource Files\audio</Filter>
+    </None>
+    <None Include="resources\audio\weapons\pistol_fire.wav">
+      <Filter>Game Resource Files\audio\weapons</Filter>
+    </None>
+    <None Include="resources\audio\weapons\pistol_reload_start.wav">
+      <Filter>Game Resource Files\audio\weapons</Filter>
+    </None>
     <None Include="resources\levels\test_arena.json">
       <Filter>Game Resource Files\levels</Filter>
     </None>
-    <None Include="resources\models\gun.glb">
+    <None Include="resources\models\Shotgun.fbx">
+      <Filter>Game Resource Files\models</Filter>
+    </None>
+    <None Include="resources\models\USP-S.fbx">
       <Filter>Game Resource Files\models</Filter>
     </None>
     <None Include="resources\models\USP-S.mtl">
       <Filter>Game Resource Files\models</Filter>
     </None>
     <None Include="resources\models\USP-S.obj">
+      <Filter>Game Resource Files\models</Filter>
+    </None>
+    <None Include="resources\models\gun.glb">
       <Filter>Game Resource Files\models</Filter>
     </None>
     <None Include="resources\shaders\monochrome.fs">
@@ -294,10 +327,16 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="resources\textures\muzzleflash.png">
+    <Image Include="resources\textures\Shotgun_Texture.png">
       <Filter>Game Resource Files\textures</Filter>
     </Image>
     <Image Include="resources\textures\USP-S.png">
+      <Filter>Game Resource Files\textures</Filter>
+    </Image>
+    <Image Include="resources\textures\muzzleflash.png">
+      <Filter>Game Resource Files\textures</Filter>
+    </Image>
+    <Image Include="resources\textures\skybox.png">
       <Filter>Game Resource Files\textures</Filter>
     </Image>
   </ItemGroup>

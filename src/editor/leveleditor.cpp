@@ -47,7 +47,7 @@ Vector3 wallCenterFromCursor(Vector3 cursor, Vector3 size) {
 }
 
 bool raycastGround(Camera3D camera, Vector3 &hitPoint) {
-  Ray ray = GetMouseRay(GetMousePosition(), camera);
+  Ray ray = GetScreenToWorldRay(GetMousePosition(), camera);
 
   if (std::fabs(ray.direction.y) < 0.0001f) {
     return false;
@@ -66,7 +66,7 @@ bool raycastGround(Camera3D camera, Vector3 &hitPoint) {
 }
 
 Ray mouseRay(Camera3D camera) {
-  return GetMouseRay(GetMousePosition(), camera);
+  return GetScreenToWorldRay(GetMousePosition(), camera);
 }
 
 Vector3 normalizedGroundVector(Vector3 value) {

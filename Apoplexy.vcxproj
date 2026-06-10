@@ -100,42 +100,42 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(ProjectDir)bin\Debug\</OutDir>
     <IntDir>$(ProjectDir)obj\x64\Debug\Apoplexy\</IntDir>
-    <TargetName>Apoplexy</TargetName>
+    <TargetName>apoplexy</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(ProjectDir)bin\Debug\</OutDir>
     <IntDir>$(ProjectDir)obj\x86\Debug\Apoplexy\</IntDir>
-    <TargetName>Apoplexy</TargetName>
+    <TargetName>apoplexy</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(ProjectDir)bin\Debug\</OutDir>
     <IntDir>$(ProjectDir)obj\ARM64\Debug\Apoplexy\</IntDir>
-    <TargetName>Apoplexy</TargetName>
+    <TargetName>apoplexy</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(ProjectDir)bin\Release\</OutDir>
     <IntDir>$(ProjectDir)obj\x64\Release\Apoplexy\</IntDir>
-    <TargetName>Apoplexy</TargetName>
+    <TargetName>apoplexy</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(ProjectDir)bin\Release\</OutDir>
     <IntDir>$(ProjectDir)obj\x86\Release\Apoplexy\</IntDir>
-    <TargetName>Apoplexy</TargetName>
+    <TargetName>apoplexy</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(ProjectDir)bin\Release\</OutDir>
     <IntDir>$(ProjectDir)obj\ARM64\Release\Apoplexy\</IntDir>
-    <TargetName>Apoplexy</TargetName>
+    <TargetName>apoplexy</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -281,6 +281,7 @@
     <ClInclude Include="include\raygui\raygui.h" />
     <ClInclude Include="include\resource_dir.h" />
     <ClInclude Include="src\assets\assetmanager.hpp" />
+    <ClInclude Include="src\audio\audiosystem.hpp" />
     <ClInclude Include="src\collision\collision.hpp" />
     <ClInclude Include="src\core\constants.hpp" />
     <ClInclude Include="src\core\game.hpp" />
@@ -309,6 +310,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\assets\assetmanager.cpp" />
+    <ClCompile Include="src\audio\audiosystem.cpp" />
     <ClCompile Include="src\collision\collision.cpp" />
     <ClCompile Include="src\core\game.cpp" />
     <ClCompile Include="src\editor\editorgrid.cpp" />
@@ -329,10 +331,15 @@
     <ClCompile Include="src\weapon\weaponinventory.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\audio\footsteps.wav" />
+    <None Include="resources\audio\weapons\pistol_fire.wav" />
+    <None Include="resources\audio\weapons\pistol_reload_start.wav" />
     <None Include="resources\levels\test_arena.json" />
-    <None Include="resources\models\gun.glb" />
+    <None Include="resources\models\Shotgun.fbx" />
+    <None Include="resources\models\USP-S.fbx" />
     <None Include="resources\models\USP-S.mtl" />
     <None Include="resources\models\USP-S.obj" />
+    <None Include="resources\models\gun.glb" />
     <None Include="resources\shaders\monochrome.fs" />
     <None Include="resources\shaders\monochrome.vs" />
     <None Include="resources\shaders\skybox.fs" />
@@ -343,8 +350,10 @@
     <None Include="resources\shaders\world_lit.vs" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="resources\textures\muzzleflash.png" />
+    <Image Include="resources\textures\Shotgun_Texture.png" />
     <Image Include="resources\textures\USP-S.png" />
+    <Image Include="resources\textures\muzzleflash.png" />
+    <Image Include="resources\textures\skybox.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="raylib.vcxproj">

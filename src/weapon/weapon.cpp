@@ -156,6 +156,10 @@ void Weapon::tryShoot(const Player &, std::vector<Enemy> &enemies,
 
     particles.spawnEnemyHit(enemyHitPoint, hitNormal,
                             enemies[hitEnemyIndex].getVelocity());
+    audio.play(AudioId::EnemyHit,
+               {1.0f,
+                0.96f + static_cast<float>(GetRandomValue(0, 8)) / 100.0f,
+                0.0f});
 
     Vector3 enemyPosition = enemies[hitEnemyIndex].getPosition();
     Vector3 enemyVelocity = enemies[hitEnemyIndex].getVelocity();

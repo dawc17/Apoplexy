@@ -34,7 +34,7 @@ void AudioSystem::load() {
            0.65f);
   loadClip(AudioId::PlayerHurt, "audio/player/hurt.wav", AudioBus::Player,
            0.8f);
-  loadClip(AudioId::EnemyHit, "audio/enemies/hit.wav", AudioBus::Enemies, 0.7f);
+  loadClip(AudioId::EnemyHit, "audio/enemies/hit.wav", AudioBus::Enemies, 1.0f);
   loadClip(AudioId::EnemyDeath, "audio/enemies/death.wav", AudioBus::Enemies,
            0.85f);
 

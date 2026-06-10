@@ -43,7 +43,7 @@ endef
 ifeq ($(config),debug_x64)
 TARGETDIR = bin/Debug
 TARGET = $(TARGETDIR)/apoplexy
-OBJDIR = obj/x64/Debug/apoplexy
+OBJDIR = obj/x64/Debug/Apoplexy
 DEFINES += -DDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_GLFW_X11
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -g -std=c17
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -g -std=c++17
@@ -54,7 +54,7 @@ ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64
 else ifeq ($(config),debug_x86)
 TARGETDIR = bin/Debug
 TARGET = $(TARGETDIR)/apoplexy
-OBJDIR = obj/x86/Debug/apoplexy
+OBJDIR = obj/x86/Debug/Apoplexy
 DEFINES += -DDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_GLFW_X11
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -g -std=c17
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -g -std=c++17
@@ -65,7 +65,7 @@ ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -m32
 else ifeq ($(config),debug_arm64)
 TARGETDIR = bin/Debug
 TARGET = $(TARGETDIR)/apoplexy
-OBJDIR = obj/ARM64/Debug/apoplexy
+OBJDIR = obj/ARM64/Debug/Apoplexy
 DEFINES += -DDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_GLFW_X11
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -Wshadow -g -std=c17
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -Wshadow -g -std=c++17
@@ -76,7 +76,7 @@ ALL_LDFLAGS += $(LDFLAGS)
 else ifeq ($(config),release_x64)
 TARGETDIR = bin/Release
 TARGET = $(TARGETDIR)/apoplexy
-OBJDIR = obj/x64/Release/apoplexy
+OBJDIR = obj/x64/Release/Apoplexy
 DEFINES += -DNDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_GLFW_X11
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -O2 -std=c17
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -O2 -std=c++17
@@ -87,7 +87,7 @@ ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
 else ifeq ($(config),release_x86)
 TARGETDIR = bin/Release
 TARGET = $(TARGETDIR)/apoplexy
-OBJDIR = obj/x86/Release/apoplexy
+OBJDIR = obj/x86/Release/Apoplexy
 DEFINES += -DNDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_GLFW_X11
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -O2 -std=c17
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -O2 -std=c++17
@@ -98,7 +98,7 @@ ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -m32 -s
 else ifeq ($(config),release_arm64)
 TARGETDIR = bin/Release
 TARGET = $(TARGETDIR)/apoplexy
-OBJDIR = obj/ARM64/Release/apoplexy
+OBJDIR = obj/ARM64/Release/Apoplexy
 DEFINES += -DNDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_GLFW_X11
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -Wshadow -O2 -std=c17
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -Wshadow -O2 -std=c++17
@@ -119,6 +119,7 @@ GENERATED :=
 OBJECTS :=
 
 GENERATED += $(OBJDIR)/assetmanager.o
+GENERATED += $(OBJDIR)/audiosystem.o
 GENERATED += $(OBJDIR)/collision.o
 GENERATED += $(OBJDIR)/editorgrid.o
 GENERATED += $(OBJDIR)/editorselection.o
@@ -138,6 +139,7 @@ GENERATED += $(OBJDIR)/viewmodel.o
 GENERATED += $(OBJDIR)/weapon.o
 GENERATED += $(OBJDIR)/weaponinventory.o
 OBJECTS += $(OBJDIR)/assetmanager.o
+OBJECTS += $(OBJDIR)/audiosystem.o
 OBJECTS += $(OBJDIR)/collision.o
 OBJECTS += $(OBJDIR)/editorgrid.o
 OBJECTS += $(OBJDIR)/editorselection.o
@@ -165,7 +167,7 @@ all: $(TARGET)
 
 $(TARGET): $(GENERATED) $(OBJECTS) $(LDDEPS) | $(TARGETDIR)
 	$(PRELINKCMDS)
-	@echo Linking apoplexy
+	@echo Linking Apoplexy
 	$(SILENT) $(LINKCMD)
 	$(POSTBUILDCMDS)
 
@@ -186,7 +188,7 @@ else
 endif
 
 clean:
-	@echo Cleaning apoplexy
+	@echo Cleaning Apoplexy
 ifeq (posix,$(SHELLTYPE))
 	$(SILENT) rm -f  $(TARGET)
 	$(SILENT) rm -rf $(GENERATED)
@@ -222,7 +224,13 @@ endif
 $(OBJDIR)/assetmanager.o: src/assets/assetmanager.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/audiosystem.o: src/audio/audiosystem.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/collision.o: src/collision/collision.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/game.o: src/core/game.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/editorgrid.o: src/editor/editorgrid.cpp
@@ -234,7 +242,7 @@ $(OBJDIR)/editorselection.o: src/editor/editorselection.cpp
 $(OBJDIR)/editorui.o: src/editor/editorui.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/game.o: src/core/game.cpp
+$(OBJDIR)/leveleditor.o: src/editor/leveleditor.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/particles.o: src/effects/particles.cpp
@@ -246,19 +254,16 @@ $(OBJDIR)/enemy.o: src/enemy/enemy.cpp
 $(OBJDIR)/level.o: src/level/level.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/leveleditor.o: src/editor/leveleditor.cpp
-	@echo "$(notdir $<)"
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/main.o: src/main.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/player.o: src/player/player.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/raygui_impl.o: src/ui/raygui_impl.cpp
+$(OBJDIR)/renderer.o: src/render/renderer.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/renderer.o: src/render/renderer.cpp
+$(OBJDIR)/raygui_impl.o: src/ui/raygui_impl.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/ui.o: src/ui/ui.cpp

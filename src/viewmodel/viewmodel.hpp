@@ -27,6 +27,8 @@ private:
   float recoilAmount = 0.0f;
   Vector2 swayOffset{};
   Vector2 swayRotation{};
+  float idleBobTimer = 0.0f;
+  float idleBobAmount = 0.0f;
   float walkBobTimer = 0.0f;
   float walkBobAmount = 0.0f;
   float sprintAmount = 0.0f;

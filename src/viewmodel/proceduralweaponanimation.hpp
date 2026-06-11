@@ -33,4 +33,8 @@ struct ProceduralWeaponAnimationData {
   Vector3 reloadSpinDegreesPerSecond{0.0f, 0.0f, 0.0f};
   float reloadSpinEaseInSpeed = 18.0f;
   float reloadSpinEaseOutSpeed = 12.0f;
+
+  float idleBobSpeed = 1.65f;
+  float idleBobY = 0.006f;
+  float idleBobEaseSpeed = 3.5f;
 };

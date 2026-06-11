@@ -2,10 +2,10 @@
 
 #include "../assets/assetmanager.hpp"
 #include "../render/lighting.hpp"
-#include "viewmodeldebug.hpp"
+#include "external/glad.h"
 #include "raylib.h"
 #include "rlgl.h"
-#include "external/glad.h"
+#include "viewmodeldebug.hpp"
 #include "weapon/weapondata.hpp"
 
 #include <algorithm>
@@ -67,6 +67,8 @@ void Viewmodel::reset() {
   recoilAmount = 0.0f;
   swayOffset = {0.0f, 0.0f};
   swayRotation = {0.0f, 0.0f};
+  idleBobTimer = 0.0f;
+  idleBobAmount = 0.0f;
   walkBobTimer = 0.0f;
   walkBobAmount = 0.0f;
   sprintAmount = 0.0f;
@@ -114,6 +116,13 @@ void Viewmodel::update(float dt, bool playerSprinting, bool weaponReloading,
 
   bool walking = IsKeyDown(KEY_W) || IsKeyDown(KEY_A) || IsKeyDown(KEY_S) ||
                  IsKeyDown(KEY_D);
+
+  idleBobTimer += dt * procedural.idleBobSpeed;
+
+  bool idle = !walking && !playerSprinting && !weaponReloading;
+  float targetIdleBobAmount = idle ? 1.0f : 0.0f;
+  float idleBobEase = 1.0f - std::expf(-procedural.idleBobEaseSpeed * dt);
+  idleBobAmount += (targetIdleBobAmount - idleBobAmount) * idleBobEase;
 
   if (walking) {
     walkBobTimer += dt * procedural.walkBobSpeed;
@@ -197,10 +206,9 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
   viewCamera.fovy = 70;
   viewCamera.projection = CAMERA_PERSPECTIVE;
 
-  float recoilProgress =
-      procedural.recoilDuration > 0.0f
-          ? recoilTimer / procedural.recoilDuration
-          : 1.0f;
+  float recoilProgress = procedural.recoilDuration > 0.0f
+                             ? recoilTimer / procedural.recoilDuration
+                             : 1.0f;
   float recoilKick = recoilKickCurve(recoilProgress) * recoilAmount;
   float recoilFollowThrough =
       recoilFollowThroughCurve(recoilProgress) * recoilAmount;
@@ -208,6 +216,8 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
   float bobX = std::sinf(walkBobTimer) * procedural.walkBobX * walkBobAmount;
   float bobY =
       std::fabs(std::cosf(walkBobTimer)) * procedural.walkBobY * walkBobAmount;
+  float idleBobY =
+      std::sinf(idleBobTimer) * procedural.idleBobY * idleBobAmount;
 
   bobX += std::sinf(walkBobTimer * procedural.sprintBobSpeedScale) *
           procedural.sprintBobX * sprintAmount;
@@ -227,7 +237,7 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
           recoilKick * procedural.recoilKickOffset.x +
           recoilFollowThrough * procedural.recoilFollowThroughOffset.x,
       weapon.viewModel.holdPosition.y + sprintOffset.y + swayOffset.y - bobY -
-          recoilKick * procedural.recoilKickOffset.y +
+          idleBobY - recoilKick * procedural.recoilKickOffset.y +
           recoilFollowThrough * procedural.recoilFollowThroughOffset.y,
       weapon.viewModel.holdPosition.z + sprintOffset.z +
           recoilKick * procedural.recoilKickOffset.z +

@@ -22,6 +22,8 @@ public:
   void update(float dt, Player &player, const Level &level);
   void draw() const;
 
+  void resolveOverlap(Enemy &other);
+
   bool applyDamage(int damage);
 
   bool isAlive() const;
@@ -33,7 +35,9 @@ private:
   void updateHitbox();
   bool canSeePlayer(const Player &player, const Level &level) const;
   void chasePlayer(float dt, const Player &player, const Level &level);
-  void moveToward(Vector3 target, float targetSpeed, float dt);
+  void moveToward(Vector3 target, float targetSpeed, float dt,
+                  const Level &level);
+  Vector3 steerAroundWalls(Vector3 desiredDirection, const Level &level) const;
   void stopHorizontalMovement(float dt);
   void attackPlayer(float dt, Player &player);
 

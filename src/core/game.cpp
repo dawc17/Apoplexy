@@ -137,6 +137,15 @@ void Game::updatePlaying(float dt) {
     for (Enemy &enemy : enemies) {
       enemy.update(dt, player, level);
     }
+
+    constexpr int separationPasses = 3;
+    for (int pass = 0; pass < separationPasses; ++pass) {
+      for (int i = 0; i < static_cast<int>(enemies.size()); ++i) {
+        for (int j = i + 1; j < static_cast<int>(enemies.size()); ++j) {
+          enemies[i].resolveOverlap(enemies[j]);
+        }
+      }
+    }
   }
 
   if (player.consumeDamageTaken()) {

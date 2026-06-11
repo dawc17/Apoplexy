@@ -5,7 +5,15 @@
 class Player;
 class Level;
 
-enum class EnemyState { Idle, Chase, Attack, Dead };
+enum class EnemyState {
+  Idle,
+  Alert,
+  Chase,
+  Search,
+  AttackWindup,
+  AttackRecovery,
+  Dead
+};
 
 class Enemy {
 public:
@@ -23,16 +31,22 @@ public:
 
 private:
   void updateHitbox();
+  bool canSeePlayer(const Player &player, const Level &level) const;
   void chasePlayer(float dt, const Player &player, const Level &level);
+  void moveToward(Vector3 target, float targetSpeed, float dt);
+  void stopHorizontalMovement(float dt);
   void attackPlayer(float dt, Player &player);
 
 private:
   Vector3 position{};
   Vector3 velocity{};
+  Vector3 facingDirection{0.0f, 0.0f, 1.0f};
 
   float radius = 0.4f;
   float height = 1.5f;
   float speed = 2.5f;
+  float searchSpeed = 1.8f;
+  float acceleration = 14.0f;
   float gravity = 24.0f;
   bool grounded = false;
 
@@ -44,6 +58,17 @@ private:
 
   float attackRange = 1.4f;
   float attackCooldown = 0.0f;
+  float attackWindupDuration = 0.34f;
+  float attackRecoveryDuration = 0.52f;
+
+  float visionRange = 18.0f;
+  float visionHalfAngleDegrees = 55.0f;
+  float loseSightGrace = 0.45f;
+  float searchDuration = 2.2f;
+  float alertDuration = 0.22f;
+  float stateTimer = 0.0f;
+  float timeSinceSeenPlayer = 999.0f;
+  Vector3 lastKnownPlayerPosition{};
 
   EnemyState state = EnemyState::Idle;
 

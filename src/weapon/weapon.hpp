@@ -64,6 +64,11 @@ private:
 
   bool startReload();
   void finishReload(AudioSystem &audio);
+  void updateReloadSpinHit(float previousReloadElapsed,
+                           float currentReloadElapsed,
+                           const Camera3D &camera,
+                           std::vector<Enemy> &enemies, const Level &level,
+                           ParticleSystem &particles, AudioSystem &audio);
   void tryMelee(AudioSystem &audio);
   void updateMelee(float dt, const Camera3D &camera, std::vector<Enemy> &enemies,
                    const Level &level, ParticleSystem &particles,
@@ -94,6 +99,7 @@ private:
   float meleeTimer = 0.0f;
   float meleeDuration = 0.0f;
   bool reloading = false;
+  bool reloadSpinHasHit = false;
   bool meleeHasHit = false;
   bool shotFired = false;
   std::vector<DebugShotRay> debugRays;

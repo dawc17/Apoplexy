@@ -43,6 +43,7 @@ void Weapon::reset() {
   meleeDuration = 0.0f;
 
   reloading = false;
+  reloadSpinHasHit = false;
   meleeHasHit = false;
   shotFired = false;
 
@@ -56,6 +57,7 @@ void Weapon::cancelReload(AudioSystem &audio) {
 
   reloading = false;
   reloadTimer = 0.0f;
+  reloadSpinHasHit = false;
   audio.stop(AudioId::PistolReloadStart);
 }
 
@@ -120,7 +122,12 @@ void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
   if (reloading) {
     audio.playLooping(AudioId::PistolReloadStart);
 
+    float previousReloadElapsed = data->ammo.reloadDuration - reloadTimer;
     reloadTimer = std::max(0.0f, reloadTimer - dt);
+    float currentReloadElapsed = data->ammo.reloadDuration - reloadTimer;
+
+    updateReloadSpinHit(previousReloadElapsed, currentReloadElapsed, camera,
+                        enemies, level, particles, audio);
 
     if (reloadTimer <= 0.0f) {
       finishReload(audio);
@@ -266,6 +273,7 @@ bool Weapon::startReload() {
 
   reloading = true;
   reloadTimer = data->ammo.reloadDuration;
+  reloadSpinHasHit = false;
   return true;
 }
 
@@ -281,13 +289,42 @@ void Weapon::finishReload(AudioSystem &audio) {
   if (data->ammo.reloadOneRoundAtATime &&
       ammoInMagazine < data->ammo.magazineSize && reserveAmmo > 0) {
     reloadTimer = data->ammo.reloadDuration;
+    reloadSpinHasHit = false;
     return;
   }
 
   reloading = false;
   reloadTimer = 0.0f;
+  reloadSpinHasHit = false;
   audio.stop(AudioId::PistolReloadStart);
   audio.play(AudioId::PistolReloadEnd);
+}
+
+void Weapon::updateReloadSpinHit(float previousReloadElapsed,
+                                 float currentReloadElapsed,
+                                 const Camera3D &camera,
+                                 std::vector<Enemy> &enemies,
+                                 const Level &level, ParticleSystem &particles,
+                                 AudioSystem &audio) {
+  if (data->modelId != WeaponModelId::Shotgun) {
+    return;
+  }
+
+  if (!data->ammo.reloadOneRoundAtATime || reloadSpinHasHit) {
+    return;
+  }
+
+  float activeStart = data->melee.windupDuration;
+  float activeEnd = activeStart + data->melee.activeDuration;
+  bool crossedActiveWindow =
+      previousReloadElapsed <= activeEnd && currentReloadElapsed >= activeStart;
+
+  if (!crossedActiveWindow) {
+    return;
+  }
+
+  performMeleeHit(camera, enemies, level, particles, audio);
+  reloadSpinHasHit = true;
 }
 
 void Weapon::tryMelee(AudioSystem &audio) {

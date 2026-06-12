@@ -21,6 +21,7 @@ constexpr int PSX_RENDER_HEIGHT = 320;
 Game::Game() {
   assets.load();
   audio.load();
+  audio.playMusic();
   sceneTarget = LoadRenderTexture(PSX_RENDER_WIDTH, PSX_RENDER_HEIGHT);
   SetTextureFilter(sceneTarget.texture, TEXTURE_FILTER_POINT);
   weapons.addWeapon(WeaponCatalog::Pistol,
@@ -61,6 +62,8 @@ void Game::reset() {
 }
 
 void Game::update(float dt) {
+  audio.update();
+
   switch (state) {
   case GameState::Menu:
     if (IsKeyPressed(KEY_ENTER)) {

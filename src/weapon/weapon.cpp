@@ -6,6 +6,7 @@
 #include "../level/level.hpp"
 #include "../player/player.hpp"
 
+#include "audio/audiosystem.hpp"
 #include "raylib.h"
 #include "raymath.h"
 
@@ -13,6 +14,8 @@
 #include <cfloat>
 #include <iostream>
 #include <vector>
+
+bool Weapon::debugRaysEnabled = false;
 
 Weapon::Weapon(const WeaponData &weaponData,
                const ProceduralWeaponAnimationData &weaponProceduralAnimation)
@@ -28,6 +31,7 @@ void Weapon::reset() {
   reloadTimer = 0.0f;
   muzzleFlashTimer = 0.0f;
   muzzleFlashRotation = 0.0f;
+  spreadBloom = 0.0f;
 
   reloading = false;
   shotFired = false;
@@ -38,8 +42,24 @@ void Weapon::reset() {
 void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
                     const Level &level, const Camera3D camera,
                     ParticleSystem &particles, AudioSystem &audio) {
+  if (IsKeyPressed(KEY_F4)) {
+    debugRaysEnabled = !debugRaysEnabled;
+  }
+
   cooldown = std::max(0.0f, cooldown - dt);
   muzzleFlashTimer = std::max(0.0f, muzzleFlashTimer - dt);
+  spreadBloom =
+      std::max(0.0f, spreadBloom - data->fire.spreadRecoverySpeed * dt);
+
+  for (DebugShotRay &ray : debugRays) {
+    ray.timer = std::max(0.0f, ray.timer - dt);
+  }
+
+  debugRays.erase(std::remove_if(debugRays.begin(), debugRays.end(),
+                                 [](const DebugShotRay &ray) {
+                                   return ray.timer <= 0.0f;
+                                 }),
+                  debugRays.end());
 
   if (reloading) {
     audio.playLooping(AudioId::PistolReloadStart);
@@ -78,6 +98,19 @@ void Weapon::drawViewModel(const Camera3D &camera, const AssetManager &assets,
                  muzzleFlashRotation, lighting, pointLightContribution);
 }
 
+void Weapon::drawDebugRays() const {
+  if (!debugRaysEnabled) {
+    return;
+  }
+
+  for (const DebugShotRay &ray : debugRays) {
+    float alpha = ray.timer / 0.35f;
+    Color color = ray.hit ? GREEN : RED;
+    DrawLine3D(ray.start, ray.end, Fade(color, alpha));
+    DrawSphere(ray.end, 0.045f, color);
+  }
+}
+
 const WeaponData &Weapon::getData() const { return *data; }
 
 int Weapon::getAmmoInMagazine() const { return ammoInMagazine; }
@@ -96,7 +129,21 @@ float Weapon::getReloadProgress() const {
   return 1.0f - reloadTimer / data->ammo.reloadDuration;
 }
 
-void Weapon::tryShoot(const Player &, std::vector<Enemy> &enemies,
+float Weapon::getCurrentSpreadDegrees(const Player &player) const {
+  float spread = data->fire.spreadDegrees + spreadBloom;
+
+  if (player.isSprinting()) {
+    spread += data->fire.sprintSpreadDegrees;
+  } else if (player.getHorizontalSpeed() > 1.0f) {
+    spread += data->fire.movingSpreadDegrees;
+  }
+
+  return std::min(spread, data->fire.spreadDegrees +
+                              data->fire.maxSpreadBloomDegrees +
+                              data->fire.sprintSpreadDegrees);
+}
+
+void Weapon::tryShoot(const Player &player, std::vector<Enemy> &enemies,
                       const Level &level, const Camera3D &camera,
                       ParticleSystem &particles, AudioSystem &audio) {
   if (reloading) {
@@ -119,57 +166,19 @@ void Weapon::tryShoot(const Player &, std::vector<Enemy> &enemies,
   muzzleFlashRotation = static_cast<float>(GetRandomValue(-25, 25));
   shotFired = true;
   viewmodel.addRecoil(1.0f);
-  audio.play(AudioId::PistolFire,
-             {1.0f,
-              0.96f + static_cast<float>(GetRandomValue(0, 8)) / 100.0f,
-              0.0f});
+  audio.play(
+      AudioId::PistolFire,
+      {1.0f, 0.96f + static_cast<float>(GetRandomValue(0, 8)) / 100.0f, 0.0f});
 
-  Ray ray = makeShootRay(camera);
-  int hitEnemyIndex = -1;
-  Vector3 enemyHitPoint{};
-  Vector3 levelHitPoint{};
-  float enemyHitDistance = FLT_MAX;
-  float levelHitDistance = FLT_MAX;
+  float spreadDegrees = getCurrentSpreadDegrees(player);
 
-  if (!Collision::rayEnemies(ray, enemies, hitEnemyIndex, enemyHitPoint)) {
-    std::cout << "Hit something else than an enemy" << std::endl;
-    return;
+  for (int pellet = 0; pellet < data->fire.pelletCount; ++pellet) {
+    Ray ray = makeShootRay(camera, spreadDegrees);
+    firePelletRay(ray, enemies, level, particles, audio);
   }
 
-  enemyHitDistance = Vector3Distance(ray.position, enemyHitPoint);
-  if (enemyHitDistance > data->fire.range) {
-    return;
-  }
-
-  if (Collision::rayLevel(ray, level, levelHitPoint, levelHitDistance) &&
-      levelHitDistance < enemyHitDistance) {
-    std::cout << "Hello";
-    return;
-  }
-
-  if (hitEnemyIndex >= 0) {
-    std::cout << "Hit enemy at index: " << hitEnemyIndex << " at a distance of "
-              << enemyHitDistance << std::endl;
-
-    Vector3 hitNormal = Vector3Normalize(
-        Vector3Subtract(enemyHitPoint, enemies[hitEnemyIndex].getPosition()));
-
-    particles.spawnEnemyHit(enemyHitPoint, hitNormal,
-                            enemies[hitEnemyIndex].getVelocity());
-    audio.play(AudioId::EnemyHit,
-               {1.0f,
-                0.96f + static_cast<float>(GetRandomValue(0, 8)) / 100.0f,
-                0.0f});
-
-    Vector3 enemyPosition = enemies[hitEnemyIndex].getPosition();
-    Vector3 enemyVelocity = enemies[hitEnemyIndex].getVelocity();
-
-    if (enemies[hitEnemyIndex].applyDamage(data->fire.damage)) {
-      particles.spawnEnemyDeath(
-          {enemyPosition.x, enemyPosition.y + 0.75f, enemyPosition.z},
-          enemyVelocity);
-    }
-  }
+  spreadBloom = std::min(data->fire.maxSpreadBloomDegrees,
+                         spreadBloom + data->fire.spreadBloomPerShot);
 }
 
 bool Weapon::startReload() {
@@ -203,14 +212,98 @@ void Weapon::finishReload(AudioSystem &audio) {
   audio.play(AudioId::PistolReloadEnd);
 }
 
-Ray Weapon::makeShootRay(const Camera3D &camera) const {
-  Vector3 direction =
+Ray Weapon::makeShootRay(const Camera3D &camera, float spreadDegrees) const {
+  Vector3 forward =
       Vector3Normalize(Vector3Subtract(camera.target, camera.position));
+  Vector3 right = Vector3Normalize(Vector3CrossProduct(forward, camera.up));
+  Vector3 up = camera.up;
+
+  float spreadRadians = spreadDegrees * DEG2RAD;
+  float angle = static_cast<float>(GetRandomValue(0, 6283)) / 1000.0f;
+  float radius =
+      std::sqrtf(static_cast<float>(GetRandomValue(0, 10000)) / 10000.0f) *
+      std::tanf(spreadRadians);
+
+  Vector3 offset = Vector3Add(Vector3Scale(right, std::cosf(angle) * radius),
+                              Vector3Scale(up, std::sinf(angle) * radius));
+  Vector3 direction = Vector3Normalize(Vector3Add(forward, offset));
 
   Ray ray{};
   ray.position = camera.position;
   ray.direction = direction;
   return ray;
+}
+
+void Weapon::firePelletRay(Ray ray, std::vector<Enemy> &enemies,
+                           const Level &level, ParticleSystem &particles,
+                           AudioSystem &audio) {
+  int hitEnemyIndex = -1;
+  Vector3 enemyHitPoint{};
+  Vector3 levelHitPoint{};
+  float enemyHitDistance = FLT_MAX;
+  float levelHitDistance = FLT_MAX;
+
+  bool hitEnemy = Collision::rayEnemies(ray, enemies, hitEnemyIndex,
+                                        enemyHitPoint);
+  bool hitLevel = Collision::rayLevel(ray, level, levelHitPoint,
+                                      levelHitDistance);
+
+  if (!hitEnemy) {
+    float debugDistance =
+        hitLevel ? std::min(levelHitDistance, data->fire.range)
+                 : data->fire.range;
+    addDebugRay(ray, debugDistance, hitLevel);
+    return;
+  }
+
+  enemyHitDistance = Vector3Distance(ray.position, enemyHitPoint);
+  if (enemyHitDistance > data->fire.range) {
+    addDebugRay(ray, data->fire.range, false);
+    return;
+  }
+
+  if (hitLevel && levelHitDistance < enemyHitDistance) {
+    addDebugRay(ray, levelHitDistance, true);
+    return;
+  }
+
+  addDebugRay(ray, enemyHitDistance, true);
+
+  if (hitEnemyIndex < 0) {
+    return;
+  }
+
+  Vector3 hitNormal = Vector3Normalize(
+      Vector3Subtract(enemyHitPoint, enemies[hitEnemyIndex].getPosition()));
+
+  particles.spawnEnemyHit(enemyHitPoint, hitNormal,
+                          enemies[hitEnemyIndex].getVelocity());
+
+  audio.play(
+      AudioId::EnemyHit,
+      {1.0f, 0.96f + static_cast<float>(GetRandomValue(0, 8)) / 100.0f, 0.0f});
+
+  Vector3 enemyPosition = enemies[hitEnemyIndex].getPosition();
+  Vector3 enemyVelocity = enemies[hitEnemyIndex].getVelocity();
+
+  if (enemies[hitEnemyIndex].applyDamage(data->fire.damage)) {
+    particles.spawnEnemyDeath(
+        {enemyPosition.x, enemyPosition.y + 0.75f, enemyPosition.z},
+        enemyVelocity);
+  }
+}
+
+void Weapon::addDebugRay(Ray ray, float distance, bool hit) {
+  if (!debugRaysEnabled) {
+    return;
+  }
+
+  DebugShotRay debugRay{};
+  debugRay.start = ray.position;
+  debugRay.end = Vector3Add(ray.position, Vector3Scale(ray.direction, distance));
+  debugRay.hit = hit;
+  debugRay.timer = 0.35f;
+  debugRays.push_back(debugRay);
 }
 
 bool Weapon::consumeShotFired() {

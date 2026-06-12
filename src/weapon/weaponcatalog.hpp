@@ -13,6 +13,13 @@ inline const WeaponData Pistol{
         100.0f, // range
         6.0f,   // fireRate
         false,  // automatic
+        1,      // pelletCount
+        0.15f,  // spreadDegrees
+        0.45f,  // movingSpreadDegrees
+        0.95f,  // sprintSpreadDegrees
+        0.25f,  // spreadBloomPerShot
+        1.25f,  // maxSpreadBloomDegrees
+        8.0f    // spreadRecoverySpeed
     },
 
     // Ammo
@@ -37,7 +44,19 @@ inline const WeaponData Pistol{
 inline const WeaponData Shotgun{
     "Shotgun",
     WeaponModelId::Shotgun,
-    {55, 34.0f, 1.15f, false},
+    {
+        8,
+        34.0f,
+        1.15f,
+        false,
+        10,
+        4.2f,
+        1.2f,
+        2.2f,
+        1.1f,
+        3.5f,
+        5.5f,
+    },
     {
         6,
         60,

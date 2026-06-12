@@ -21,6 +21,7 @@ enum class AudioId {
 
 enum class AudioBus {
   Master,
+  Bgm,
   Sfx,
   Weapons,
   Player,
@@ -57,11 +58,15 @@ public:
 
   void load();
   void unload();
+  void update();
 
   void setBusVolume(AudioBus bus, float volume);
   float getBusVolume(AudioBus bus) const;
 
   void setListener(const AudioListener &listener);
+
+  void playMusic();
+  void stopMusic();
 
   void play(AudioId id, AudioPlayback playback = {});
   void playLooping(AudioId id, AudioPlayback playback = {});
@@ -97,6 +102,9 @@ private:
 private:
   std::array<AudioClip, audioIdCount> clips{};
   std::array<float, audioBusCount> busVolumes{};
+  Music music{};
+  bool musicLoaded = false;
+  bool musicPlaying = false;
   AudioListener listener{};
   bool loaded = false;
 };

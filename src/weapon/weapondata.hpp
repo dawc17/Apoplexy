@@ -16,6 +16,13 @@ struct WeaponFireData {
   float range = 100.0f;
   float fireRate = 6.0f;
   bool automatic = false;
+  int pelletCount = 1;
+  float spreadDegrees = 0.25f;
+  float movingSpreadDegrees = 0.75f;
+  float sprintSpreadDegrees = 1.25f;
+  float spreadBloomPerShot = 0.35f;
+  float maxSpreadBloomDegrees = 2.5f;
+  float spreadRecoverySpeed = 7.0f;
 };
 
 struct WeaponViewModelData {

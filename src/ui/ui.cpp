@@ -58,8 +58,8 @@ void drawViewmodelDebugPanel(const Game &game) {
                &entry.rotationDegrees.z, -180.0f, 180.0f);
   DrawText(TextFormat("% .1f", entry.rotationDegrees.z), 292, 416, 16, WHITE);
 
-  GuiSliderBar({112.0f, 452.0f, 170.0f, 18.0f}, "Scale", nullptr,
-               &entry.scale, 0.001f, 1.0f);
+  GuiSliderBar({112.0f, 452.0f, 170.0f, 18.0f}, "Scale", nullptr, &entry.scale,
+               0.001f, 1.0f);
   DrawText(TextFormat("% .4f", entry.scale), 292, 452, 16, WHITE);
 
   GuiSliderBar({112.0f, 488.0f, 170.0f, 18.0f}, "Muz X", nullptr,
@@ -94,16 +94,24 @@ void draw(const Game &game) {
     return;
   }
 
-  DrawLine(width / 2 - 10, height / 2, width / 2 - 4, height / 2, BLUE);
-  DrawLine(width / 2 + 4, height / 2, width / 2 + 10, height / 2, BLUE);
-  DrawLine(width / 2, height / 2 - 10, width / 2, height / 2 - 4, BLUE);
-  DrawLine(width / 2, height / 2 + 4, width / 2, height / 2 + 10, BLUE);
-
   DrawText(TextFormat("HP: %d", game.getPlayer().getHealth()), 24, 24, 28, RED);
 
   DrawText(TextFormat("Enemies: %d", aliveEnemyCount(game)), 24, 58, 24, RED);
 
   const Weapon &weapon = game.getWeapon();
+
+  float spread = weapon.getCurrentSpreadDegrees(game.getPlayer());
+  int gap = 5 + static_cast<int>(spread * 4.0f);
+  int length = 8;
+
+  DrawLine(width / 2 - gap - length, height / 2, width / 2 - gap, height / 2,
+           BLUE);
+  DrawLine(width / 2 + gap, height / 2, width / 2 + gap + length, height / 2,
+           BLUE);
+  DrawLine(width / 2, height / 2 - gap - length, width / 2, height / 2 - gap,
+           BLUE);
+  DrawLine(width / 2, height / 2 + gap, width / 2, height / 2 + gap + length,
+           BLUE);
 
   DrawText(TextFormat("Ammo: %d / %d", weapon.getAmmoInMagazine(),
                       weapon.getReserveAmmo()),
@@ -131,6 +139,10 @@ void draw(const Game &game) {
 
   if (game.areEnemiesFrozen()) {
     DrawText("Enemies frozen", 24, 208, 24, GREEN);
+  }
+
+  if (Weapon::debugRaysEnabled) {
+    DrawText("Shot rays: F4 ON", 24, 300, 20, GREEN);
   }
 
   drawViewmodelDebugPanel(game);

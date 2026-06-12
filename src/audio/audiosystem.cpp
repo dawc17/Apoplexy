@@ -21,6 +21,7 @@ void AudioSystem::load() {
   }
 
   busVolumes.fill(1.0f);
+  busVolumes[static_cast<int>(AudioBus::Bgm)] = 0.0f;
 
   loadClip(AudioId::PistolFire, "audio/weapons/pistol_fire.wav",
            AudioBus::Weapons, 0.85f);
@@ -38,6 +39,21 @@ void AudioSystem::load() {
   loadClip(AudioId::EnemyDeath, "audio/enemies/death.wav", AudioBus::Enemies,
            0.85f);
 
+  if (FileExists("audio/music/music.mp3")) {
+    music = LoadMusicStream("audio/music/music.mp3");
+    musicLoaded = IsMusicValid(music);
+
+    if (musicLoaded) {
+      music.looping = true;
+      SetMusicVolume(music, busVolumes[static_cast<int>(AudioBus::Master)] *
+                                busVolumes[static_cast<int>(AudioBus::Bgm)]);
+    } else {
+      std::cout << "Failed to load music file: music.mp3" << std::endl;
+    }
+  } else {
+    std::cout << "Missing music file" << std::endl;
+  }
+
   loaded = true;
 }
 
@@ -49,7 +65,24 @@ void AudioSystem::unload() {
     }
   }
 
+  if (musicLoaded) {
+    StopMusicStream(music);
+    UnloadMusicStream(music);
+    musicLoaded = false;
+    musicPlaying = false;
+  }
+
   loaded = false;
+}
+
+void AudioSystem::update() {
+  if (!musicLoaded) {
+    return;
+  }
+
+  SetMusicVolume(music, busVolumes[static_cast<int>(AudioBus::Master)] *
+                            busVolumes[static_cast<int>(AudioBus::Bgm)]);
+  UpdateMusicStream(music);
 }
 
 void AudioSystem::setBusVolume(AudioBus bus, float volume) {
@@ -69,6 +102,24 @@ void AudioSystem::setListener(const AudioListener &newListener) {
   }
 
   listener.forward = Vector3Normalize(listener.forward);
+}
+
+void AudioSystem::playMusic() {
+  if (!musicLoaded || musicPlaying) {
+    return;
+  }
+
+  PlayMusicStream(music);
+  musicPlaying = true;
+}
+
+void AudioSystem::stopMusic() {
+  if (!musicLoaded || !musicPlaying) {
+    return;
+  }
+
+  StopMusicStream(music);
+  musicPlaying = false;
 }
 
 void AudioSystem::play(AudioId id, AudioPlayback playback) {

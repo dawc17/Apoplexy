@@ -5,7 +5,6 @@
 #include "viewmodel/proceduralweaponanimation.hpp"
 #include "weapon.hpp"
 
-#include <cstddef>
 #include <vector>
 
 class AssetManager;
@@ -30,11 +29,17 @@ public:
 
   int getActiveWeaponIndex() const;
   int getWeaponCount() const;
+  float getSwitchAmount() const;
 
 private:
   void updateSwitchInput(AudioSystem &audio);
+  void requestSwitch(int index, AudioSystem &audio);
 
 private:
   std::vector<Weapon> weapons;
   int activeWeaponIndex = 0;
+  int pendingWeaponIndex = 0;
+  float switchTimer = 0.0f;
+  float switchDuration = 0.34f;
+  bool switchCommited = false;
 };

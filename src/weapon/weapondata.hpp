@@ -9,6 +9,7 @@ struct WeaponAmmoData {
   int maxReserveAmmo = 48;
   float reloadDuration = 1.1f;
   bool autoReloadWhenEmpty = true;
+  bool reloadOneRoundAtATime = false;
 };
 
 struct WeaponFireData {

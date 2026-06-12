@@ -30,6 +30,7 @@ public:
   const Player &getPlayer() const;
   const Weapon &getWeapon() const;
   const WeaponInventory &getWeaponInventory() const;
+  float getWeaponSwitchAmount() const;
   const std::vector<Enemy> &getEnemies() const;
   const Camera3D &getCamera() const;
   const AssetManager &getAssets() const;

@@ -28,6 +28,7 @@ inline const WeaponData Pistol{
         48,   // maxReserveAmmo
         1.8f, // reloadDuration
         true, // autoReloadWhenEmpty
+        false // reloadOneRoundAtATime
     },
 
     // Viewmodel
@@ -60,7 +61,8 @@ inline const WeaponData Shotgun{
     {
         6,
         60,
-        5.0f,
+        0.72f,
+        true,
         true,
     },
     {

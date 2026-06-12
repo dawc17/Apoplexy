@@ -331,6 +331,7 @@ Level &Game::getMutableLevel() { return level; }
 const Player &Game::getPlayer() const { return player; }
 const Weapon &Game::getWeapon() const { return weapons.getActiveWeapon(); }
 const WeaponInventory &Game::getWeaponInventory() const { return weapons; }
+float Game::getWeaponSwitchAmount() const { return weapons.getSwitchAmount(); }
 const std::vector<Enemy> &Game::getEnemies() const { return enemies; }
 const Camera3D &Game::getCamera() const { return camera; }
 const AssetManager &Game::getAssets() const { return assets; }

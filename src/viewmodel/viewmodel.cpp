@@ -171,7 +171,7 @@ void Viewmodel::addRecoil(float amount) {
 void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
                      const ProceduralWeaponAnimationData &procedural,
                      const AssetManager &assets, float muzzleFlashTimer,
-                     float muzzleFlashRotation,
+                     float muzzleFlashRotation, float switchAmount,
                      const Lighting::SceneLighting &lighting,
                      Vector3 pointLightContribution) const {
   const Model &gun = assets.getWeaponModel(weapon.modelId);
@@ -230,17 +230,24 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
       procedural.sprintOffset.z * sprintAmount,
   };
 
+  float switchPose = easeInOutCubic(switchAmount);
+  Vector3 switchOffset{0.10f * switchPose, -0.42f * switchPose,
+                       -0.12f * switchPose};
+  Vector3 switchRotationDegrees{18.0f * switchPose, 22.0f * switchPose,
+                                -12.0f * switchPose};
+
   float reloadPose = easeInOutCubic(reloadAmount);
   WeaponViewModelData viewModel = ViewmodelDebug::viewModelFor(weapon);
 
   Vector3 position{
-      viewModel.holdPosition.x + sprintOffset.x + swayOffset.x + bobX -
-          recoilKick * procedural.recoilKickOffset.x +
+      viewModel.holdPosition.x + sprintOffset.x + switchOffset.x +
+          swayOffset.x + bobX - recoilKick * procedural.recoilKickOffset.x +
           recoilFollowThrough * procedural.recoilFollowThroughOffset.x,
-      viewModel.holdPosition.y + sprintOffset.y + swayOffset.y - bobY -
-          idleBobY - recoilKick * procedural.recoilKickOffset.y +
+      viewModel.holdPosition.y + sprintOffset.y + switchOffset.y +
+          swayOffset.y - bobY - idleBobY -
+          recoilKick * procedural.recoilKickOffset.y +
           recoilFollowThrough * procedural.recoilFollowThroughOffset.y,
-      viewModel.holdPosition.z + sprintOffset.z +
+      viewModel.holdPosition.z + sprintOffset.z + switchOffset.z +
           recoilKick * procedural.recoilKickOffset.z +
           recoilFollowThrough * procedural.recoilFollowThroughOffset.z,
   };
@@ -274,6 +281,10 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
   rlRotatef(viewModel.holdRotationDegrees.y, 0.0f, 1.0f, 0.0f);
   rlRotatef(viewModel.holdRotationDegrees.x, 1.0f, 0.0f, 0.0f);
   rlRotatef(viewModel.holdRotationDegrees.z, 0.0f, 0.0f, 1.0f);
+
+  rlRotatef(switchRotationDegrees.y, 0.0f, 1.0f, 0.0f);
+  rlRotatef(switchRotationDegrees.x, 1.0f, 0.0f, 0.0f);
+  rlRotatef(switchRotationDegrees.z, 0.0f, 0.0f, 1.0f);
 
   rlRotatef(reloadSpinRotationDegrees.y * reloadPose, 0.0f, 1.0f, 0.0f);
   rlRotatef(reloadSpinRotationDegrees.x * reloadPose, 1.0f, 0.0f, 0.0f);
@@ -331,8 +342,8 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
     }
 
     DrawCircleV(indicator, 6.0f, RED);
-    DrawCircleLines(static_cast<int>(indicator.x), static_cast<int>(indicator.y),
-                    9.0f, YELLOW);
+    DrawCircleLines(static_cast<int>(indicator.x),
+                    static_cast<int>(indicator.y), 9.0f, YELLOW);
     DrawText("MUZZLE OFFSCREEN", static_cast<int>(indicator.x) + 10,
              static_cast<int>(indicator.y) - 7, 12, YELLOW);
   }

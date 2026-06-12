@@ -1,0 +1,3 @@
+- Weapon swapping animation
+- Spin per shell reload for shotgun
+- Quick melee for all weapons

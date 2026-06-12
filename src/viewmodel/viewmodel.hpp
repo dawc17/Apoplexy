@@ -19,7 +19,8 @@ public:
   void draw(const Camera3D &camera, const WeaponData &weapon,
             const ProceduralWeaponAnimationData &procedural,
             const AssetManager &assets, float muzzleFlashTimer,
-            float muzzleFlashRotation, const Lighting::SceneLighting &lighting,
+            float muzzleFlashRotation, float switchAmount,
+            const Lighting::SceneLighting &lighting,
             Vector3 pointLightContribution) const;
 
 private:

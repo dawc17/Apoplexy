@@ -30,6 +30,7 @@ public:
          const ProceduralWeaponAnimationData &proceduralAnimation);
 
   void reset();
+  void cancelReload(AudioSystem &audio);
 
   void update(float dt, const Player &player, std::vector<Enemy> &enemies,
               const Level &level, const Camera3D camera,
@@ -37,7 +38,7 @@ public:
 
   void drawViewModel(const Camera3D &camera, const AssetManager &assets,
                      const Lighting::SceneLighting &lighting,
-                     Vector3 pointLightContribution) const;
+                     Vector3 pointLightContribution, float switchAmount) const;
   void drawDebugRays() const;
 
   const WeaponData &getData() const;

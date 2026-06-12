@@ -24,7 +24,8 @@ float distanceSquared(Vector3 a, Vector3 b) {
 }
 
 std::vector<Lighting::PointLight>
-gatherPointLights(const Lighting::SceneLighting &scene, Vector3 cameraPosition) {
+gatherPointLights(const Lighting::SceneLighting &scene,
+                  Vector3 cameraPosition) {
   std::vector<Lighting::PointLight> pointLights;
 
   for (const Lighting::PointLight &light : scene.staticPointLights) {
@@ -60,8 +61,7 @@ void drawSkybox(const Game &game, Camera3D camera) {
 
   rlDisableDepthMask();
   rlDisableBackfaceCulling();
-  DrawModel(game.getAssets().getSkyboxModel(), {0.0f, 0.0f, 0.0f}, 1.0f,
-            WHITE);
+  DrawModel(game.getAssets().getSkyboxModel(), {0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
   rlEnableBackfaceCulling();
   rlEnableDepthMask();
 }
@@ -113,8 +113,9 @@ void drawWorld(const Game &game) {
   if (!game.isEditorEnabled()) {
     Vector3 viewmodelPointLight =
         Lighting::samplePointLightsAt(camera.position, pointLights);
-    game.getWeapon().drawViewModel(game.getCamera(), game.getAssets(),
-                                   scene, viewmodelPointLight);
+    game.getWeapon().drawViewModel(game.getCamera(), game.getAssets(), scene,
+                                   viewmodelPointLight,
+                                   game.getWeaponSwitchAmount());
   }
 }
 } // namespace Renderer

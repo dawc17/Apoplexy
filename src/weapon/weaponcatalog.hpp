@@ -5,6 +5,7 @@
 namespace WeaponCatalog {
 inline const WeaponData Pistol{
     "Pistol",
+    WeaponModelId::Pistol,
 
     // Fire
     {
@@ -35,7 +36,8 @@ inline const WeaponData Pistol{
 
 inline const WeaponData Shotgun{
     "Shotgun",
-    {30, 50.0f, 2.0f, false},
+    WeaponModelId::Shotgun,
+    {55, 34.0f, 1.15f, false},
     {
         6,
         60,
@@ -43,10 +45,10 @@ inline const WeaponData Shotgun{
         true,
     },
     {
-        {-0.247f, -0.147f, 0.381f}, // holdPosition
-        {-2.8f, -7.4f, -1.9f},      // holdRotationDegrees
-        0.104f,                     // modelScale
-        {0.015f, 0.054f, 0.575f},   // muzzlePoint
+        {-0.176f, -0.194f, 0.428f}, // holdPosition
+        {0.0f, -180.0f, 0.0f},      // holdRotationDegrees
+        1.0f,                       // modelScale
+        {0.015f, 0.054f, -0.575f},  // muzzlePoint
         1.478f,                     // muzzleFlashWidth
         0.657f,
     }};

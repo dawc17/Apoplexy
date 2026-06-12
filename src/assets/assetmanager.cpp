@@ -1,5 +1,6 @@
 #include "assetmanager.hpp"
 #include "raylib.h"
+#include "weapon/weapondata.hpp"
 #include <raylib.h>
 
 void AssetManager::load() {
@@ -7,17 +8,22 @@ void AssetManager::load() {
     return;
   }
 
-  gunModel = LoadModel("models/USP-S.obj");
+  pistolModel = LoadModel("models/USP-S.obj");
+  shotgunModel = LoadModel("models/Shotgun.glb");
+
   monoShader = LoadShader("shaders/monochrome.vs", "shaders/monochrome.fs");
-  viewmodelShader =
-      LoadShader("shaders/viewmodel.vs", "shaders/viewmodel.fs");
-  worldLitShader =
-      LoadShader("shaders/world_lit.vs", "shaders/world_lit.fs");
+  viewmodelShader = LoadShader("shaders/viewmodel.vs", "shaders/viewmodel.fs");
+  worldLitShader = LoadShader("shaders/world_lit.vs", "shaders/world_lit.fs");
   muzzleFlashTexture = LoadTexture("textures/muzzleflash.png");
 
   if (FileExists("textures/USP-S.png")) {
-    gunTexture = LoadTexture("textures/USP-S.png");
-    gunTextureLoaded = true;
+    pistolTexture = LoadTexture("textures/USP-S.png");
+    pistolTextureLoaded = true;
+  }
+
+  if (FileExists("textures/Shotgun.png")) {
+    shotgunTexture = LoadTexture("textures/Shotgun.png");
+    shotgunTextureLoaded = true;
   }
 
   if (FileExists("textures/skybox.png")) {
@@ -26,29 +32,40 @@ void AssetManager::load() {
         GetShaderLocation(skyboxShader, "environmentMap");
 
     int environmentMap = MATERIAL_MAP_CUBEMAP;
-    SetShaderValue(skyboxShader, GetShaderLocation(skyboxShader, "environmentMap"),
+    SetShaderValue(skyboxShader,
+                   GetShaderLocation(skyboxShader, "environmentMap"),
                    &environmentMap, SHADER_UNIFORM_INT);
 
     Image skyboxImage = LoadImage("textures/skybox.png");
-    skyboxCubemap =
-        LoadTextureCubemap(skyboxImage, CUBEMAP_LAYOUT_AUTO_DETECT);
+    skyboxCubemap = LoadTextureCubemap(skyboxImage, CUBEMAP_LAYOUT_AUTO_DETECT);
     UnloadImage(skyboxImage);
 
     skyboxModel = LoadModelFromMesh(GenMeshCube(1.0f, 1.0f, 1.0f));
     skyboxModel.materials[0].shader = skyboxShader;
-    skyboxModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture =
-        skyboxCubemap;
+    skyboxModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = skyboxCubemap;
     skyboxLoaded = true;
   }
 
-  for (int i = 0; i < gunModel.materialCount; ++i) {
-    gunModel.materials[i].shader = viewmodelShader;
-    gunModel.materials[i].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
+  for (int i = 0; i < pistolModel.materialCount; ++i) {
+    pistolModel.materials[i].shader = viewmodelShader;
+    pistolModel.materials[i].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
 
-    if (gunTextureLoaded) {
-      gunModel.materials[i].maps[MATERIAL_MAP_DIFFUSE].texture = gunTexture;
+    if (pistolTextureLoaded) {
+      pistolModel.materials[i].maps[MATERIAL_MAP_DIFFUSE].texture =
+          pistolTexture;
     }
   }
+
+  for (int i = 0; i < shotgunModel.materialCount; ++i) {
+    shotgunModel.materials[i].shader = viewmodelShader;
+    shotgunModel.materials[i].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
+
+    if (shotgunTextureLoaded) {
+      shotgunModel.materials[i].maps[MATERIAL_MAP_DIFFUSE].texture =
+          shotgunTexture;
+    }
+  }
+
   loaded = true;
 }
 
@@ -57,14 +74,19 @@ void AssetManager::unload() {
     return;
   }
 
-  UnloadModel(gunModel);
+  UnloadModel(pistolModel);
+  UnloadModel(shotgunModel);
   UnloadShader(monoShader);
   UnloadShader(viewmodelShader);
   UnloadShader(worldLitShader);
   UnloadTexture(muzzleFlashTexture);
-  if (gunTextureLoaded) {
-    UnloadTexture(gunTexture);
-    gunTextureLoaded = false;
+  if (pistolTextureLoaded) {
+    UnloadTexture(pistolTexture);
+    pistolTextureLoaded = false;
+  }
+  if (shotgunTextureLoaded) {
+    UnloadTexture(shotgunTexture);
+    shotgunTextureLoaded = false;
   }
   if (skyboxLoaded) {
     UnloadShader(skyboxShader);
@@ -76,7 +98,15 @@ void AssetManager::unload() {
   loaded = false;
 }
 
-const Model &AssetManager::getGunModel() const { return gunModel; }
+const Model &AssetManager::getWeaponModel(WeaponModelId modelId) const {
+  switch (modelId) {
+  case WeaponModelId::Shotgun:
+    return shotgunModel;
+  case WeaponModelId::Pistol:
+  default:
+    return pistolModel;
+  }
+}
 
 Shader AssetManager::getMonoShader() const { return monoShader; }
 

@@ -2,6 +2,8 @@
 
 #include "raylib.h"
 
+enum class WeaponModelId { Pistol, Shotgun, Count };
+
 struct WeaponAmmoData {
   int magazineSize = 12;
   int maxReserveAmmo = 48;
@@ -28,6 +30,7 @@ struct WeaponViewModelData {
 
 struct WeaponData {
   const char *name = "";
+  WeaponModelId modelId = WeaponModelId::Pistol;
 
   WeaponFireData fire;
   WeaponAmmoData ammo;

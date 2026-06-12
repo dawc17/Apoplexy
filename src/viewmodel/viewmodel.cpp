@@ -174,7 +174,7 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
                      float muzzleFlashRotation,
                      const Lighting::SceneLighting &lighting,
                      Vector3 pointLightContribution) const {
-  const Model &gun = assets.getGunModel();
+  const Model &gun = assets.getWeaponModel(weapon.modelId);
   const Texture2D &flash = assets.getMuzzleFlashTexture();
   Shader viewmodelShader = assets.getViewmodelShader();
 
@@ -231,21 +231,19 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
   };
 
   float reloadPose = easeInOutCubic(reloadAmount);
+  WeaponViewModelData viewModel = ViewmodelDebug::viewModelFor(weapon);
 
   Vector3 position{
-      weapon.viewModel.holdPosition.x + sprintOffset.x + swayOffset.x + bobX -
+      viewModel.holdPosition.x + sprintOffset.x + swayOffset.x + bobX -
           recoilKick * procedural.recoilKickOffset.x +
           recoilFollowThrough * procedural.recoilFollowThroughOffset.x,
-      weapon.viewModel.holdPosition.y + sprintOffset.y + swayOffset.y - bobY -
+      viewModel.holdPosition.y + sprintOffset.y + swayOffset.y - bobY -
           idleBobY - recoilKick * procedural.recoilKickOffset.y +
           recoilFollowThrough * procedural.recoilFollowThroughOffset.y,
-      weapon.viewModel.holdPosition.z + sprintOffset.z +
+      viewModel.holdPosition.z + sprintOffset.z +
           recoilKick * procedural.recoilKickOffset.z +
           recoilFollowThrough * procedural.recoilFollowThroughOffset.z,
   };
-  position.x += ViewmodelDebug::positionOffset.x;
-  position.y += ViewmodelDebug::positionOffset.y;
-  position.z += ViewmodelDebug::positionOffset.z;
 
   rlDrawRenderBatchActive();
   BeginMode3D(viewCamera);
@@ -273,13 +271,9 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
                     procedural.recoilFollowThroughRotationDegrees.z,
             0.0f, 0.0f, 1.0f);
 
-  rlRotatef(weapon.viewModel.holdRotationDegrees.y, 0.0f, 1.0f, 0.0f);
-  rlRotatef(weapon.viewModel.holdRotationDegrees.x, 1.0f, 0.0f, 0.0f);
-  rlRotatef(weapon.viewModel.holdRotationDegrees.z, 0.0f, 0.0f, 1.0f);
-
-  rlRotatef(ViewmodelDebug::rotationOffsetDegrees.y, 0.0f, 1.0f, 0.0f);
-  rlRotatef(ViewmodelDebug::rotationOffsetDegrees.x, 1.0f, 0.0f, 0.0f);
-  rlRotatef(ViewmodelDebug::rotationOffsetDegrees.z, 0.0f, 0.0f, 1.0f);
+  rlRotatef(viewModel.holdRotationDegrees.y, 0.0f, 1.0f, 0.0f);
+  rlRotatef(viewModel.holdRotationDegrees.x, 1.0f, 0.0f, 0.0f);
+  rlRotatef(viewModel.holdRotationDegrees.z, 0.0f, 0.0f, 1.0f);
 
   rlRotatef(reloadSpinRotationDegrees.y * reloadPose, 0.0f, 1.0f, 0.0f);
   rlRotatef(reloadSpinRotationDegrees.x * reloadPose, 1.0f, 0.0f, 0.0f);
@@ -291,29 +285,57 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
             0.0f);
   rlRotatef(procedural.sprintRotationDegrees.z * sprintAmount, 0.0f, 0.0f,
             1.0f);
-  DrawModel(gun, {0.0f, 0.0f, 0.0f},
-            weapon.viewModel.modelScale * ViewmodelDebug::scaleMultiplier,
-            WHITE);
+  DrawModel(gun, {0.0f, 0.0f, 0.0f}, viewModel.modelScale, WHITE);
 
-  if (muzzleFlashTimer > 0.0f) {
-    float t = muzzleFlashTimer / 0.05f;
+  Vector3 muzzleWorld =
+      Vector3Transform(viewModel.muzzlePoint, rlGetMatrixTransform());
+  Vector2 muzzleScreen = GetWorldToScreenEx(
+      muzzleWorld, viewCamera, GetRenderWidth(), GetRenderHeight());
+  bool muzzleOffscreen =
+      muzzleWorld.z <= 0.01f || muzzleScreen.x < 0.0f ||
+      muzzleScreen.y < 0.0f ||
+      muzzleScreen.x > static_cast<float>(GetRenderWidth()) ||
+      muzzleScreen.y > static_cast<float>(GetRenderHeight());
+
+  if (muzzleFlashTimer > 0.0f || ViewmodelDebug::panelOpen) {
+    float t = ViewmodelDebug::panelOpen ? 0.55f : muzzleFlashTimer / 0.05f;
+    float alpha = ViewmodelDebug::panelOpen ? 0.55f : 0.95f * t;
 
     Rectangle source{0.0f, 0.0f, static_cast<float>(flash.width),
                      static_cast<float>(flash.height)};
 
-    Vector2 size{weapon.viewModel.muzzleFlashWidth * t,
-                 weapon.viewModel.muzzleFlashHeight * t};
+    Vector2 size{viewModel.muzzleFlashWidth * t,
+                 viewModel.muzzleFlashHeight * t};
     Vector2 origin{size.x * 0.5f, size.y * 0.5f};
 
     BeginBlendMode(BLEND_ADDITIVE);
-    DrawBillboardPro(viewCamera, flash, source, weapon.viewModel.muzzlePoint,
+    DrawBillboardPro(viewCamera, flash, source, viewModel.muzzlePoint,
                      {0.0f, 1.0f, 0.0f}, size, origin, muzzleFlashRotation,
-                     Fade(WHITE, 0.95f * t));
+                     Fade(WHITE, alpha));
     EndBlendMode();
   }
 
   rlPopMatrix();
   EndMode3D();
+
+  if (ViewmodelDebug::panelOpen && muzzleOffscreen) {
+    float width = static_cast<float>(GetRenderWidth());
+    float height = static_cast<float>(GetRenderHeight());
+    Vector2 indicator{
+        std::clamp(muzzleScreen.x, 14.0f, width - 14.0f),
+        std::clamp(muzzleScreen.y, 14.0f, height - 14.0f),
+    };
+
+    if (muzzleWorld.z <= 0.01f) {
+      indicator = {width * 0.5f, height - 18.0f};
+    }
+
+    DrawCircleV(indicator, 6.0f, RED);
+    DrawCircleLines(static_cast<int>(indicator.x), static_cast<int>(indicator.y),
+                    9.0f, YELLOW);
+    DrawText("MUZZLE OFFSCREEN", static_cast<int>(indicator.x) + 10,
+             static_cast<int>(indicator.y) - 7, 12, YELLOW);
+  }
 
   rlEnableDepthTest();
 }

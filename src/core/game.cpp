@@ -25,6 +25,8 @@ Game::Game() {
   SetTextureFilter(sceneTarget.texture, TEXTURE_FILTER_POINT);
   weapons.addWeapon(WeaponCatalog::Pistol,
                     ProceduralWeaponAnimationCatalog::Pistol);
+  weapons.addWeapon(WeaponCatalog::Shotgun,
+                    ProceduralWeaponAnimationCatalog::Pistol);
   reset();
 }
 

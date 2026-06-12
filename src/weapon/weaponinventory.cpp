@@ -137,6 +137,7 @@ void WeaponInventory::requestSwitch(int index, AudioSystem &audio) {
   }
 
   getActiveWeapon().cancelReload(audio);
+  getActiveWeapon().cancelMelee();
   pendingWeaponIndex = index;
   switchTimer = switchDuration;
   switchCommited = false;

@@ -31,6 +31,7 @@ public:
 
   void reset();
   void cancelReload(AudioSystem &audio);
+  void cancelMelee();
 
   void update(float dt, const Player &player, std::vector<Enemy> &enemies,
               const Level &level, const Camera3D camera,
@@ -47,6 +48,8 @@ public:
   int getReserveAmmo() const;
   int getMagazineSize() const;
   bool isReloading() const;
+  bool isMeleeing() const;
+  float getMeleeProgress() const;
   float getReloadProgress() const;
   float getCurrentSpreadDegrees(const Player &player) const;
 
@@ -61,6 +64,13 @@ private:
 
   bool startReload();
   void finishReload(AudioSystem &audio);
+  void tryMelee(AudioSystem &audio);
+  void updateMelee(float dt, const Camera3D &camera, std::vector<Enemy> &enemies,
+                   const Level &level, ParticleSystem &particles,
+                   AudioSystem &audio);
+  void performMeleeHit(const Camera3D &camera, std::vector<Enemy> &enemies,
+                       const Level &level, ParticleSystem &particles,
+                       AudioSystem &audio);
 
   Ray makeShootRay(const Camera3D &camera, float spreadDegrees) const;
   void firePelletRay(Ray ray, std::vector<Enemy> &enemies, const Level &level,
@@ -81,7 +91,10 @@ private:
   float muzzleFlashTimer = 0.0f;
   float muzzleFlashRotation = 0.0f;
   float spreadBloom = 0.0f;
+  float meleeTimer = 0.0f;
+  float meleeDuration = 0.0f;
   bool reloading = false;
+  bool meleeHasHit = false;
   bool shotFired = false;
   std::vector<DebugShotRay> debugRays;
 };

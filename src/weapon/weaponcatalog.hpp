@@ -31,6 +31,9 @@ inline const WeaponData Pistol{
         false // reloadOneRoundAtATime
     },
 
+    // Melee
+    {},
+
     // Viewmodel
     {
         {-0.247f, -0.147f, 0.381f}, // holdPosition
@@ -65,6 +68,7 @@ inline const WeaponData Shotgun{
         true,
         true,
     },
+    {},
     {
         {-0.176f, -0.194f, 0.428f}, // holdPosition
         {0.0f, -180.0f, 0.0f},      // holdRotationDegrees

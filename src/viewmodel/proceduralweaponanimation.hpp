@@ -37,4 +37,11 @@ struct ProceduralWeaponAnimationData {
   float idleBobSpeed = 1.65f;
   float idleBobY = 0.006f;
   float idleBobEaseSpeed = 3.5f;
+
+  Vector3 meleeExtendOffset{0.04f, 0.10f, 0.22f};
+  Vector3 meleeExtendRotationDegrees{-12.0f, -8.0f, 8.0f};
+  Vector3 meleeSwingOffset{0.16f, -0.34f, -0.10f};
+  Vector3 meleeSwingRotationDegrees{46.0f, 14.0f, -34.0f};
+  float meleeEaseInSpeed = 28.0f;
+  float meleeEaseOutSpeed = 14.0f;
 };

@@ -26,6 +26,15 @@ struct WeaponFireData {
   float spreadRecoverySpeed = 7.0f;
 };
 
+struct WeaponMeleeData {
+  int damage = 5;
+  float range = 1.65f;
+  float radius = 0.45f;
+  float windupDuration = 0.10f;
+  float activeDuration = 0.08f;
+  float recoveryDuration = 0.32f;
+};
+
 struct WeaponViewModelData {
   Vector3 holdPosition{};
   Vector3 holdRotationDegrees{};
@@ -42,5 +51,6 @@ struct WeaponData {
 
   WeaponFireData fire;
   WeaponAmmoData ammo;
+  WeaponMeleeData melee;
   WeaponViewModelData viewModel;
 };

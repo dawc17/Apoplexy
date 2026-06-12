@@ -60,6 +60,30 @@ float recoilFollowThroughCurve(float t) {
   float recover = easeInOutSine((t - 0.46f) / 0.54f);
   return 1.0f - recover;
 }
+
+float meleeExtendCurve(float t) {
+  if (t < 0.26f) {
+    return easeOutCubic(t / 0.26f);
+  }
+
+  if (t < 0.58f) {
+    return 1.0f;
+  }
+
+  return 1.0f - easeInOutSine((t - 0.58f) / 0.42f);
+}
+
+float meleeSwingCurve(float t) {
+  if (t < 0.20f) {
+    return 0.0f;
+  }
+
+  if (t < 0.52f) {
+    return easeInOutCubic((t - 0.20f) / 0.32f);
+  }
+
+  return 1.0f - easeOutCubic((t - 0.52f) / 0.48f);
+}
 } // namespace
 
 void Viewmodel::reset() {
@@ -73,10 +97,13 @@ void Viewmodel::reset() {
   walkBobAmount = 0.0f;
   sprintAmount = 0.0f;
   reloadAmount = 0.0f;
+  meleeAmount = 0.0f;
+  meleeProgress = 1.0f;
   reloadSpinRotationDegrees = {0.0f, 0.0f, 0.0f};
 }
 
 void Viewmodel::update(float dt, bool playerSprinting, bool weaponReloading,
+                       bool weaponMeleeing, float weaponMeleeProgress,
                        const ProceduralWeaponAnimationData &procedural) {
   recoilTimer = std::min(procedural.recoilDuration, recoilTimer + dt);
 
@@ -119,7 +146,7 @@ void Viewmodel::update(float dt, bool playerSprinting, bool weaponReloading,
 
   idleBobTimer += dt * procedural.idleBobSpeed;
 
-  bool idle = !walking && !playerSprinting && !weaponReloading;
+  bool idle = !walking && !playerSprinting && !weaponReloading && !weaponMeleeing;
   float targetIdleBobAmount = idle ? 1.0f : 0.0f;
   float idleBobEase = 1.0f - std::expf(-procedural.idleBobEaseSpeed * dt);
   idleBobAmount += (targetIdleBobAmount - idleBobAmount) * idleBobEase;
@@ -161,11 +188,28 @@ void Viewmodel::update(float dt, bool playerSprinting, bool weaponReloading,
     reloadAmount = 0.0f;
     reloadSpinRotationDegrees = {0.0f, 0.0f, 0.0f};
   }
+
+  float targetMeleeAmount = weaponMeleeing ? 1.0f : 0.0f;
+  float meleeEaseSpeed =
+      weaponMeleeing ? procedural.meleeEaseInSpeed : procedural.meleeEaseOutSpeed;
+  float meleeEase = 1.0f - std::expf(-meleeEaseSpeed * dt);
+  meleeAmount += (targetMeleeAmount - meleeAmount) * meleeEase;
+
+  if (!weaponMeleeing && meleeAmount < 0.001f) {
+    meleeAmount = 0.0f;
+  }
+
+  meleeProgress = std::clamp(weaponMeleeProgress, 0.0f, 1.0f);
 }
 
 void Viewmodel::addRecoil(float amount) {
   recoilTimer = 0.0f;
   recoilAmount = amount;
+}
+
+void Viewmodel::clearMelee() {
+  meleeAmount = 0.0f;
+  meleeProgress = 1.0f;
 }
 
 void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
@@ -237,17 +281,26 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
                                 -12.0f * switchPose};
 
   float reloadPose = easeInOutCubic(reloadAmount);
+  float meleePose = easeOutCubic(meleeAmount);
+  float meleeExtend = meleeExtendCurve(meleeProgress) * meleePose;
+  float meleeSwing = meleeSwingCurve(meleeProgress) * meleePose;
   WeaponViewModelData viewModel = ViewmodelDebug::viewModelFor(weapon);
 
   Vector3 position{
       viewModel.holdPosition.x + sprintOffset.x + switchOffset.x +
+          procedural.meleeExtendOffset.x * meleeExtend +
+          procedural.meleeSwingOffset.x * meleeSwing +
           swayOffset.x + bobX - recoilKick * procedural.recoilKickOffset.x +
           recoilFollowThrough * procedural.recoilFollowThroughOffset.x,
       viewModel.holdPosition.y + sprintOffset.y + switchOffset.y +
+          procedural.meleeExtendOffset.y * meleeExtend +
+          procedural.meleeSwingOffset.y * meleeSwing +
           swayOffset.y - bobY - idleBobY -
           recoilKick * procedural.recoilKickOffset.y +
           recoilFollowThrough * procedural.recoilFollowThroughOffset.y,
       viewModel.holdPosition.z + sprintOffset.z + switchOffset.z +
+          procedural.meleeExtendOffset.z * meleeExtend +
+          procedural.meleeSwingOffset.z * meleeSwing +
           recoilKick * procedural.recoilKickOffset.z +
           recoilFollowThrough * procedural.recoilFollowThroughOffset.z,
   };
@@ -281,6 +334,16 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
   rlRotatef(viewModel.holdRotationDegrees.y, 0.0f, 1.0f, 0.0f);
   rlRotatef(viewModel.holdRotationDegrees.x, 1.0f, 0.0f, 0.0f);
   rlRotatef(viewModel.holdRotationDegrees.z, 0.0f, 0.0f, 1.0f);
+
+  rlRotatef(procedural.meleeExtendRotationDegrees.y * meleeExtend +
+                procedural.meleeSwingRotationDegrees.y * meleeSwing,
+            0.0f, 1.0f, 0.0f);
+  rlRotatef(procedural.meleeExtendRotationDegrees.x * meleeExtend +
+                procedural.meleeSwingRotationDegrees.x * meleeSwing,
+            1.0f, 0.0f, 0.0f);
+  rlRotatef(procedural.meleeExtendRotationDegrees.z * meleeExtend +
+                procedural.meleeSwingRotationDegrees.z * meleeSwing,
+            0.0f, 0.0f, 1.0f);
 
   rlRotatef(switchRotationDegrees.y, 0.0f, 1.0f, 0.0f);
   rlRotatef(switchRotationDegrees.x, 1.0f, 0.0f, 0.0f);

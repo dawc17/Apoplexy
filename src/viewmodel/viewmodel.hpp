@@ -13,8 +13,10 @@ class Viewmodel {
 public:
   void reset();
   void update(float dt, bool playerSprinting, bool weaponReloading,
+              bool weaponMeleeing, float weaponMeleeProgress,
               const ProceduralWeaponAnimationData &procedural);
   void addRecoil(float amount);
+  void clearMelee();
 
   void draw(const Camera3D &camera, const WeaponData &weapon,
             const ProceduralWeaponAnimationData &procedural,
@@ -34,5 +36,7 @@ private:
   float walkBobAmount = 0.0f;
   float sprintAmount = 0.0f;
   float reloadAmount = 0.0f;
+  float meleeAmount = 0.0f;
+  float meleeProgress = 1.0f;
   Vector3 reloadSpinRotationDegrees{};
 };

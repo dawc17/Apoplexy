@@ -32,5 +32,11 @@ inline const ProceduralWeaponAnimationData Pistol{
     1.65f,                     // idleBobSpeed
     0.006f,                    // idleBobY
     3.5f,                      // idleBobEaseSpeed
+    {0.04f, 0.10f, 0.22f},     // meleeExtendOffset
+    {-12.0f, -8.0f, 8.0f},     // meleeExtendRotationDegrees
+    {0.16f, -0.34f, -0.10f},   // meleeSwingOffset
+    {46.0f, 14.0f, -34.0f},    // meleeSwingRotationDegrees
+    28.0f,                     // meleeEaseInSpeed
+    14.0f,                     // meleeEaseOutSpeed
 };
 } // namespace ProceduralWeaponAnimationCatalog

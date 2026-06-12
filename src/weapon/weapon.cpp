@@ -16,6 +16,14 @@
 
 bool Weapon::debugRaysEnabled = false;
 
+namespace {
+BoundingBox expandedBox(BoundingBox box, float amount) {
+  box.min = {box.min.x - amount, box.min.y - amount, box.min.z - amount};
+  box.max = {box.max.x + amount, box.max.y + amount, box.max.z + amount};
+  return box;
+}
+} // namespace
+
 Weapon::Weapon(const WeaponData &weaponData,
                const ProceduralWeaponAnimationData &weaponProceduralAnimation)
     : data(&weaponData), proceduralAnimation(&weaponProceduralAnimation) {
@@ -31,8 +39,11 @@ void Weapon::reset() {
   muzzleFlashTimer = 0.0f;
   muzzleFlashRotation = 0.0f;
   spreadBloom = 0.0f;
+  meleeTimer = 0.0f;
+  meleeDuration = 0.0f;
 
   reloading = false;
+  meleeHasHit = false;
   shotFired = false;
 
   viewmodel.reset();
@@ -46,6 +57,13 @@ void Weapon::cancelReload(AudioSystem &audio) {
   reloading = false;
   reloadTimer = 0.0f;
   audio.stop(AudioId::PistolReloadStart);
+}
+
+void Weapon::cancelMelee() {
+  meleeTimer = 0.0f;
+  meleeDuration = 0.0f;
+  meleeHasHit = false;
+  viewmodel.clearMelee();
 }
 
 void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
@@ -73,6 +91,25 @@ void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
                          ? IsMouseButtonDown(MOUSE_BUTTON_LEFT)
                          : IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
+  bool meleePressed = IsKeyPressed(KEY_V);
+  bool wasMeleeing = isMeleeing();
+
+  if (meleePressed && !wasMeleeing) {
+    tryMelee(audio);
+    wasMeleeing = true;
+  }
+
+  if (isMeleeing()) {
+    updateMelee(dt, camera, enemies, level, particles, audio);
+  }
+
+  if (wasMeleeing || isMeleeing()) {
+    viewmodel.update(dt, player.isSprinting(), reloading, true,
+                     getMeleeProgress(),
+                     *proceduralAnimation);
+    return;
+  }
+
   if (reloading && data->ammo.reloadOneRoundAtATime && wantsToFire &&
       ammoInMagazine > 0 && cooldown <= 0.0f) {
     cancelReload(audio);
@@ -90,7 +127,8 @@ void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
     }
   }
 
-  viewmodel.update(dt, player.isSprinting(), reloading, *proceduralAnimation);
+  viewmodel.update(dt, player.isSprinting(), reloading, false, 1.0f,
+                   *proceduralAnimation);
 
   if (IsKeyPressed(KEY_R)) {
     startReload();
@@ -138,6 +176,16 @@ int Weapon::getMagazineSize() const { return data->ammo.magazineSize; }
 
 bool Weapon::isReloading() const { return reloading; }
 
+bool Weapon::isMeleeing() const { return meleeTimer > 0.0f; }
+
+float Weapon::getMeleeProgress() const {
+  if (meleeDuration <= 0.0f) {
+    return 1.0f;
+  }
+
+  return std::clamp(1.0f - meleeTimer / meleeDuration, 0.0f, 1.0f);
+}
+
 float Weapon::getReloadProgress() const {
   if (!reloading || data->ammo.reloadDuration <= 0.0f) {
     return 0.0f;
@@ -163,7 +211,7 @@ float Weapon::getCurrentSpreadDegrees(const Player &player) const {
 void Weapon::tryShoot(const Player &player, std::vector<Enemy> &enemies,
                       const Level &level, const Camera3D &camera,
                       ParticleSystem &particles, AudioSystem &audio) {
-  if (reloading) {
+  if (reloading || isMeleeing()) {
     return;
   }
 
@@ -204,7 +252,7 @@ void Weapon::tryShoot(const Player &player, std::vector<Enemy> &enemies,
 }
 
 bool Weapon::startReload() {
-  if (reloading) {
+  if (reloading || isMeleeing()) {
     return false;
   }
 
@@ -230,8 +278,8 @@ void Weapon::finishReload(AudioSystem &audio) {
   ammoInMagazine += ammoToLoad;
   reserveAmmo -= ammoToLoad;
 
-  if (data->ammo.reloadOneRoundAtATime && ammoInMagazine < data->ammo.magazineSize &&
-      reserveAmmo > 0) {
+  if (data->ammo.reloadOneRoundAtATime &&
+      ammoInMagazine < data->ammo.magazineSize && reserveAmmo > 0) {
     reloadTimer = data->ammo.reloadDuration;
     return;
   }
@@ -240,6 +288,119 @@ void Weapon::finishReload(AudioSystem &audio) {
   reloadTimer = 0.0f;
   audio.stop(AudioId::PistolReloadStart);
   audio.play(AudioId::PistolReloadEnd);
+}
+
+void Weapon::tryMelee(AudioSystem &audio) {
+  if (isMeleeing()) {
+    return;
+  }
+
+  cancelReload(audio);
+
+  meleeDuration = data->melee.windupDuration + data->melee.activeDuration +
+                  data->melee.recoveryDuration;
+  meleeTimer = meleeDuration;
+  meleeHasHit = false;
+}
+
+void Weapon::updateMelee(float dt, const Camera3D &camera,
+                         std::vector<Enemy> &enemies, const Level &level,
+                         ParticleSystem &particles, AudioSystem &audio) {
+  if (!isMeleeing()) {
+    return;
+  }
+
+  float previousElapsed = meleeDuration - meleeTimer;
+  meleeTimer = std::max(0.0f, meleeTimer - dt);
+  float elapsed = meleeDuration - meleeTimer;
+  float activeStart = data->melee.windupDuration;
+  float activeEnd = activeStart + data->melee.activeDuration;
+
+  if (!meleeHasHit && previousElapsed <= activeEnd && elapsed >= activeStart) {
+    performMeleeHit(camera, enemies, level, particles, audio);
+    meleeHasHit = true;
+  }
+
+  if (meleeTimer <= 0.0f) {
+    meleeDuration = 0.0f;
+    meleeHasHit = false;
+  }
+}
+
+void Weapon::performMeleeHit(const Camera3D &camera,
+                             std::vector<Enemy> &enemies, const Level &level,
+                             ParticleSystem &particles, AudioSystem &audio) {
+  Vector3 forward =
+      Vector3Normalize(Vector3Subtract(camera.target, camera.position));
+
+  Ray ray{};
+  ray.position = camera.position;
+  ray.direction = forward;
+
+  int hitEnemyIndex = -1;
+  Vector3 enemyHitPoint{};
+  float enemyHitDistance = FLT_MAX;
+
+  for (int i = 0; i < static_cast<int>(enemies.size()); ++i) {
+    if (!enemies[i].isAlive()) {
+      continue;
+    }
+
+    BoundingBox hitbox =
+        expandedBox(enemies[i].getHitbox(), data->melee.radius);
+    RayCollision hit = GetRayCollisionBox(ray, hitbox);
+
+    if (!hit.hit || hit.distance < 0.0f || hit.distance > data->melee.range) {
+      continue;
+    }
+
+    if (hit.distance >= enemyHitDistance) {
+      continue;
+    }
+
+    hitEnemyIndex = i;
+    enemyHitPoint = hit.point;
+    enemyHitDistance = hit.distance;
+  }
+
+  Vector3 levelHitPoint{};
+  float levelHitDistance = FLT_MAX;
+  bool hitLevel =
+      Collision::rayLevel(ray, level, levelHitPoint, levelHitDistance);
+
+  if (hitEnemyIndex < 0) {
+    float debugDistance =
+        hitLevel ? std::min(levelHitDistance, data->melee.range)
+                 : data->melee.range;
+    addDebugRay(ray, debugDistance, hitLevel);
+    return;
+  }
+
+  if (hitLevel && levelHitDistance < enemyHitDistance) {
+    addDebugRay(ray, levelHitDistance, true);
+    return;
+  }
+
+  addDebugRay(ray, enemyHitDistance, true);
+
+  Vector3 hitNormal = Vector3Normalize(
+      Vector3Subtract(enemyHitPoint, enemies[hitEnemyIndex].getPosition()));
+
+  particles.spawnEnemyHit(enemyHitPoint, hitNormal,
+                          enemies[hitEnemyIndex].getVelocity());
+
+  audio.play(
+      AudioId::EnemyHit,
+      {1.0f, 0.96f + static_cast<float>(GetRandomValue(0, 8)) / 100.0f, 0.0f});
+
+  Vector3 enemyPosition = enemies[hitEnemyIndex].getPosition();
+  Vector3 enemyVelocity = enemies[hitEnemyIndex].getVelocity();
+
+  if (enemies[hitEnemyIndex].applyDamage(data->melee.damage)) {
+    particles.spawnEnemyDeath(
+        {enemyPosition.x, enemyPosition.y + 0.75f, enemyPosition.z},
+        enemyVelocity);
+  }
 }
 
 Ray Weapon::makeShootRay(const Camera3D &camera, float spreadDegrees) const {

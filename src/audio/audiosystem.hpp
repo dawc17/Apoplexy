@@ -8,11 +8,13 @@
 
 enum class AudioId {
   PistolFire,
+  ShotgunFire,
   PistolDryFire,
   PistolReloadStart,
   PistolReloadEnd,
   PlayerFootstep,
   PlayerHurt,
+  WeaponSwitch,
   EnemyHit,
   EnemyDeath,
 

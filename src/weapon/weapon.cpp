@@ -12,7 +12,6 @@
 
 #include <algorithm>
 #include <cfloat>
-#include <iostream>
 #include <vector>
 
 bool Weapon::debugRaysEnabled = false;
@@ -55,11 +54,10 @@ void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
     ray.timer = std::max(0.0f, ray.timer - dt);
   }
 
-  debugRays.erase(std::remove_if(debugRays.begin(), debugRays.end(),
-                                 [](const DebugShotRay &ray) {
-                                   return ray.timer <= 0.0f;
-                                 }),
-                  debugRays.end());
+  debugRays.erase(
+      std::remove_if(debugRays.begin(), debugRays.end(),
+                     [](const DebugShotRay &ray) { return ray.timer <= 0.0f; }),
+      debugRays.end());
 
   if (reloading) {
     audio.playLooping(AudioId::PistolReloadStart);
@@ -166,8 +164,13 @@ void Weapon::tryShoot(const Player &player, std::vector<Enemy> &enemies,
   muzzleFlashRotation = static_cast<float>(GetRandomValue(-25, 25));
   shotFired = true;
   viewmodel.addRecoil(1.0f);
+
+  AudioId fireSound = data->modelId == WeaponModelId::Shotgun
+                          ? AudioId::ShotgunFire
+                          : AudioId::PistolFire;
+
   audio.play(
-      AudioId::PistolFire,
+      fireSound,
       {1.0f, 0.96f + static_cast<float>(GetRandomValue(0, 8)) / 100.0f, 0.0f});
 
   float spreadDegrees = getCurrentSpreadDegrees(player);
@@ -243,15 +246,15 @@ void Weapon::firePelletRay(Ray ray, std::vector<Enemy> &enemies,
   float enemyHitDistance = FLT_MAX;
   float levelHitDistance = FLT_MAX;
 
-  bool hitEnemy = Collision::rayEnemies(ray, enemies, hitEnemyIndex,
-                                        enemyHitPoint);
-  bool hitLevel = Collision::rayLevel(ray, level, levelHitPoint,
-                                      levelHitDistance);
+  bool hitEnemy =
+      Collision::rayEnemies(ray, enemies, hitEnemyIndex, enemyHitPoint);
+  bool hitLevel =
+      Collision::rayLevel(ray, level, levelHitPoint, levelHitDistance);
 
   if (!hitEnemy) {
-    float debugDistance =
-        hitLevel ? std::min(levelHitDistance, data->fire.range)
-                 : data->fire.range;
+    float debugDistance = hitLevel
+                              ? std::min(levelHitDistance, data->fire.range)
+                              : data->fire.range;
     addDebugRay(ray, debugDistance, hitLevel);
     return;
   }
@@ -300,7 +303,8 @@ void Weapon::addDebugRay(Ray ray, float distance, bool hit) {
 
   DebugShotRay debugRay{};
   debugRay.start = ray.position;
-  debugRay.end = Vector3Add(ray.position, Vector3Scale(ray.direction, distance));
+  debugRay.end =
+      Vector3Add(ray.position, Vector3Scale(ray.direction, distance));
   debugRay.hit = hit;
   debugRay.timer = 0.35f;
   debugRays.push_back(debugRay);

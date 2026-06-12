@@ -103,15 +103,16 @@ void draw(const Game &game) {
   float spread = weapon.getCurrentSpreadDegrees(game.getPlayer());
   int gap = 5 + static_cast<int>(spread * 4.0f);
   int length = 8;
+  int thickness = 3;
 
-  DrawLine(width / 2 - gap - length, height / 2, width / 2 - gap, height / 2,
-           BLUE);
-  DrawLine(width / 2 + gap, height / 2, width / 2 + gap + length, height / 2,
-           BLUE);
-  DrawLine(width / 2, height / 2 - gap - length, width / 2, height / 2 - gap,
-           BLUE);
-  DrawLine(width / 2, height / 2 + gap, width / 2, height / 2 + gap + length,
-           BLUE);
+  DrawRectangle(width / 2 - gap - length, height / 2 - thickness / 2, length,
+                thickness, BLUE);
+  DrawRectangle(width / 2 + gap, height / 2 - thickness / 2, length, thickness,
+                BLUE);
+  DrawRectangle(width / 2 - thickness / 2, height / 2 - gap - length, thickness,
+                length, BLUE);
+  DrawRectangle(width / 2 - thickness / 2, height / 2 + gap, thickness, length,
+                BLUE);
 
   DrawText(TextFormat("Ammo: %d / %d", weapon.getAmmoInMagazine(),
                       weapon.getReserveAmmo()),

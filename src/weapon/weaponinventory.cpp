@@ -5,6 +5,7 @@
 #include "../level/level.hpp"
 #include "../player/player.hpp"
 
+#include "audio/audiosystem.hpp"
 #include "raylib.h"
 #include "viewmodel/proceduralweaponanimation.hpp"
 
@@ -32,7 +33,7 @@ void WeaponInventory::update(float dt, const Player &player,
                              std::vector<Enemy> &enemies, const Level &level,
                              const Camera3D camera, ParticleSystem &particles,
                              AudioSystem &audio) {
-  updateSwitchInput();
+  updateSwitchInput(audio);
 
   if (weapons.empty()) {
     return;
@@ -56,10 +57,12 @@ int WeaponInventory::getWeaponCount() const {
   return static_cast<int>(weapons.size());
 }
 
-void WeaponInventory::updateSwitchInput() {
+void WeaponInventory::updateSwitchInput(AudioSystem &audio) {
   if (weapons.empty()) {
     return;
   }
+
+  int previousWeaponIndex = activeWeaponIndex;
 
   if (IsKeyPressed(KEY_ONE)) {
     activeWeaponIndex = 0;
@@ -87,5 +90,9 @@ void WeaponInventory::updateSwitchInput() {
 
   if (activeWeaponIndex >= static_cast<int>(weapons.size())) {
     activeWeaponIndex = 0;
+  }
+
+  if (activeWeaponIndex != previousWeaponIndex) {
+    audio.play(AudioId::WeaponSwitch, {1.0f, 1.0f, 0.0f});
   }
 }

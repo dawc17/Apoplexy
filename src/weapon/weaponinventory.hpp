@@ -1,7 +1,7 @@
 #pragma once
 
-#include "raylib.h"
 #include "audio/audiosystem.hpp"
+#include "raylib.h"
 #include "viewmodel/proceduralweaponanimation.hpp"
 #include "weapon.hpp"
 
@@ -32,7 +32,7 @@ public:
   int getWeaponCount() const;
 
 private:
-  void updateSwitchInput();
+  void updateSwitchInput(AudioSystem &audio);
 
 private:
   std::vector<Weapon> weapons;

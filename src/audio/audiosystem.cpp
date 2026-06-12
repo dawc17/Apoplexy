@@ -25,12 +25,16 @@ void AudioSystem::load() {
 
   loadClip(AudioId::PistolFire, "audio/weapons/pistol_fire.wav",
            AudioBus::Weapons, 0.85f);
+  loadClip(AudioId::ShotgunFire, "audio/weapons/shotgun_fire.wav",
+           AudioBus::Weapons, 1.0f);
   loadClip(AudioId::PistolDryFire, "audio/weapons/pistol_dry_fire.wav",
            AudioBus::Weapons, 0.75f);
   loadClip(AudioId::PistolReloadStart, "audio/weapons/pistol_reload_start.wav",
            AudioBus::Weapons, 1.0f);
   loadClip(AudioId::PistolReloadEnd, "audio/weapons/pistol_reload_end.wav",
            AudioBus::Weapons, 0.75f);
+  loadClip(AudioId::WeaponSwitch, "audio/weapons/switch.wav", AudioBus::Weapons,
+           1.0f);
   loadClip(AudioId::PlayerFootstep, "audio/footsteps.wav", AudioBus::Player,
            0.65f);
   loadClip(AudioId::PlayerHurt, "audio/player/hurt.wav", AudioBus::Player,

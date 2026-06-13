@@ -30,6 +30,9 @@ struct WeaponMeleeData {
   int damage = 5;
   float range = 1.65f;
   float radius = 0.45f;
+  float knockbackImpulse = 7.0f;
+  float knockbackLift = 1.2f;
+  float reloadSpinKnockbackMultiplier = 1.8f;
   float windupDuration = 0.10f;
   float activeDuration = 0.08f;
   float recoveryDuration = 0.32f;

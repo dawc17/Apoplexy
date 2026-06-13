@@ -25,6 +25,7 @@ public:
   void resolveOverlap(Enemy &other);
 
   bool applyDamage(int damage);
+  void applyKnockback(Vector3 direction, float impulse, float lift);
 
   bool isAlive() const;
   BoundingBox getHitbox() const;

@@ -75,7 +75,7 @@ private:
                    AudioSystem &audio);
   void performMeleeHit(const Camera3D &camera, std::vector<Enemy> &enemies,
                        const Level &level, ParticleSystem &particles,
-                       AudioSystem &audio);
+                       AudioSystem &audio, float knockbackMultiplier = 1.0f);
 
   Ray makeShootRay(const Camera3D &camera, float spreadDegrees) const;
   void firePelletRay(Ray ray, std::vector<Enemy> &enemies, const Level &level,

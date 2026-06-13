@@ -247,6 +247,31 @@ bool Enemy::applyDamage(int damage) {
   return false;
 }
 
+void Enemy::applyKnockback(Vector3 direction, float impulse, float lift) {
+  if (!isAlive()) {
+    return;
+  }
+
+  direction.y = 0.0f;
+  if (Vector3LengthSqr(direction) <= 0.0001f) {
+    direction = Vector3Negate(facingDirection);
+  }
+
+  if (Vector3LengthSqr(direction) <= 0.0001f) {
+    direction = {0.0f, 0.0f, 1.0f};
+  }
+
+  direction = Vector3Normalize(direction);
+  velocity.x += direction.x * impulse;
+  velocity.z += direction.z * impulse;
+  velocity.y = std::max(velocity.y, lift);
+
+  if (state == EnemyState::AttackWindup) {
+    state = EnemyState::AttackRecovery;
+    stateTimer = attackRecoveryDuration;
+  }
+}
+
 bool Enemy::isAlive() const { return health > 0; }
 
 BoundingBox Enemy::getHitbox() const { return hitbox; }

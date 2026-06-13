@@ -323,7 +323,8 @@ void Weapon::updateReloadSpinHit(float previousReloadElapsed,
     return;
   }
 
-  performMeleeHit(camera, enemies, level, particles, audio);
+  performMeleeHit(camera, enemies, level, particles, audio,
+                  data->melee.reloadSpinKnockbackMultiplier);
   reloadSpinHasHit = true;
 }
 
@@ -366,7 +367,8 @@ void Weapon::updateMelee(float dt, const Camera3D &camera,
 
 void Weapon::performMeleeHit(const Camera3D &camera,
                              std::vector<Enemy> &enemies, const Level &level,
-                             ParticleSystem &particles, AudioSystem &audio) {
+                             ParticleSystem &particles, AudioSystem &audio,
+                             float knockbackMultiplier) {
   Vector3 forward =
       Vector3Normalize(Vector3Subtract(camera.target, camera.position));
 
@@ -432,6 +434,12 @@ void Weapon::performMeleeHit(const Camera3D &camera,
 
   Vector3 enemyPosition = enemies[hitEnemyIndex].getPosition();
   Vector3 enemyVelocity = enemies[hitEnemyIndex].getVelocity();
+  Vector3 knockbackDirection =
+      Vector3Subtract(enemyPosition, camera.position);
+
+  enemies[hitEnemyIndex].applyKnockback(
+      knockbackDirection, data->melee.knockbackImpulse * knockbackMultiplier,
+      data->melee.knockbackLift);
 
   if (enemies[hitEnemyIndex].applyDamage(data->melee.damage)) {
     particles.spawnEnemyDeath(

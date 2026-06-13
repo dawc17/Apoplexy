@@ -1,3 +1,12 @@
-- Weapon swapping animation
-- Spin per shell reload for shotgun
-- Quick melee for all weapons
+- hit reactions
+above is on hold
+
+- a second enemy type
+- better shotgun identity
+  i want it to be a crowd control weapon
+  reload already does damage, should knock back
+  shot has heavier camera kick and more punchy animation
+  pellets push enemies slightly
+- health and ammo pickups
+- replace debug ui
+- quick melee tuning (knockback?)

@@ -20,6 +20,7 @@ public:
   explicit Enemy(Vector3 spawnPosition);
 
   void update(float dt, Player &player, const Level &level);
+  void updateEditorTest(float dt, const Level &level);
   void draw() const;
 
   void resolveOverlap(Enemy &other);
@@ -31,9 +32,11 @@ public:
   void applyKnockback(Vector3 direction, float impulse, float lift);
 
   bool isAlive() const;
+  EnemyState getState() const;
   BoundingBox getHitbox() const;
   Vector3 getPosition() const;
   Vector3 getVelocity() const;
+  Vector3 getInvestigationTarget() const;
 
 private:
   void updateHitbox();

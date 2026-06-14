@@ -105,6 +105,7 @@ void drawWorld(const Game &game) {
   game.getParticles().draw();
   game.getWeapon().drawDebugRays();
   game.getLevelEditor().draw(game.getLevel());
+  game.drawEditorTestDebug();
 
   EndMode3D();
 

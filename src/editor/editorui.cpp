@@ -45,8 +45,12 @@ EditorTool indexToTool(int index) {
   case 4:
     return EditorTool::Light;
   default:
-    return EditorTool::Wall;
+      return EditorTool::Wall;
   }
+}
+
+const char *modeLabel(LevelEditor::Mode mode) {
+  return mode == LevelEditor::Mode::Test ? "Test" : "Build";
 }
 } // namespace
 
@@ -64,7 +68,11 @@ void draw(LevelEditor &editor, Level &level) {
   DrawRectangleLinesEx(panel, 1.0f, GREEN);
 
   DrawText("Editor", 28, 28, 24, GREEN);
-  DrawText("Shift-drag gizmo disables snap", 28, 50, 14, GREEN);
+  DrawText(TextFormat("Mode: %s (T)", modeLabel(editor.getMode())), 28, 50, 14,
+           editor.isTestMode() ? SKYBLUE : GREEN);
+  DrawText(editor.isTestMode() ? "Left click emits test noise"
+                               : "Shift-drag gizmo disables snap",
+           28, 66, 14, editor.isTestMode() ? SKYBLUE : GREEN);
 
   DrawText("Wall Size", 28, 120, 18, GREEN);
 

@@ -136,6 +136,49 @@ void Enemy::update(float dt, Player &player, const Level &level) {
   updateHitbox();
 }
 
+void Enemy::updateEditorTest(float dt, const Level &level) {
+  if (!isAlive()) {
+    state = EnemyState::Dead;
+    return;
+  }
+
+  attackCooldown = std::max(0.0f, attackCooldown - dt);
+  hitFlashTimer = std::max(0.0f, hitFlashTimer - dt);
+  stateTimer = std::max(0.0f, stateTimer - dt);
+
+  if (state == EnemyState::Alert) {
+    stopHorizontalMovement(dt);
+
+    if (stateTimer <= 0.0f) {
+      state = EnemyState::Search;
+      stateTimer = searchDuration;
+    }
+  } else if (state == EnemyState::Search) {
+    moveToward(lastKnownPlayerPosition, searchSpeed, dt, level);
+
+    if (Math::distanceXZ(position, lastKnownPlayerPosition) <= 0.65f ||
+        stateTimer <= 0.0f) {
+      state = EnemyState::Idle;
+    }
+  } else {
+    stopHorizontalMovement(dt);
+  }
+
+  if (!grounded || velocity.y > 0.0f) {
+    velocity.y -= gravity * dt;
+  } else {
+    velocity.y = 0.0f;
+  }
+
+  Collision::MoveResult move = Collision::moveCylinderLevel(
+      position, velocity, radius, height, level, dt);
+  position = move.position;
+  velocity = move.velocity;
+  grounded = move.grounded;
+
+  updateHitbox();
+}
+
 void Enemy::draw() const {
   if (!isAlive()) {
     return;
@@ -297,7 +340,6 @@ bool Enemy::applyDamage(int damage) {
   return false;
 }
 
-// sigma function overloading tuff boiii
 bool Enemy::applyDamage(int damage, Vector3 threatPosition) {
   bool killed = applyDamage(damage);
 
@@ -335,11 +377,15 @@ void Enemy::applyKnockback(Vector3 direction, float impulse, float lift) {
 
 bool Enemy::isAlive() const { return health > 0; }
 
+EnemyState Enemy::getState() const { return state; }
+
 BoundingBox Enemy::getHitbox() const { return hitbox; }
 
 Vector3 Enemy::getPosition() const { return position; }
 
 Vector3 Enemy::getVelocity() const { return velocity; }
+
+Vector3 Enemy::getInvestigationTarget() const { return lastKnownPlayerPosition; }
 
 void Enemy::reactToThreat(Vector3 threatPosition) {
   lastKnownPlayerPosition = threatPosition;

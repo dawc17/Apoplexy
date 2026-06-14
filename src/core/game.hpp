@@ -37,6 +37,7 @@ public:
   AudioSystem &getAudio();
   const AudioSystem &getAudio() const;
   const ParticleSystem &getParticles() const;
+  void drawEditorTestDebug() const;
   const LevelEditor &getLevelEditor() const;
   LevelEditor &getMutableLevelEditor();
   bool areEnemiesFrozen() const;
@@ -47,6 +48,8 @@ private:
   void updatePlaying(float dt);
   void drawPlaying();
   void updateFootsteps(float dt);
+  void updateEnemies(float dt);
+  void updateEditorTest(float dt);
   void notifyEnemiesOfNoise(Vector3 position, float radius);
   void startCameraShake(float strength, float duration);
   void updateCameraShake(float dt);

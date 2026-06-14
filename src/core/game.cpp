@@ -98,6 +98,11 @@ void Game::updatePlaying(float dt) {
     camera = levelEditor.getCamera();
     audio.stop(AudioId::PistolReloadStart);
     audio.stop(AudioId::PlayerFootstep);
+
+    if (levelEditor.isTestMode()) {
+      updateEditorTest(dt);
+    }
+
     return;
   }
 
@@ -146,18 +151,7 @@ void Game::updatePlaying(float dt) {
   particles.update(dt);
 
   if (!enemiesFrozen) {
-    for (Enemy &enemy : enemies) {
-      enemy.update(dt, player, level);
-    }
-
-    constexpr int separationPasses = 3;
-    for (int pass = 0; pass < separationPasses; ++pass) {
-      for (int i = 0; i < static_cast<int>(enemies.size()); ++i) {
-        for (int j = i + 1; j < static_cast<int>(enemies.size()); ++j) {
-          enemies[i].resolveOverlap(enemies[j]);
-        }
-      }
-    }
+    updateEnemies(dt);
   }
 
   if (player.consumeDamageTaken()) {
@@ -310,6 +304,48 @@ void Game::updateFootsteps(float dt) {
   }
 }
 
+void Game::updateEnemies(float dt) {
+  for (Enemy &enemy : enemies) {
+    enemy.update(dt, player, level);
+  }
+
+  constexpr int separationPasses = 3;
+  for (int pass = 0; pass < separationPasses; ++pass) {
+    for (int i = 0; i < static_cast<int>(enemies.size()); ++i) {
+      for (int j = i + 1; j < static_cast<int>(enemies.size()); ++j) {
+        enemies[i].resolveOverlap(enemies[j]);
+      }
+    }
+  }
+}
+
+void Game::updateEditorTest(float dt) {
+  LevelEditor::NoiseEvent noiseEvent{};
+
+  if (levelEditor.consumeNoiseEvent(noiseEvent)) {
+    notifyEnemiesOfNoise(noiseEvent.position, noiseEvent.radius);
+  }
+
+  particles.update(dt);
+
+  if (enemiesFrozen) {
+    return;
+  }
+
+  for (Enemy &enemy : enemies) {
+    enemy.updateEditorTest(dt, level);
+  }
+
+  constexpr int separationPasses = 3;
+  for (int pass = 0; pass < separationPasses; ++pass) {
+    for (int i = 0; i < static_cast<int>(enemies.size()); ++i) {
+      for (int j = i + 1; j < static_cast<int>(enemies.size()); ++j) {
+        enemies[i].resolveOverlap(enemies[j]);
+      }
+    }
+  }
+}
+
 void Game::notifyEnemiesOfNoise(Vector3 position, float radius) {
   if (enemiesFrozen) {
     return;
@@ -363,6 +399,39 @@ const AssetManager &Game::getAssets() const { return assets; }
 AudioSystem &Game::getAudio() { return audio; }
 const AudioSystem &Game::getAudio() const { return audio; }
 const ParticleSystem &Game::getParticles() const { return particles; }
+void Game::drawEditorTestDebug() const {
+  if (!levelEditor.isTestMode()) {
+    return;
+  }
+
+  if (levelEditor.hasLastTestNoise()) {
+    Vector3 noisePosition = levelEditor.getLastTestNoisePosition();
+    DrawSphere(noisePosition, 0.22f, SKYBLUE);
+    DrawCircle3D(noisePosition, levelEditor.getLastTestNoiseRadius(),
+                 {1.0f, 0.0f, 0.0f}, 90.0f, Fade(SKYBLUE, 0.45f));
+  }
+
+  for (const Enemy &enemy : enemies) {
+    if (!enemy.isAlive()) {
+      continue;
+    }
+
+    EnemyState enemyState = enemy.getState();
+    if (enemyState != EnemyState::Alert && enemyState != EnemyState::Search &&
+        enemyState != EnemyState::Chase) {
+      continue;
+    }
+
+    Vector3 start = enemy.getPosition();
+    Vector3 end = enemy.getInvestigationTarget();
+    start.y += 0.08f;
+    end.y += 0.08f;
+
+    Color color = enemyState == EnemyState::Search ? ORANGE : RED;
+    DrawLine3D(start, end, color);
+    DrawSphere(end, 0.16f, color);
+  }
+}
 const LevelEditor &Game::getLevelEditor() const { return levelEditor; }
 LevelEditor &Game::getMutableLevelEditor() { return levelEditor; }
 bool Game::areEnemiesFrozen() const { return enemiesFrozen; }

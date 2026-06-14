@@ -245,6 +245,12 @@ void LevelEditor::update(Level &level, float dt) {
     return;
   }
 
+  if (IsKeyPressed(KEY_T)) {
+    mode = mode == Mode::Build ? Mode::Test : Mode::Build;
+    activeGizmoAxis = GizmoAxis::None;
+    selection.clear();
+  }
+
   float step = settings.snapSize;
 
   if (IsKeyPressed(KEY_W)) {
@@ -310,6 +316,23 @@ void LevelEditor::update(Level &level, float dt) {
   }
 
   cursor = snapCursor(cursor, settings.snapSize);
+
+  if (mode == Mode::Test) {
+    if (!isMouseOverEditorPanel() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+      Vector3 mouseHit{};
+
+      if (raycastGround(camera, mouseHit)) {
+        pendingNoiseEvent = {mouseHit, testNoiseRadius};
+        pendingNoiseEventValid = true;
+        lastTestNoisePosition = mouseHit;
+        lastTestNoiseRadius = testNoiseRadius;
+        lastTestNoiseValid = true;
+      }
+    }
+
+    updateCamera();
+    return;
+  }
 
   if (IsKeyPressed(KEY_ONE)) {
     settings.wallSize = {2.0f, 2.0f, 2.0f};
@@ -427,7 +450,9 @@ void LevelEditor::draw(const Level &level) const {
     }
   }
 
-  if (settings.tool == EditorTool::Wall) {
+  if (mode == Mode::Test) {
+    DrawSphere({cursor.x, 0.0f, cursor.z}, 0.22f, SKYBLUE);
+  } else if (settings.tool == EditorTool::Wall) {
     Vector3 previewCenter = wallCenterFromCursor(cursor, settings.wallSize);
     DrawCubeWires(previewCenter, settings.wallSize.x, settings.wallSize.y,
                   settings.wallSize.z, GREEN);
@@ -456,12 +481,36 @@ void LevelEditor::draw(const Level &level) const {
                  Fade(color, 0.35f));
   }
 
-  drawMoveGizmo(level);
+  if (mode == Mode::Build) {
+    drawMoveGizmo(level);
+  }
 }
 
 bool LevelEditor::isEnabled() const { return enabled; }
 
+bool LevelEditor::isTestMode() const { return enabled && mode == Mode::Test; }
+
+LevelEditor::Mode LevelEditor::getMode() const { return mode; }
+
 Camera3D LevelEditor::getCamera() const { return camera; }
+
+bool LevelEditor::consumeNoiseEvent(NoiseEvent &event) {
+  if (!pendingNoiseEventValid) {
+    return false;
+  }
+
+  event = pendingNoiseEvent;
+  pendingNoiseEventValid = false;
+  return true;
+}
+
+Vector3 LevelEditor::getLastTestNoisePosition() const {
+  return lastTestNoisePosition;
+}
+
+float LevelEditor::getLastTestNoiseRadius() const { return lastTestNoiseRadius; }
+
+bool LevelEditor::hasLastTestNoise() const { return lastTestNoiseValid; }
 
 EditorSettings &LevelEditor::getSettings() { return settings; }
 const EditorSettings &LevelEditor::getSettings() const { return settings; }

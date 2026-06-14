@@ -121,6 +121,9 @@ raylib_dir = "external/raylib-master"
 
 workspaceName = "Apoplexy"
 
+-- Keep generated GNU Make outputs predictable across desktop platforms:
+-- `make` builds bin/Debug/apoplexy on Linux/macOS and bin/Debug/apoplexy.exe on Windows.
+
 if (os.isdir('build_files') == false) then
     os.mkdir('build_files')
 end
@@ -225,6 +228,9 @@ if (downloadRaylib) then
             defines{"_WIN32"}
             links {"winmm", "gdi32", "opengl32"}
             libdirs {"../bin/%{cfg.buildcfg}"}
+
+        filter {"system:windows", "action:gmake*"}
+            linkoptions {"-static", "-static-libgcc", "-static-libstdc++"}
 
         filter "system:linux"
             links {"pthread", "m", "dl", "rt"}

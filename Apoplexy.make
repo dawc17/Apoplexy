@@ -28,6 +28,8 @@ ifeq ($(origin AR), default)
   AR = ar
 endif
 RESCOMP = windres
+WINDOWS_LIBS = -lwinmm -lgdi32 -lopengl32
+LINUX_LIBS = -lpthread -lm -ldl -lrt -lX11
 INCLUDES += -Isrc -Iinclude -Iinclude/raygui -Ibuild/external/raylib-master/src
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
@@ -106,6 +108,13 @@ LIBS += bin/Release/libraylib.a -lpthread -lm -ldl -lrt -lX11
 LDDEPS += bin/Release/libraylib.a
 ALL_LDFLAGS += $(LDFLAGS) -s
 
+endif
+
+ifeq ($(OS),Windows_NT)
+  TARGET := $(TARGET).exe
+  DEFINES := $(filter-out -D_GLFW_X11 -D_GLFW_WAYLAND,$(DEFINES)) -D_WIN32
+  LIBS := $(filter-out $(LINUX_LIBS),$(LIBS)) $(WINDOWS_LIBS)
+  ALL_LDFLAGS := $(filter-out -L/usr/lib64 -L/usr/lib32,$(ALL_LDFLAGS)) -static -static-libgcc -static-libstdc++
 endif
 
 # Per File Configurations

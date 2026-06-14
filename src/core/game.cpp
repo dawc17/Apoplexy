@@ -11,6 +11,7 @@
 #include "raymath.h"
 #include "viewmodel/proceduralweaponanimationcatalog.hpp"
 #include "weapon/weaponcatalog.hpp"
+#include "weapon/weapondata.hpp"
 #include "weapon/weaponinventory.hpp"
 
 namespace {
@@ -41,6 +42,7 @@ void Game::reset() {
   state = GameState::Playing;
   damageVignetteTimer = 0.0f;
   footstepStopGraceTimer = 0.0f;
+  footstepNoiseTimer = 0.0f;
   audio.stop(AudioId::PistolReloadStart);
   audio.stop(AudioId::PlayerFootstep);
 
@@ -133,6 +135,11 @@ void Game::updatePlaying(float dt) {
 
   // tune fire shake here
   if (weapons.getActiveWeapon().consumeShotFired()) {
+    const WeaponData &weapon = weapons.getActiveWeapon().getData();
+    float noiseRadius =
+        weapon.modelId == WeaponModelId::Shotgun ? 28.0f : 7.0f;
+    
+    notifyEnemiesOfNoise(camera.position, noiseRadius);
     startCameraShake(0.15f, 0.12f);
   }
 
@@ -293,6 +300,24 @@ void Game::updateFootsteps(float dt) {
   float volume = player.isSprinting() ? 0.85f : 0.68f;
 
   audio.playLooping(AudioId::PlayerFootstep, {volume, pitch, 0.0f});
+
+  footstepNoiseTimer -= dt;
+
+  if (footstepNoiseTimer <= 0.0f) {
+    float noiseRadius = player.isSprinting() ? 8.0f : 4.5f;
+    footstepNoiseTimer = player.isSprinting() ? 0.30f : 0.46f;
+    notifyEnemiesOfNoise(player.getPosition(), noiseRadius);
+  }
+}
+
+void Game::notifyEnemiesOfNoise(Vector3 position, float radius) {
+  if (enemiesFrozen) {
+    return;
+  }
+
+  for (Enemy &enemy : enemies) {
+    enemy.hearNoise(position, radius, level);
+  }
 }
 
 void Game::startCameraShake(float strength, float duration) {

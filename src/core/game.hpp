@@ -47,6 +47,7 @@ private:
   void updatePlaying(float dt);
   void drawPlaying();
   void updateFootsteps(float dt);
+  void notifyEnemiesOfNoise(Vector3 position, float radius);
   void startCameraShake(float strength, float duration);
   void updateCameraShake(float dt);
   void drawDamageVignette() const;
@@ -70,6 +71,7 @@ private:
   float cameraShakeDuration = 0.0f;
   float cameraShakeStrength = 0.0f;
   float footstepStopGraceTimer = 0.0f;
+  float footstepNoiseTimer = 0.0f;
   float damageVignetteTimer = 0.0f;
   float damageVignetteDuration = 0.45f;
   bool enemiesFrozen = false;

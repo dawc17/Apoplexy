@@ -8,6 +8,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "rlgl.h"
+#include "util/math.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -230,6 +231,55 @@ void Enemy::resolveOverlap(Enemy &other) {
   other.updateHitbox();
 }
 
+bool Enemy::hearNoise(Vector3 sourcePosition, float noiseRadius,
+                      const Level &level) {
+  if (!isAlive() || noiseRadius <= 0.0f) {
+    return false;
+  }
+
+  float distance = Math::distanceXZ(position, sourcePosition);
+  if (distance > noiseRadius) {
+    return false;
+  }
+
+  Vector3 ear{position.x, position.y + height * 0.65f, position.z};
+  Vector3 toSource = Vector3Subtract(sourcePosition, ear);
+  float sourceDistance = Vector3Length(toSource);
+
+  if (sourceDistance > 0.001f) {
+    Ray ray{};
+    ray.position = ear;
+    ray.direction = Vector3Scale(toSource, 1.0f / sourceDistance);
+
+    Vector3 wallHit{};
+    float wallDistance = 0.0f;
+
+    if (Collision::rayLevel(ray, level, wallHit, wallDistance) &&
+        wallDistance < sourceDistance - 0.05f && distance > noiseRadius * 0.35f) {
+      return false;
+    }
+  }
+
+  lastKnownPlayerPosition = sourcePosition;
+  timeSinceSeenPlayer = loseSightGrace;
+
+  Vector3 look = Vector3Subtract(sourcePosition, position);
+  look.y = 0.0f;
+
+  if (Vector3LengthSqr(look) > 0.001f) {
+    facingDirection = Vector3Normalize(look);
+  }
+
+  if (state == EnemyState::Idle || state == EnemyState::Search) {
+    state = EnemyState::Search;
+    stateTimer = searchDuration;
+  } else if (state == EnemyState::Alert) {
+    stateTimer = std::max(stateTimer, alertDuration);
+  }
+
+  return true;
+}
+
 bool Enemy::applyDamage(int damage) {
   if (!isAlive()) {
     return false;
@@ -245,6 +295,17 @@ bool Enemy::applyDamage(int damage) {
   }
 
   return false;
+}
+
+// sigma function overloading tuff boiii
+bool Enemy::applyDamage(int damage, Vector3 threatPosition) {
+  bool killed = applyDamage(damage);
+
+  if (!killed && isAlive()) {
+    reactToThreat(threatPosition);
+  }
+
+  return killed;
 }
 
 void Enemy::applyKnockback(Vector3 direction, float impulse, float lift) {
@@ -279,6 +340,23 @@ BoundingBox Enemy::getHitbox() const { return hitbox; }
 Vector3 Enemy::getPosition() const { return position; }
 
 Vector3 Enemy::getVelocity() const { return velocity; }
+
+void Enemy::reactToThreat(Vector3 threatPosition) {
+  lastKnownPlayerPosition = threatPosition;
+  timeSinceSeenPlayer = 0.0f;
+
+  Vector3 look = Vector3Subtract(threatPosition, position);
+  look.y = 0.0f;
+
+  if (Vector3LengthSqr(look) > 0.001f) {
+    facingDirection = Vector3Normalize(look);
+  }
+
+  if (state == EnemyState::Idle || state == EnemyState::Search) {
+    state = EnemyState::Alert;
+    stateTimer = alertDuration;
+  }
+}
 
 bool Enemy::canSeePlayer(const Player &player, const Level &level) const {
   Vector3 eye{position.x, position.y + height * 0.7f, position.z};

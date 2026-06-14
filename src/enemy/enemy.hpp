@@ -24,7 +24,10 @@ public:
 
   void resolveOverlap(Enemy &other);
 
+  bool hearNoise(Vector3 sourcePosition, float noiseRadius, const Level &level);
+
   bool applyDamage(int damage);
+  bool applyDamage(int damage, Vector3 threatPosition);
   void applyKnockback(Vector3 direction, float impulse, float lift);
 
   bool isAlive() const;
@@ -35,6 +38,7 @@ public:
 private:
   void updateHitbox();
   bool canSeePlayer(const Player &player, const Level &level) const;
+  void reactToThreat(Vector3 threatPosition);
   void chasePlayer(float dt, const Player &player, const Level &level);
   void moveToward(Vector3 target, float targetSpeed, float dt,
                   const Level &level);

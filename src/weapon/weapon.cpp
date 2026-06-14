@@ -441,7 +441,7 @@ void Weapon::performMeleeHit(const Camera3D &camera,
       knockbackDirection, data->melee.knockbackImpulse * knockbackMultiplier,
       data->melee.knockbackLift);
 
-  if (enemies[hitEnemyIndex].applyDamage(data->melee.damage)) {
+  if (enemies[hitEnemyIndex].applyDamage(data->melee.damage, camera.position)) {
     particles.spawnEnemyDeath(
         {enemyPosition.x, enemyPosition.y + 0.75f, enemyPosition.z},
         enemyVelocity);
@@ -522,7 +522,7 @@ void Weapon::firePelletRay(Ray ray, std::vector<Enemy> &enemies,
   Vector3 enemyPosition = enemies[hitEnemyIndex].getPosition();
   Vector3 enemyVelocity = enemies[hitEnemyIndex].getVelocity();
 
-  if (enemies[hitEnemyIndex].applyDamage(data->fire.damage)) {
+  if (enemies[hitEnemyIndex].applyDamage(data->fire.damage, ray.position)) {
     particles.spawnEnemyDeath(
         {enemyPosition.x, enemyPosition.y + 0.75f, enemyPosition.z},
         enemyVelocity);

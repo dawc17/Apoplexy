@@ -1,4 +1,4 @@
 # apoplexy
-a soon-to-be stylized fps shooter made in c++
-with raylib
+a soon-to-be stealth first person shooter made in c++
+with raylib </br>
 <3

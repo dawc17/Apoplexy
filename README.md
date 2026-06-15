@@ -3,7 +3,7 @@
 ## What is Apoplexy **right now?**
 It is a prototype, a MVP of what I eventually want this project to evolve into.
 ### What features exist at the moment?
-- A level editor (F1)
+- A level editor (F1) **BROKEN IN RELEASE MODE ATM, SORRY!**
 - Procedural animations for everything
 - 2 weapons, a silenced pistol and a shotgun
 - "Smart" enemies that react to sound and chase you around when they see you

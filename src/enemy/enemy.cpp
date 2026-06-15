@@ -54,6 +54,18 @@ void Enemy::update(float dt, Player &player, const Level &level) {
     stopHorizontalMovement(dt);
 
     if (seesPlayer) {
+      state = EnemyState::Suspicious;
+      stateTimer = suspicionDuration;
+    }
+    break;
+
+  case EnemyState::Suspicious:
+    stopHorizontalMovement(dt);
+
+    if (!seesPlayer) {
+      state = EnemyState::Search;
+      stateTimer = searchDuration;
+    } else if (stateTimer <= 0.0f) {
       state = EnemyState::Alert;
       stateTimer = alertDuration;
     }
@@ -85,8 +97,8 @@ void Enemy::update(float dt, Player &player, const Level &level) {
 
   case EnemyState::Search:
     if (seesPlayer) {
-      state = EnemyState::Alert;
-      stateTimer = alertDuration;
+      state = EnemyState::Suspicious;
+      stateTimer = suspicionDuration;
       break;
     }
 
@@ -187,7 +199,9 @@ void Enemy::draw() const {
   // woke enemy foid out to kill you (changes color)
   Color color = MAROON;
 
-  if (state == EnemyState::Alert || state == EnemyState::Search) {
+  if (state == EnemyState::Suspicious) {
+    color = YELLOW;
+  } else if (state == EnemyState::Alert || state == EnemyState::Search) {
     color = ORANGE;
   } else if (state == EnemyState::Chase) {
     color = RED;
@@ -298,7 +312,8 @@ bool Enemy::hearNoise(Vector3 sourcePosition, float noiseRadius,
     float wallDistance = 0.0f;
 
     if (Collision::rayLevel(ray, level, wallHit, wallDistance) &&
-        wallDistance < sourceDistance - 0.05f && distance > noiseRadius * 0.35f) {
+        wallDistance < sourceDistance - 0.05f &&
+        distance > noiseRadius * 0.35f) {
       return false;
     }
   }
@@ -313,7 +328,8 @@ bool Enemy::hearNoise(Vector3 sourcePosition, float noiseRadius,
     facingDirection = Vector3Normalize(look);
   }
 
-  if (state == EnemyState::Idle || state == EnemyState::Search) {
+  if (state == EnemyState::Idle || state == EnemyState::Search ||
+      state == EnemyState::Suspicious) {
     state = EnemyState::Search;
     stateTimer = searchDuration;
   } else if (state == EnemyState::Alert) {
@@ -385,7 +401,9 @@ Vector3 Enemy::getPosition() const { return position; }
 
 Vector3 Enemy::getVelocity() const { return velocity; }
 
-Vector3 Enemy::getInvestigationTarget() const { return lastKnownPlayerPosition; }
+Vector3 Enemy::getInvestigationTarget() const {
+  return lastKnownPlayerPosition;
+}
 
 void Enemy::reactToThreat(Vector3 threatPosition) {
   lastKnownPlayerPosition = threatPosition;
@@ -398,7 +416,8 @@ void Enemy::reactToThreat(Vector3 threatPosition) {
     facingDirection = Vector3Normalize(look);
   }
 
-  if (state == EnemyState::Idle || state == EnemyState::Search) {
+  if (state == EnemyState::Idle || state == EnemyState::Search ||
+      state == EnemyState::Suspicious) {
     state = EnemyState::Alert;
     stateTimer = alertDuration;
   }

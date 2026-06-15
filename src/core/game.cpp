@@ -141,9 +141,8 @@ void Game::updatePlaying(float dt) {
   // tune fire shake here
   if (weapons.getActiveWeapon().consumeShotFired()) {
     const WeaponData &weapon = weapons.getActiveWeapon().getData();
-    float noiseRadius =
-        weapon.modelId == WeaponModelId::Shotgun ? 28.0f : 7.0f;
-    
+    float noiseRadius = weapon.modelId == WeaponModelId::Shotgun ? 28.0f : 7.0f;
+
     notifyEnemiesOfNoise(camera.position, noiseRadius);
     startCameraShake(0.15f, 0.12f);
   }
@@ -293,6 +292,11 @@ void Game::updateFootsteps(float dt) {
   float pitch = player.isSprinting() ? 1.08f : 1.0f;
   float volume = player.isSprinting() ? 0.85f : 0.68f;
 
+  if (player.isCrouching()) {
+    pitch = 0.92f;
+    volume = 0.32f;
+  }
+
   audio.playLooping(AudioId::PlayerFootstep, {volume, pitch, 0.0f});
 
   footstepNoiseTimer -= dt;
@@ -300,6 +304,11 @@ void Game::updateFootsteps(float dt) {
   if (footstepNoiseTimer <= 0.0f) {
     float noiseRadius = player.isSprinting() ? 8.0f : 4.5f;
     footstepNoiseTimer = player.isSprinting() ? 0.30f : 0.46f;
+
+    if (player.isCrouching()) {
+      noiseRadius = 1.35f;
+      footstepNoiseTimer = 0.72f;
+    }
     notifyEnemiesOfNoise(player.getPosition(), noiseRadius);
   }
 }
@@ -417,7 +426,8 @@ void Game::drawEditorTestDebug() const {
     }
 
     EnemyState enemyState = enemy.getState();
-    if (enemyState != EnemyState::Alert && enemyState != EnemyState::Search &&
+    if (enemyState != EnemyState::Suspicious &&
+        enemyState != EnemyState::Alert && enemyState != EnemyState::Search &&
         enemyState != EnemyState::Chase) {
       continue;
     }

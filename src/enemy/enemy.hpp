@@ -7,6 +7,7 @@ class Level;
 
 enum class EnemyState {
   Idle,
+  Suspicious,
   Alert,
   Chase,
   Search,
@@ -75,6 +76,7 @@ private:
 
   float visionRange = 18.0f;
   float visionHalfAngleDegrees = 55.0f;
+  float suspicionDuration = 0.65f;
   float loseSightGrace = 0.45f;
   float searchDuration = 2.2f;
   float alertDuration = 0.22f;

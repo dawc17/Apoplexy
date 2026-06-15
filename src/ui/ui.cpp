@@ -23,6 +23,51 @@ int aliveEnemyCount(const Game &game) {
   return count;
 }
 
+void drawAwarenessIndicator(const Game &game, int screenWidth) {
+  const char *label = nullptr;
+  Color color = WHITE;
+
+  for (const Enemy &enemy : game.getEnemies()) {
+    if (!enemy.isAlive()) {
+      continue;
+    }
+
+    EnemyState state = enemy.getState();
+    if (state == EnemyState::Chase || state == EnemyState::AttackWindup ||
+        state == EnemyState::AttackRecovery) {
+      label = "DISCOVERED";
+      color = RED;
+      break;
+    }
+
+    if (state == EnemyState::Alert) {
+      label = "SPOTTED";
+      color = ORANGE;
+    } else if (state == EnemyState::Suspicious && label == nullptr) {
+      label = "SEEN?";
+      color = YELLOW;
+    } else if (state == EnemyState::Search && label == nullptr) {
+      label = "HEARD";
+      color = YELLOW;
+    }
+  }
+
+  if (label == nullptr) {
+    return;
+  }
+
+  int fontSize = 28;
+  int textWidth = MeasureText(label, fontSize);
+  int x = screenWidth / 2 - textWidth / 2;
+  int y = 28;
+
+  DrawRectangle(x - 18, y - 8, textWidth + 36, fontSize + 18,
+                Fade(BLACK, 0.62f));
+  DrawRectangleLines(x - 18, y - 8, textWidth + 36, fontSize + 18,
+                     Fade(color, 0.75f));
+  DrawText(label, x, y, fontSize, color);
+}
+
 void drawViewmodelDebugPanel(const Game &game) {
   if (!ViewmodelDebug::panelOpen) {
     DrawText("F2 Viewmodel", 24, 238, 18, Fade(WHITE, 0.65f));
@@ -97,6 +142,7 @@ void draw(const Game &game) {
   DrawText(TextFormat("HP: %d", game.getPlayer().getHealth()), 24, 24, 28, RED);
 
   DrawText(TextFormat("Enemies: %d", aliveEnemyCount(game)), 24, 58, 24, RED);
+  drawAwarenessIndicator(game, width);
 
   const Weapon &weapon = game.getWeapon();
 
@@ -140,6 +186,10 @@ void draw(const Game &game) {
 
   if (game.areEnemiesFrozen()) {
     DrawText("Enemies frozen", 24, 208, 24, GREEN);
+  }
+
+  if (game.getPlayer().isCrouching()) {
+    DrawText("CROUCHING", 24, 238, 20, YELLOW);
   }
 
   if (Weapon::debugRaysEnabled) {

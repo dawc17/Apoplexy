@@ -22,12 +22,14 @@ void Player::reset(Vector3 spawnPostion) {
   headBobTimer = 0.0f;
   headBobAmount = 0.0f;
   sprintFovAmount = 0.0f;
+  crouchAmount = 0.0f;
 
   health = maxHealth;
   damageTaken = false;
   sprintBlockedByShot = false;
   sprinting = false;
   grounded = false;
+  crouching = false;
 }
 
 void Player::update(float dt, const Level &level) {
@@ -74,7 +76,11 @@ Camera3D Player::getCamera() const {
 Vector3 Player::getPosition() const { return position; }
 
 Vector3 Player::getEyePosition() const {
-  return {position.x, position.y + height * 0.85f, position.z};
+  float standingEyeHeight = height * 0.85f;
+  float crouchingEyeHeight = height * 0.5f;
+  float eyeHeight =
+      standingEyeHeight + (crouchingEyeHeight - standingEyeHeight) * crouchAmount;
+  return {position.x, position.y + eyeHeight, position.z};
 }
 
 // getters
@@ -95,6 +101,8 @@ bool Player::isDead() const { return health <= 0; }
 bool Player::isGrounded() const { return grounded; }
 
 bool Player::isSprinting() const { return sprinting; }
+
+bool Player::isCrouching() const { return crouching; }
 
 bool Player::consumeDamageTaken() {
   bool taken = damageTaken;
@@ -142,6 +150,9 @@ void Player::updateMovement(float dt, const Level &level) {
   float targetSpeed = moveSpeed;
   bool shooting = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
   bool holdingSprint = IsKeyDown(KEY_LEFT_SHIFT);
+  bool holdingCrouch = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_C);
+
+  crouching = holdingCrouch && grounded;
 
   if (!holdingSprint) {
     sprintBlockedByShot = false;
@@ -150,15 +161,21 @@ void Player::updateMovement(float dt, const Level &level) {
   }
 
   sprinting =
-      holdingSprint && !sprintBlockedByShot && Vector3Length(moveDir) > 0.0f;
+      holdingSprint && !crouching && !sprintBlockedByShot && Vector3Length(moveDir) > 0.0f;
 
   if (sprinting) {
     targetSpeed = moveSpeed * 1.45f;
+  } else if (crouching) {
+    targetSpeed = moveSpeed * 0.42f;
   }
 
   float targetSprintFovAmount = sprinting ? 1.0f : 0.0f;
   float sprintFovEase = 1.0f - std::expf(-7.0 * dt);
   sprintFovAmount += (targetSprintFovAmount - sprintFovAmount) * sprintFovEase;
+
+  float targetCrouchAmount = crouching ? 1.0f : 0.0f;
+  float crouchEase = 1.0f - std::expf(-12.0f * dt);
+  crouchAmount += (targetCrouchAmount - crouchAmount) * crouchEase;
 
   Vector3 targetVelocity{moveDir.x * targetSpeed, velocity.y,
                          moveDir.z * targetSpeed};
@@ -186,12 +203,14 @@ void Player::updateMovement(float dt, const Level &level) {
   }
 
   float sprintBobBoost = sprinting ? 1.18f : 1.0f;
+  float crouchBobScale = crouching ? 0.35f : 1.0f;
   float targetHeadBobAmount = speedPercent * sprintBobBoost;
+  targetHeadBobAmount *= crouchBobScale;
   float headBobEase = 1.0f - std::expf(-8.0f * dt);
   headBobAmount += (targetHeadBobAmount - headBobAmount) * headBobEase;
 
-  Collision::MoveResult move =
-      Collision::moveCylinderLevel(position, velocity, radius, height, level, dt);
+  Collision::MoveResult move = Collision::moveCylinderLevel(
+      position, velocity, radius, height, level, dt);
   position = move.position;
   velocity = move.velocity;
   grounded = move.grounded;

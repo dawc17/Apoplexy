@@ -24,6 +24,7 @@ public:
   bool isDead() const;
   bool isGrounded() const;
   bool isSprinting() const;
+  bool isCrouching() const;
   bool consumeDamageTaken();
 
 private:
@@ -38,6 +39,7 @@ private:
   float pitch = 0.0f;
 
   float sprintFovAmount = 0.0f;
+  float crouchAmount = 0.0f;
 
   float headBobTimer = 0.0f;
   float headBobAmount = 0.0f;
@@ -53,4 +55,5 @@ private:
   bool damageTaken = false;
   bool sprintBlockedByShot = false;
   bool sprinting = false;
+  bool crouching = false;
 };

@@ -1,6 +1,20 @@
 # Apoplexy
 
-## What will Apoplexy be?
+## What is Apoplexy **right now?**
+It is a prototype, a MVP of what I eventually want this project to evolve into.
+### What features exist at the moment?
+- A level editor (F1)
+- Procedural animations for everything
+- 2 weapons, a silenced pistol and a shotgun
+- "Smart" enemies that react to sound and chase you around when they see you
+- A simple game loop (kill all enemies to win)
+- Some pretty smooth movement
+- A wonky "Killhouse" map
+- ... with more on the way!
+
+If you want to know more about what this project WILL be in the future, keep reading! </br>
+
+## What is planned?
 Apoplexy will be a brutal stealth first person shooter. Instead of the typical “movementslop” indie shooter, Apoplexy will put stealthy gameplay first, with more intense engagements being kept as optional. </br>
 
 ## Aesthetic

@@ -3,7 +3,9 @@
 #include "../editor/editorui.hpp"
 #include "../render/renderer.hpp"
 #include "../ui/ui.hpp"
+#ifdef DEBUG
 #include "../viewmodel/viewmodeldebug.hpp"
+#endif
 
 #include "audio/audiosystem.hpp"
 #include "gamestate.hpp"
@@ -106,6 +108,7 @@ void Game::updatePlaying(float dt) {
     return;
   }
 
+#ifdef DEBUG
   if (IsKeyPressed(KEY_F2)) {
     ViewmodelDebug::panelOpen = !ViewmodelDebug::panelOpen;
 
@@ -126,6 +129,7 @@ void Game::updatePlaying(float dt) {
   if (IsKeyPressed(KEY_X)) {
     enemiesFrozen = !enemiesFrozen;
   }
+#endif
 
   player.update(dt, level);
   camera = player.getCamera();

@@ -3,11 +3,15 @@
 #include "../core/game.hpp"
 #include "../core/gamestate.hpp"
 #include "../enemy/enemy.hpp"
+#ifdef DEBUG
 #include "../viewmodel/viewmodeldebug.hpp"
+#endif
 #include "../weapon/weapon.hpp"
 #include "../weapon/weaponinventory.hpp"
 
+#ifdef DEBUG
 #include "raygui/raygui.h"
+#endif
 #include "raylib.h"
 
 namespace {
@@ -68,6 +72,7 @@ void drawAwarenessIndicator(const Game &game, int screenWidth) {
   DrawText(label, x, y, fontSize, color);
 }
 
+#ifdef DEBUG
 void drawViewmodelDebugPanel(const Game &game) {
   if (!ViewmodelDebug::panelOpen) {
     DrawText("F2 Viewmodel", 24, 238, 18, Fade(WHITE, 0.65f));
@@ -103,8 +108,8 @@ void drawViewmodelDebugPanel(const Game &game) {
                &entry.rotationDegrees.z, -180.0f, 180.0f);
   DrawText(TextFormat("% .1f", entry.rotationDegrees.z), 292, 416, 16, WHITE);
 
-  GuiSliderBar({112.0f, 452.0f, 170.0f, 18.0f}, "Scale", nullptr, &entry.scale,
-               0.001f, 1.0f);
+  GuiSliderBar({112.0f, 452.0f, 170.0f, 18.0f}, "Scale", nullptr,
+               &entry.scale, 0.001f, 1.0f);
   DrawText(TextFormat("% .4f", entry.scale), 292, 452, 16, WHITE);
 
   GuiSliderBar({112.0f, 488.0f, 170.0f, 18.0f}, "Muz X", nullptr,
@@ -122,12 +127,14 @@ void drawViewmodelDebugPanel(const Game &game) {
   DrawText(TextFormat("% .3f", entry.muzzleFlashWidth), 292, 576, 16, WHITE);
   GuiSliderBar({112.0f, 602.0f, 170.0f, 18.0f}, "Flash H", nullptr,
                &entry.muzzleFlashHeight, 0.05f, 4.0f);
-  DrawText(TextFormat("% .3f", entry.muzzleFlashHeight), 292, 602, 16, WHITE);
+  DrawText(TextFormat("% .3f", entry.muzzleFlashHeight), 292, 602, 16,
+           WHITE);
 
   if (GuiButton({112.0f, 640.0f, 82.0f, 22.0f}, "Reset")) {
     ViewmodelDebug::reset(weapon);
   }
 }
+#endif
 } // namespace
 
 namespace UI {
@@ -177,26 +184,29 @@ void draw(const Game &game) {
                       inventory.getWeaponCount()),
            width - 260, height - 136, 22, RED);
 
+#ifdef DEBUG
   DrawText(TextFormat("Current xPos: %f", game.getPlayer().getPosition().x), 24,
            100, 28, RED);
   DrawText(TextFormat("Current zPos: %f", game.getPlayer().getPosition().z), 24,
            138, 28, RED);
   DrawText(TextFormat("Current yPos: %f", game.getPlayer().getPosition().y), 24,
            170, 28, RED);
-
   if (game.areEnemiesFrozen()) {
     DrawText("Enemies frozen", 24, 208, 24, GREEN);
   }
+#endif
 
   if (game.getPlayer().isCrouching()) {
     DrawText("CROUCHING", 24, 238, 20, YELLOW);
   }
 
+#ifdef DEBUG
   if (Weapon::debugRaysEnabled) {
     DrawText("Shot rays: F4 ON", 24, 300, 20, GREEN);
   }
 
   drawViewmodelDebugPanel(game);
+#endif
 
   if (game.getState() == GameState::Dead) {
     DrawText("DEAD", width / 2 - 60, height / 2 - 40, 48, RED);

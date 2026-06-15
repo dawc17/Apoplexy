@@ -71,9 +71,11 @@ void Weapon::cancelMelee() {
 void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
                     const Level &level, const Camera3D camera,
                     ParticleSystem &particles, AudioSystem &audio) {
+#ifdef DEBUG
   if (IsKeyPressed(KEY_F4)) {
     debugRaysEnabled = !debugRaysEnabled;
   }
+#endif
 
   cooldown = std::max(0.0f, cooldown - dt);
   muzzleFlashTimer = std::max(0.0f, muzzleFlashTimer - dt);
@@ -530,6 +532,7 @@ void Weapon::firePelletRay(Ray ray, std::vector<Enemy> &enemies,
 }
 
 void Weapon::addDebugRay(Ray ray, float distance, bool hit) {
+#ifdef DEBUG
   if (!debugRaysEnabled) {
     return;
   }
@@ -541,6 +544,11 @@ void Weapon::addDebugRay(Ray ray, float distance, bool hit) {
   debugRay.hit = hit;
   debugRay.timer = 0.35f;
   debugRays.push_back(debugRay);
+#else
+  (void)ray;
+  (void)distance;
+  (void)hit;
+#endif
 }
 
 bool Weapon::consumeShotFired() {

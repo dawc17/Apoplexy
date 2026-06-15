@@ -5,7 +5,9 @@
 #include "external/glad.h"
 #include "raylib.h"
 #include "rlgl.h"
+#ifdef DEBUG
 #include "viewmodeldebug.hpp"
+#endif
 #include "weapon/weapondata.hpp"
 
 #include <algorithm>
@@ -284,7 +286,11 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
   float meleePose = easeOutCubic(meleeAmount);
   float meleeExtend = meleeExtendCurve(meleeProgress) * meleePose;
   float meleeSwing = meleeSwingCurve(meleeProgress) * meleePose;
+#ifdef DEBUG
   WeaponViewModelData viewModel = ViewmodelDebug::viewModelFor(weapon);
+#else
+  WeaponViewModelData viewModel = weapon.viewModel;
+#endif
 
   Vector3 position{
       viewModel.holdPosition.x + sprintOffset.x + switchOffset.x +
@@ -371,9 +377,18 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
       muzzleScreen.x > static_cast<float>(GetRenderWidth()) ||
       muzzleScreen.y > static_cast<float>(GetRenderHeight());
 
-  if (muzzleFlashTimer > 0.0f || ViewmodelDebug::panelOpen) {
+  if (muzzleFlashTimer > 0.0f
+#ifdef DEBUG
+      || ViewmodelDebug::panelOpen
+#endif
+  ) {
+#ifdef DEBUG
     float t = ViewmodelDebug::panelOpen ? 0.55f : muzzleFlashTimer / 0.05f;
     float alpha = ViewmodelDebug::panelOpen ? 0.55f : 0.95f * t;
+#else
+    float t = muzzleFlashTimer / 0.05f;
+    float alpha = 0.95f * t;
+#endif
 
     Rectangle source{0.0f, 0.0f, static_cast<float>(flash.width),
                      static_cast<float>(flash.height)};
@@ -392,6 +407,7 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
   rlPopMatrix();
   EndMode3D();
 
+#ifdef DEBUG
   if (ViewmodelDebug::panelOpen && muzzleOffscreen) {
     float width = static_cast<float>(GetRenderWidth());
     float height = static_cast<float>(GetRenderHeight());
@@ -410,6 +426,7 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
     DrawText("MUZZLE OFFSCREEN", static_cast<int>(indicator.x) + 10,
              static_cast<int>(indicator.y) - 7, 12, YELLOW);
   }
+#endif
 
   rlEnableDepthTest();
 }

@@ -405,6 +405,18 @@ void Level::drawDecals() const {
   }
 }
 
+void Level::drawWallDecalPreview(Vector3 position, Vector3 normal, Vector2 size,
+                                 const char *texturePath) const {
+  WallDecal decal{};
+  decal.position = position;
+  decal.normal = normal;
+  decal.size = size;
+  decal.texturePath = texturePath != nullptr ? texturePath : "";
+
+  drawDecalQuad(decal);
+  DrawSphereWires(position, 0.18f, 8, 8, SKYBLUE);
+}
+
 const std::vector<Wall> &Level::getWalls() const { return walls; }
 
 const std::vector<WallDecal> &Level::getWallDecals() const {

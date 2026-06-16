@@ -281,6 +281,11 @@ void LevelEditor::update(Level &level, float dt) {
     return;
   }
 
+  if (settings.decalPathEditMode) {
+    updateCamera();
+    return;
+  }
+
   if (IsKeyPressed(KEY_T)) {
     mode = mode == Mode::Build ? Mode::Test : Mode::Build;
     activeGizmoAxis = GizmoAxis::None;
@@ -530,8 +535,10 @@ void LevelEditor::draw(const Level &level) const {
     Vector3 hitNormal{};
 
     if (raycastWallFace(level, mouseRay(camera), hitPoint, hitNormal)) {
-      DrawSphere(Vector3Add(hitPoint, Vector3Scale(hitNormal, 0.05f)), 0.18f,
-                 SKYBLUE);
+      Vector3 previewPosition =
+          Vector3Add(hitPoint, Vector3Scale(hitNormal, 0.025f));
+      level.drawWallDecalPreview(previewPosition, hitNormal, settings.decalSize,
+                                 settings.decalTexturePath);
     }
   }
 

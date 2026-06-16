@@ -30,6 +30,8 @@ public:
 
   void draw() const;
   void drawDecals() const;
+  void drawWallDecalPreview(Vector3 position, Vector3 normal, Vector2 size,
+                            const char *texturePath) const;
 
   void addWall(Vector3 position, Vector3 size);
   void removeWall(int index);

@@ -27,9 +27,29 @@ int aliveEnemyCount(const Game &game) {
   return count;
 }
 
+struct HudStyle {
+  Color health;
+  Color weapon;
+  Color reticle;
+  Color status;
+  Color warning;
+  Color danger;
+  Color text;
+  Color panel;
+};
+
+const HudStyle &hudStyle() {
+  static const HudStyle style{
+      RED, RED, BLUE, GREEN, YELLOW, RED, WHITE, Fade(BLACK, 0.62f),
+  };
+
+  return style;
+}
+
 void drawAwarenessIndicator(const Game &game, int screenWidth) {
+  const HudStyle &style = hudStyle();
   const char *label = nullptr;
-  Color color = WHITE;
+  Color color = style.text;
 
   for (const Enemy &enemy : game.getEnemies()) {
     if (!enemy.isAlive()) {
@@ -40,7 +60,7 @@ void drawAwarenessIndicator(const Game &game, int screenWidth) {
     if (state == EnemyState::Chase || state == EnemyState::AttackWindup ||
         state == EnemyState::AttackRecovery) {
       label = "DISCOVERED";
-      color = RED;
+      color = style.danger;
       break;
     }
 
@@ -49,10 +69,10 @@ void drawAwarenessIndicator(const Game &game, int screenWidth) {
       color = ORANGE;
     } else if (state == EnemyState::Suspicious && label == nullptr) {
       label = "SEEN?";
-      color = YELLOW;
+      color = style.warning;
     } else if (state == EnemyState::Search && label == nullptr) {
       label = "HEARD";
-      color = YELLOW;
+      color = style.warning;
     }
   }
 
@@ -65,8 +85,7 @@ void drawAwarenessIndicator(const Game &game, int screenWidth) {
   int x = screenWidth / 2 - textWidth / 2;
   int y = 28;
 
-  DrawRectangle(x - 18, y - 8, textWidth + 36, fontSize + 18,
-                Fade(BLACK, 0.62f));
+  DrawRectangle(x - 18, y - 8, textWidth + 36, fontSize + 18, style.panel);
   DrawRectangleLines(x - 18, y - 8, textWidth + 36, fontSize + 18,
                      Fade(color, 0.75f));
   DrawText(label, x, y, fontSize, color);
@@ -108,8 +127,8 @@ void drawViewmodelDebugPanel(const Game &game) {
                &entry.rotationDegrees.z, -180.0f, 180.0f);
   DrawText(TextFormat("% .1f", entry.rotationDegrees.z), 292, 416, 16, WHITE);
 
-  GuiSliderBar({112.0f, 452.0f, 170.0f, 18.0f}, "Scale", nullptr,
-               &entry.scale, 0.001f, 1.0f);
+  GuiSliderBar({112.0f, 452.0f, 170.0f, 18.0f}, "Scale", nullptr, &entry.scale,
+               0.001f, 1.0f);
   DrawText(TextFormat("% .4f", entry.scale), 292, 452, 16, WHITE);
 
   GuiSliderBar({112.0f, 488.0f, 170.0f, 18.0f}, "Muz X", nullptr,
@@ -127,30 +146,25 @@ void drawViewmodelDebugPanel(const Game &game) {
   DrawText(TextFormat("% .3f", entry.muzzleFlashWidth), 292, 576, 16, WHITE);
   GuiSliderBar({112.0f, 602.0f, 170.0f, 18.0f}, "Flash H", nullptr,
                &entry.muzzleFlashHeight, 0.05f, 4.0f);
-  DrawText(TextFormat("% .3f", entry.muzzleFlashHeight), 292, 602, 16,
-           WHITE);
+  DrawText(TextFormat("% .3f", entry.muzzleFlashHeight), 292, 602, 16, WHITE);
 
   if (GuiButton({112.0f, 640.0f, 82.0f, 22.0f}, "Reset")) {
     ViewmodelDebug::reset(weapon);
   }
 }
 #endif
-} // namespace
 
-namespace UI {
-void draw(const Game &game) {
-  int width = GetScreenWidth();
-  int height = GetScreenHeight();
+void drawVitals(const Game &game) {
+  const HudStyle &style = hudStyle();
+  DrawText(TextFormat("HP: %d", game.getPlayer().getHealth()), 24, 24, 28,
+           style.health);
 
-  if (game.isEditorEnabled()) {
-    return;
-  }
+  DrawText(TextFormat("Enemies: %d", aliveEnemyCount(game)), 24, 58, 24,
+           style.danger);
+}
 
-  DrawText(TextFormat("HP: %d", game.getPlayer().getHealth()), 24, 24, 28, RED);
-
-  DrawText(TextFormat("Enemies: %d", aliveEnemyCount(game)), 24, 58, 24, RED);
-  drawAwarenessIndicator(game, width);
-
+void drawCrosshair(const Game &game, int screenWidth, int screenHeight) {
+  const HudStyle &style = hudStyle();
   const Weapon &weapon = game.getWeapon();
 
   float spread = weapon.getCurrentSpreadDegrees(game.getPlayer());
@@ -158,64 +172,98 @@ void draw(const Game &game) {
   int length = 8;
   int thickness = 3;
 
-  DrawRectangle(width / 2 - gap - length, height / 2 - thickness / 2, length,
-                thickness, BLUE);
-  DrawRectangle(width / 2 + gap, height / 2 - thickness / 2, length, thickness,
-                BLUE);
-  DrawRectangle(width / 2 - thickness / 2, height / 2 - gap - length, thickness,
-                length, BLUE);
-  DrawRectangle(width / 2 - thickness / 2, height / 2 + gap, thickness, length,
-                BLUE);
+  DrawRectangle(screenWidth / 2 - gap - length,
+                screenHeight / 2 - thickness / 2, length, thickness,
+                style.reticle);
+  DrawRectangle(screenWidth / 2 + gap, screenHeight / 2 - thickness / 2, length,
+                thickness, style.reticle);
+  DrawRectangle(screenWidth / 2 - thickness / 2,
+                screenHeight / 2 - gap - length, thickness, length,
+                style.reticle);
+  DrawRectangle(screenWidth / 2 - thickness / 2, screenHeight / 2 + gap,
+                thickness, length, style.reticle);
+}
+
+void drawWeaponStatus(const Game &game, int screenWidth, int screenHeight) {
+  const HudStyle &style = hudStyle();
+  const Weapon &weapon = game.getWeapon();
+  const WeaponInventory &inventory = game.getWeaponInventory();
 
   DrawText(TextFormat("Ammo: %d / %d", weapon.getAmmoInMagazine(),
                       weapon.getReserveAmmo()),
-           width - 220, height - 72, 28, RED);
+           screenWidth - 220, screenHeight - 72, 28, style.weapon);
 
   if (weapon.isReloading()) {
     DrawText(
         TextFormat("Reloading %.0f%%", weapon.getReloadProgress() * 100.0f),
-        width - 220, height - 104, 22, GREEN);
+        screenWidth - 220, screenHeight - 104, 22, style.status);
   }
-
-  const WeaponInventory &inventory = game.getWeaponInventory();
 
   DrawText(TextFormat("Weapon: %s [%d/%d]", weapon.getData().name,
                       inventory.getActiveWeaponIndex() + 1,
                       inventory.getWeaponCount()),
-           width - 260, height - 136, 22, RED);
+           screenWidth - 260, screenHeight - 136, 22, style.weapon);
+}
 
-#ifdef DEBUG
-  DrawText(TextFormat("Current xPos: %f", game.getPlayer().getPosition().x), 24,
-           100, 28, RED);
-  DrawText(TextFormat("Current zPos: %f", game.getPlayer().getPosition().z), 24,
-           138, 28, RED);
-  DrawText(TextFormat("Current yPos: %f", game.getPlayer().getPosition().y), 24,
-           170, 28, RED);
-  if (game.areEnemiesFrozen()) {
-    DrawText("Enemies frozen", 24, 208, 24, GREEN);
-  }
-#endif
+void drawPlayerStatusIndicators(const Game &game) {
+  const HudStyle &style = hudStyle();
 
   if (game.getPlayer().isCrouching()) {
-    DrawText("CROUCHING", 24, 238, 20, YELLOW);
+    DrawText("Crouching", 24, 238, 20, style.warning);
   }
+}
 
 #ifdef DEBUG
-  if (Weapon::debugRaysEnabled) {
-    DrawText("Shot rays: F4 ON", 24, 300, 20, GREEN);
+void drawDebugOverlay(const Game &game) {
+  const HudStyle &style = hudStyle();
+  DrawText(TextFormat("Current xPos: %f", game.getPlayer().getPosition().x), 24,
+           100, 28, style.danger);
+  DrawText(TextFormat("Current zPos: %f", game.getPlayer().getPosition().z), 24,
+           138, 28, style.danger);
+  DrawText(TextFormat("Current yPos: %f", game.getPlayer().getPosition().y), 24,
+           170, 28, style.danger);
+  if (game.areEnemiesFrozen()) {
+    DrawText("Enemies frozen", 24, 208, 24, style.status);
   }
-
+  if (Weapon::debugRaysEnabled) {
+    DrawText("Shot rays: F4 ON", 24, 300, 20, style.status);
+  }
   drawViewmodelDebugPanel(game);
+}
 #endif
 
+void drawStateOverlay(const Game &game, int screenWidth, int screenHeight) {
+  const HudStyle &style = hudStyle();
+
   if (game.getState() == GameState::Dead) {
-    DrawText("DEAD", width / 2 - 60, height / 2 - 40, 48, RED);
-    DrawText("Press R to restart", width / 2 - 120, height / 2 + 18, 24, WHITE);
+    DrawText("DEAD", screenWidth / 2 - 60, screenHeight / 2 - 40, 48,
+             style.danger);
+    DrawText("Press R to restart", screenWidth / 2 - 120, screenHeight / 2 + 18,
+             24, style.text);
   }
 
   if (game.getState() == GameState::Win) {
-    DrawText("CLEAR", width / 2 - 70, height / 2 - 40, 48, GREEN);
-    DrawText("Press R to restart", width / 2 - 120, height / 2 + 18, 24, WHITE);
+    DrawText("CLEAR", screenWidth / 2 - 70, screenHeight / 2 - 40, 48,
+             style.status);
+    DrawText("Press R to restart", screenWidth / 2 - 120, screenHeight / 2 + 18,
+             24, style.text);
   }
+}
+} // namespace
+
+namespace UI {
+void draw(const Game &game) {
+  int width = GetScreenWidth();
+  int height = GetScreenHeight();
+  drawVitals(game);
+  drawAwarenessIndicator(game, width);
+  drawCrosshair(game, width, height);
+  drawWeaponStatus(game, width, height);
+  drawPlayerStatusIndicators(game);
+
+#ifdef DEBUG
+  drawDebugOverlay(game);
+#endif
+  drawStateOverlay(game, width, height);
 }
 } // namespace UI

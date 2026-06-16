@@ -21,6 +21,8 @@ Apoplexy will be a brutal stealth first person shooter. Instead of the typical â
 PSX shader and simple low-poly models so I donâ€™t spend hours finding the best looking assets, and rapid iteration.
 The game will feature a dark and gritty atmosphere, with dimly lit, urban environments. 
 Some examples for levels: Abandoned apartment/house, claustrophobic alleys, streets with heavy rain and dim street lights.
+The player is actually controlling a cyborg/terminator/robot type humanoid through some sort of interface.
+Therefore, the game will feature terminal aesthetics in the hud, menus and other screens, with japanese writing here and there for effect.
 
 ## Gameplay
 The player will do their best to stay silent, and use cover to sneak around and eliminate their targets without being discovered. They will utilize silenced weapons, close quarter melee combat and takedowns (?) to get rid of the opposition.

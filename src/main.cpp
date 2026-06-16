@@ -27,9 +27,6 @@ int main() {
         SetWindowSize(Constants::SCREEN_WIDTH, Constants::SCREEN_HEIGHT);
       }
 
-      // this is a test to see if wakatime is tracking my coding time
-      // why is it not tracking my time? what is going on??? why is it fucking
-      // broken!!!
       ToggleFullscreen();
     }
 

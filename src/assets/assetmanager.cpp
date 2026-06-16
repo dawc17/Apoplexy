@@ -6,12 +6,18 @@
 #include <vector>
 
 namespace {
-std::vector<int> terminalFontCodepoints() {
+std::vector<int> latinFontCodepoints() {
   std::vector<int> codepoints;
 
   for (int c = 32; c <= 126; ++c) {
     codepoints.push_back(c);
   }
+
+  return codepoints;
+}
+
+std::vector<int> japaneseFontCodepoints() {
+  std::vector<int> codepoints;
 
   constexpr int japaneseCodepoints[] = {
       0x5F3E, // 弾
@@ -54,15 +60,26 @@ void AssetManager::load() {
   worldLitShader = LoadShader("shaders/world_lit.vs", "shaders/world_lit.fs");
   muzzleFlashTexture = LoadTexture("textures/muzzleflash.png");
 
-  if (FileExists("fonts/NotoSansJP-Regular.ttf")) {
-    std::vector<int> codepoints = terminalFontCodepoints();
+  if (FileExists("/usr/share/fonts/Adwaita/AdwaitaMono-Regular.ttf")) {
+    std::vector<int> codepoints = latinFontCodepoints();
     terminalFont =
-        LoadFontEx("fonts/NotoSansJP-Regular.ttf", 32, codepoints.data(),
-                   static_cast<int>(codepoints.size()));
-    SetTextureFilter(terminalFont.texture, TEXTURE_FILTER_POINT);
+        LoadFontEx("/usr/share/fonts/Adwaita/AdwaitaMono-Regular.ttf", 96,
+                   codepoints.data(), static_cast<int>(codepoints.size()));
+    SetTextureFilter(terminalFont.texture, TEXTURE_FILTER_BILINEAR);
     terminalFontLoaded = true;
   } else {
     terminalFont = GetFontDefault();
+  }
+
+  if (FileExists("fonts/NotoSansJP-Regular.ttf")) {
+    std::vector<int> codepoints = japaneseFontCodepoints();
+    japaneseFont =
+        LoadFontEx("fonts/NotoSansJP-Regular.ttf", 96, codepoints.data(),
+                   static_cast<int>(codepoints.size()));
+    SetTextureFilter(japaneseFont.texture, TEXTURE_FILTER_BILINEAR);
+    japaneseFontLoaded = true;
+  } else {
+    japaneseFont = terminalFont;
   }
 
   if (FileExists("textures/USP-S.png")) {
@@ -133,6 +150,10 @@ void AssetManager::unload() {
     UnloadFont(terminalFont);
     terminalFontLoaded = false;
   }
+  if (japaneseFontLoaded) {
+    UnloadFont(japaneseFont);
+    japaneseFontLoaded = false;
+  }
   if (pistolTextureLoaded) {
     UnloadTexture(pistolTexture);
     pistolTextureLoaded = false;
@@ -168,6 +189,8 @@ Shader AssetManager::getViewmodelShader() const { return viewmodelShader; }
 Shader AssetManager::getWorldLitShader() const { return worldLitShader; }
 
 const Font &AssetManager::getTerminalFont() const { return terminalFont; }
+
+const Font &AssetManager::getJapaneseFont() const { return japaneseFont; }
 
 const Texture2D &AssetManager::getMuzzleFlashTexture() const {
   return muzzleFlashTexture;

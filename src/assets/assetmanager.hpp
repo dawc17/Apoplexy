@@ -13,6 +13,7 @@ public:
   Shader getViewmodelShader() const;
   Shader getWorldLitShader() const;
   const Font &getTerminalFont() const;
+  const Font &getJapaneseFont() const;
   const Texture2D &getMuzzleFlashTexture() const;
   const Model &getSkyboxModel() const;
   bool hasSkybox() const;
@@ -26,6 +27,7 @@ private:
   Shader worldLitShader{};
   Shader skyboxShader{};
   Font terminalFont{};
+  Font japaneseFont{};
   Texture2D pistolTexture{};
   Texture2D shotgunTexture{};
   Texture2D muzzleFlashTexture{};
@@ -34,5 +36,6 @@ private:
   bool shotgunTextureLoaded = false;
   bool skyboxLoaded = false;
   bool terminalFontLoaded = false;
+  bool japaneseFontLoaded = false;
   bool loaded = false;
 };

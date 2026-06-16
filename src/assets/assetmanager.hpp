@@ -12,6 +12,7 @@ public:
   Shader getMonoShader() const;
   Shader getViewmodelShader() const;
   Shader getWorldLitShader() const;
+  const Font &getTerminalFont() const;
   const Texture2D &getMuzzleFlashTexture() const;
   const Model &getSkyboxModel() const;
   bool hasSkybox() const;
@@ -24,6 +25,7 @@ private:
   Shader viewmodelShader{};
   Shader worldLitShader{};
   Shader skyboxShader{};
+  Font terminalFont{};
   Texture2D pistolTexture{};
   Texture2D shotgunTexture{};
   Texture2D muzzleFlashTexture{};
@@ -31,5 +33,6 @@ private:
   bool pistolTextureLoaded = false;
   bool shotgunTextureLoaded = false;
   bool skyboxLoaded = false;
+  bool terminalFontLoaded = false;
   bool loaded = false;
 };

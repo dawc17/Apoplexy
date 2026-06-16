@@ -3,6 +3,44 @@
 #include "weapon/weapondata.hpp"
 #include <raylib.h>
 
+#include <vector>
+
+namespace {
+std::vector<int> terminalFontCodepoints() {
+  std::vector<int> codepoints;
+
+  for (int c = 32; c <= 126; ++c) {
+    codepoints.push_back(c);
+  }
+
+  constexpr int japaneseCodepoints[] = {
+      0x5F3E, // 弾
+      0x85AC, // 薬
+      0x72B6, // 状
+      0x614B, // 態
+      0x8B66, // 警
+      0x544A, // 告
+      0x8996, // 視
+      0x8A8D, // 認
+      0x691C, // 検
+      0x77E5, // 知
+      0x8074, // 聴
+      0x97F3, // 音
+      0x8A3A, // 診
+      0x65AD, // 断
+      0x7DDA, // 線
+      0x5B8C, // 完
+      0x4E86, // 了
+  };
+
+  for (int c : japaneseCodepoints) {
+    codepoints.push_back(c);
+  }
+
+  return codepoints;
+}
+} // namespace
+
 void AssetManager::load() {
   if (loaded) {
     return;
@@ -15,6 +53,17 @@ void AssetManager::load() {
   viewmodelShader = LoadShader("shaders/viewmodel.vs", "shaders/viewmodel.fs");
   worldLitShader = LoadShader("shaders/world_lit.vs", "shaders/world_lit.fs");
   muzzleFlashTexture = LoadTexture("textures/muzzleflash.png");
+
+  if (FileExists("fonts/NotoSansJP-Regular.ttf")) {
+    std::vector<int> codepoints = terminalFontCodepoints();
+    terminalFont =
+        LoadFontEx("fonts/NotoSansJP-Regular.ttf", 32, codepoints.data(),
+                   static_cast<int>(codepoints.size()));
+    SetTextureFilter(terminalFont.texture, TEXTURE_FILTER_POINT);
+    terminalFontLoaded = true;
+  } else {
+    terminalFont = GetFontDefault();
+  }
 
   if (FileExists("textures/USP-S.png")) {
     pistolTexture = LoadTexture("textures/USP-S.png");
@@ -80,6 +129,10 @@ void AssetManager::unload() {
   UnloadShader(viewmodelShader);
   UnloadShader(worldLitShader);
   UnloadTexture(muzzleFlashTexture);
+  if (terminalFontLoaded) {
+    UnloadFont(terminalFont);
+    terminalFontLoaded = false;
+  }
   if (pistolTextureLoaded) {
     UnloadTexture(pistolTexture);
     pistolTextureLoaded = false;
@@ -113,6 +166,8 @@ Shader AssetManager::getMonoShader() const { return monoShader; }
 Shader AssetManager::getViewmodelShader() const { return viewmodelShader; }
 
 Shader AssetManager::getWorldLitShader() const { return worldLitShader; }
+
+const Font &AssetManager::getTerminalFont() const { return terminalFont; }
 
 const Texture2D &AssetManager::getMuzzleFlashTexture() const {
   return muzzleFlashTexture;

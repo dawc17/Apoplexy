@@ -102,6 +102,8 @@ void drawWorld(const Game &game) {
 
   EndShaderMode();
 
+  game.getLevel().drawDecals();
+
   game.getParticles().draw();
 #ifdef DEBUG
   game.getWeapon().drawDebugRays();

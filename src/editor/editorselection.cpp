@@ -34,6 +34,12 @@ bool EditorSelection::hasLight() const {
 
 int EditorSelection::getLightIndex() const { return selectedIndex; }
 
+bool EditorSelection::hasWallDecal() const {
+  return type == EditorSelectionType::WallDecal && selectedIndex >= 0;
+}
+
+int EditorSelection::getWallDecalIndex() const { return selectedIndex; }
+
 EditorSelectionType EditorSelection::getType() const { return type; }
 
 bool EditorSelection::hasAny() const {
@@ -115,6 +121,29 @@ bool EditorSelection::pick(const Level &level, Ray ray) {
     }
 
     type = EditorSelectionType::Light;
+    selectedIndex = i;
+    closestDistance = hit.distance;
+  }
+
+  const std::vector<WallDecal> &wallDecals = level.getWallDecals();
+
+  for (int i = 0; i < static_cast<int>(wallDecals.size()); ++i) {
+    RayCollision hit =
+        GetRayCollisionSphere(ray, wallDecals[i].position, 0.45f);
+
+    if (!hit.hit) {
+      continue;
+    }
+
+    if (hit.distance < 0.0f) {
+      continue;
+    }
+
+    if (hit.distance >= closestDistance) {
+      continue;
+    }
+
+    type = EditorSelectionType::WallDecal;
     selectedIndex = i;
     closestDistance = hit.distance;
   }

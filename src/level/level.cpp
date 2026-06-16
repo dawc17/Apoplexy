@@ -2,19 +2,40 @@
 
 #include "nlohmann/json.hpp"
 #include "raylib.h"
+#include "raymath.h"
+#include "rlgl.h"
 
 #include <cstdint>
 #include <fstream>
+#include <map>
+#include <string>
 
 using json = nlohmann::json;
 
 namespace {
+constexpr float GIF_FRAME_DURATION = 1.0f / 12.0f;
+
+struct DecalTexture {
+  Texture2D texture{};
+  Image animation{};
+  int frameCount = 1;
+  int currentFrame = 0;
+  float frameTimer = 0.0f;
+  bool animated = false;
+};
+
 Vector3 readVec3(const json &value) {
   return {value.at(0).get<float>(), value.at(1).get<float>(),
           value.at(2).get<float>()};
 }
 json writeVec3(Vector3 value) {
   return json::array({value.x, value.y, value.z});
+}
+Vector2 readVec2(const json &value) {
+  return {value.at(0).get<float>(), value.at(1).get<float>()};
+}
+json writeVec2(Vector2 value) {
+  return json::array({value.x, value.y});
 }
 Color readColor(const json &value) {
   unsigned char alpha =
@@ -24,6 +45,144 @@ Color readColor(const json &value) {
 }
 json writeColor(Color value) {
   return json::array({value.r, value.g, value.b, value.a});
+}
+
+std::map<std::string, DecalTexture> &decalTextureCache() {
+  static std::map<std::string, DecalTexture> cache;
+  return cache;
+}
+
+void updateAnimatedDecalTexture(DecalTexture &decalTexture, float dt) {
+  if (!decalTexture.animated || decalTexture.texture.id == 0 ||
+      decalTexture.animation.data == nullptr || decalTexture.frameCount <= 1) {
+    return;
+  }
+
+  decalTexture.frameTimer += dt;
+
+  while (decalTexture.frameTimer >= GIF_FRAME_DURATION) {
+    decalTexture.frameTimer -= GIF_FRAME_DURATION;
+    decalTexture.currentFrame =
+        (decalTexture.currentFrame + 1) % decalTexture.frameCount;
+
+    int frameByteSize =
+        decalTexture.animation.width * decalTexture.animation.height * 4;
+    unsigned char *frameData =
+        static_cast<unsigned char *>(decalTexture.animation.data) +
+        frameByteSize * decalTexture.currentFrame;
+    UpdateTexture(decalTexture.texture, frameData);
+  }
+}
+
+void updateDecalTextures(float dt) {
+  for (auto &[path, decalTexture] : decalTextureCache()) {
+    updateAnimatedDecalTexture(decalTexture, dt);
+  }
+}
+
+Texture2D getDecalTexture(const std::string &path) {
+  std::map<std::string, DecalTexture> &cache = decalTextureCache();
+  auto found = cache.find(path);
+
+  if (found != cache.end()) {
+    return found->second.texture;
+  }
+
+  DecalTexture decalTexture{};
+  if (FileExists(path.c_str())) {
+    if (IsFileExtension(path.c_str(), ".gif")) {
+      int frameCount = 0;
+      Image animation = LoadImageAnim(path.c_str(), &frameCount);
+
+      if (animation.data != nullptr && frameCount > 0) {
+        decalTexture.texture = LoadTextureFromImage(animation);
+        decalTexture.animation = animation;
+        decalTexture.frameCount = frameCount;
+        decalTexture.animated = frameCount > 1;
+      }
+    } else {
+      decalTexture.texture = LoadTexture(path.c_str());
+    }
+
+    if (decalTexture.texture.id != 0) {
+      SetTextureFilter(decalTexture.texture, TEXTURE_FILTER_POINT);
+    }
+  }
+
+  cache[path] = decalTexture;
+  return cache[path].texture;
+}
+
+void unloadDecalTextures() {
+  for (auto &[path, decalTexture] : decalTextureCache()) {
+    if (decalTexture.texture.id != 0) {
+      UnloadTexture(decalTexture.texture);
+    }
+
+    if (decalTexture.animation.data != nullptr) {
+      UnloadImage(decalTexture.animation);
+    }
+  }
+
+  decalTextureCache().clear();
+}
+
+void drawDecalQuad(const WallDecal &decal) {
+  Texture2D texture = getDecalTexture(decal.texturePath);
+  if (texture.id == 0) {
+    return;
+  }
+
+  Vector3 normal = Vector3Normalize(decal.normal);
+  Vector3 up{0.0f, 1.0f, 0.0f};
+  Vector3 right = Vector3CrossProduct(up, normal);
+
+  if (Vector3Length(right) <= 0.0001f) {
+    right = {1.0f, 0.0f, 0.0f};
+  } else {
+    right = Vector3Normalize(right);
+  }
+
+  up = Vector3Normalize(Vector3CrossProduct(normal, right));
+
+  Vector3 halfRight = Vector3Scale(right, decal.size.x * 0.5f);
+  Vector3 halfUp = Vector3Scale(up, decal.size.y * 0.5f);
+
+  Vector3 topLeft = Vector3Add(Vector3Subtract(decal.position, halfRight), halfUp);
+  Vector3 topRight = Vector3Add(Vector3Add(decal.position, halfRight), halfUp);
+  Vector3 bottomRight =
+      Vector3Subtract(Vector3Add(decal.position, halfRight), halfUp);
+  Vector3 bottomLeft =
+      Vector3Subtract(Vector3Subtract(decal.position, halfRight), halfUp);
+
+  rlDisableBackfaceCulling();
+  rlSetTexture(texture.id);
+  rlBegin(RL_QUADS);
+  rlColor4ub(255, 255, 255, 255);
+  rlTexCoord2f(1.0f, 0.0f);
+  rlVertex3f(topLeft.x, topLeft.y, topLeft.z);
+  rlTexCoord2f(0.0f, 0.0f);
+  rlVertex3f(topRight.x, topRight.y, topRight.z);
+  rlTexCoord2f(0.0f, 1.0f);
+  rlVertex3f(bottomRight.x, bottomRight.y, bottomRight.z);
+  rlTexCoord2f(1.0f, 1.0f);
+  rlVertex3f(bottomLeft.x, bottomLeft.y, bottomLeft.z);
+  rlEnd();
+
+  rlBegin(RL_QUADS);
+  rlColor4ub(255, 255, 255, 255);
+  rlTexCoord2f(1.0f, 0.0f);
+  rlVertex3f(topRight.x, topRight.y, topRight.z);
+  rlTexCoord2f(0.0f, 0.0f);
+  rlVertex3f(topLeft.x, topLeft.y, topLeft.z);
+  rlTexCoord2f(0.0f, 1.0f);
+  rlVertex3f(bottomLeft.x, bottomLeft.y, bottomLeft.z);
+  rlTexCoord2f(1.0f, 1.0f);
+  rlVertex3f(bottomRight.x, bottomRight.y, bottomRight.z);
+  rlEnd();
+
+  rlSetTexture(0);
+  rlEnableBackfaceCulling();
 }
 } // namespace
 
@@ -65,6 +224,15 @@ bool Level::loadFromFile(const char *path) {
     addWall((readVec3(wall.at("position"))), readVec3(wall.at("size")));
   }
 
+  if (data.contains("wallDecals") && data.at("wallDecals").is_array()) {
+    for (const json &decal : data.at("wallDecals")) {
+      addWallDecal(readVec3(decal.at("position")),
+                   readVec3(decal.at("normal")),
+                   readVec2(decal.value("size", json::array({1.5f, 1.5f}))),
+                   decal.value("texture", "textures/decal.png").c_str());
+    }
+  }
+
   for (const json &spawn : data.at("enemySpawns")) {
     enemySpawns.push_back(readVec3(spawn));
   }
@@ -90,6 +258,7 @@ bool Level::saveToFile(const char *path) const {
   json data;
   data["playerSpawn"] = writeVec3(playerSpawn);
   data["walls"] = json::array();
+  data["wallDecals"] = json::array();
   data["enemySpawns"] = json::array();
   data["lights"] = json::array();
   data["lighting"] = {
@@ -107,6 +276,15 @@ bool Level::saveToFile(const char *path) const {
     data["walls"].push_back({
       {"position", writeVec3(wall.position)},
       {"size", writeVec3(wall.size)},
+    });
+  }
+
+  for (const WallDecal &decal : wallDecals) {
+    data["wallDecals"].push_back({
+        {"position", writeVec3(decal.position)},
+        {"normal", writeVec3(decal.normal)},
+        {"size", writeVec2(decal.size)},
+        {"texture", decal.texturePath},
     });
   }
 
@@ -200,7 +378,9 @@ void Level::loadTestArena() {
 }
 
 void Level::unload() {
+  unloadDecalTextures();
   walls.clear();
+  wallDecals.clear();
   enemySpawns.clear();
   lights.clear();
   lighting = Lighting::SceneLighting{};
@@ -217,7 +397,19 @@ void Level::draw() const {
   }
 }
 
+void Level::drawDecals() const {
+  updateDecalTextures(GetFrameTime());
+
+  for (const WallDecal &decal : wallDecals) {
+    drawDecalQuad(decal);
+  }
+}
+
 const std::vector<Wall> &Level::getWalls() const { return walls; }
+
+const std::vector<WallDecal> &Level::getWallDecals() const {
+  return wallDecals;
+}
 
 const std::vector<Vector3> &Level::getEnemySpawns() const {
   return enemySpawns;
@@ -294,4 +486,30 @@ void Level::setWallPosition(int index, Vector3 position) {
       position.y + half.y,
       position.z + half.z,
   };
+}
+
+void Level::addWallDecal(Vector3 position, Vector3 normal, Vector2 size,
+                         const char *texturePath) {
+  WallDecal decal{};
+  decal.position = position;
+  decal.normal = Vector3Normalize(normal);
+  decal.size = size;
+  decal.texturePath = texturePath != nullptr ? texturePath : "";
+  wallDecals.push_back(decal);
+}
+
+void Level::removeWallDecal(int index) {
+  if (index < 0 || index >= static_cast<int>(wallDecals.size())) {
+    return;
+  }
+
+  wallDecals.erase(wallDecals.begin() + index);
+}
+
+void Level::setWallDecalPosition(int index, Vector3 position) {
+  if (index < 0 || index >= static_cast<int>(wallDecals.size())) {
+    return;
+  }
+
+  wallDecals[index].position = position;
 }

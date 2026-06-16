@@ -10,6 +10,7 @@ enum class EditorSelectionType {
   EnemySpawn,
   PlayerSpawn,
   Light,
+  WallDecal,
 };
 
 class EditorSelection {
@@ -26,6 +27,9 @@ public:
 
   bool hasLight() const;
   int getLightIndex() const;
+
+  bool hasWallDecal() const;
+  int getWallDecalIndex() const;
 
   EditorSelectionType getType() const;
   bool hasAny() const;

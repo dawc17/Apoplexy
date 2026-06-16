@@ -5,6 +5,7 @@
 #include "raymath.h"
 
 #include <algorithm>
+#include <cfloat>
 #include <cmath>
 
 namespace {
@@ -63,6 +64,27 @@ bool raycastGround(Camera3D camera, Vector3 &hitPoint) {
               ray.position.z + ray.direction.z * t};
 
   return true;
+}
+
+bool raycastWallFace(const Level &level, Ray ray, Vector3 &hitPoint,
+                     Vector3 &hitNormal) {
+  float closestDistance = FLT_MAX;
+  bool found = false;
+
+  for (const Wall &wall : level.getWalls()) {
+    RayCollision hit = GetRayCollisionBox(ray, wall.bounds);
+
+    if (!hit.hit || hit.distance < 0.0f || hit.distance >= closestDistance) {
+      continue;
+    }
+
+    closestDistance = hit.distance;
+    hitPoint = hit.point;
+    hitNormal = hit.normal;
+    found = true;
+  }
+
+  return found;
 }
 
 Ray mouseRay(Camera3D camera) {
@@ -188,6 +210,18 @@ bool selectedObjectPosition(const Level &level, const EditorSelection &selection
     return true;
   }
 
+  if (selection.hasWallDecal()) {
+    const std::vector<WallDecal> &wallDecals = level.getWallDecals();
+    int index = selection.getWallDecalIndex();
+
+    if (index < 0 || index >= static_cast<int>(wallDecals.size())) {
+      return false;
+    }
+
+    position = wallDecals[index].position;
+    return true;
+  }
+
   return false;
 }
 
@@ -201,6 +235,8 @@ void setSelectedObjectPosition(Level &level, const EditorSelection &selection,
     level.setPlayerSpawn(position);
   } else if (selection.hasLight()) {
     level.setLightPosition(selection.getLightIndex(), position);
+  } else if (selection.hasWallDecal()) {
+    level.setWallDecalPosition(selection.getWallDecalIndex(), position);
   }
 }
 
@@ -360,6 +396,10 @@ void LevelEditor::update(Level &level, float dt) {
     settings.tool = EditorTool::Light;
   }
 
+  if (IsKeyPressed(KEY_G)) {
+    settings.tool = EditorTool::Decal;
+  }
+
   bool gizmoConsumedInput = updateGizmo(level);
 
   bool primaryPressed =
@@ -379,6 +419,15 @@ void LevelEditor::update(Level &level, float dt) {
     } else if (settings.tool == EditorTool::Light) {
       level.addLight(
           Lighting::makeDefaultPointLight({cursor.x, 1.5f, cursor.z}));
+    } else if (settings.tool == EditorTool::Decal) {
+      Vector3 hitPoint{};
+      Vector3 hitNormal{};
+
+      if (raycastWallFace(level, mouseRay(camera), hitPoint, hitNormal)) {
+        level.addWallDecal(Vector3Add(hitPoint, Vector3Scale(hitNormal, 0.025f)),
+                           hitNormal, settings.decalSize,
+                           settings.decalTexturePath);
+      }
     }
   }
 
@@ -389,6 +438,8 @@ void LevelEditor::update(Level &level, float dt) {
       level.removeEnemySpawn(selection.getEnemySpawnIndex());
     } else if (selection.hasLight()) {
       level.removeLight(selection.getLightIndex());
+    } else if (selection.hasWallDecal()) {
+      level.removeWallDecal(selection.getWallDecalIndex());
     }
 
     selection.clear();
@@ -450,6 +501,16 @@ void LevelEditor::draw(const Level &level) const {
     }
   }
 
+  if (selection.hasWallDecal()) {
+    const std::vector<WallDecal> &wallDecals = level.getWallDecals();
+    int index = selection.getWallDecalIndex();
+
+    if (index >= 0 && index < static_cast<int>(wallDecals.size())) {
+      const WallDecal &decal = wallDecals[index];
+      DrawSphereWires(decal.position, 0.32f, 12, 12, YELLOW);
+    }
+  }
+
   if (mode == Mode::Test) {
     DrawSphere({cursor.x, 0.0f, cursor.z}, 0.22f, SKYBLUE);
   } else if (settings.tool == EditorTool::Wall) {
@@ -464,6 +525,14 @@ void LevelEditor::draw(const Level &level) const {
     DrawSphere({cursor.x, 1.5f, cursor.z}, 0.25f, YELLOW);
     DrawCircle3D({cursor.x, 1.5f, cursor.z}, 7.0f, {1.0f, 0.0f, 0.0f},
                  90.0f, Fade(YELLOW, 0.55f));
+  } else if (settings.tool == EditorTool::Decal) {
+    Vector3 hitPoint{};
+    Vector3 hitNormal{};
+
+    if (raycastWallFace(level, mouseRay(camera), hitPoint, hitNormal)) {
+      DrawSphere(Vector3Add(hitPoint, Vector3Scale(hitNormal, 0.05f)), 0.18f,
+                 SKYBLUE);
+    }
   }
 
   if (settings.showSpawns) {

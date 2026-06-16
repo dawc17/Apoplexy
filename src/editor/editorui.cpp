@@ -27,6 +27,8 @@ int toolToIndex(EditorTool tool) {
     return 3;
   case EditorTool::Light:
     return 4;
+  case EditorTool::Decal:
+    return 5;
   }
 
   return 1;
@@ -44,6 +46,8 @@ EditorTool indexToTool(int index) {
     return EditorTool::PlayerSpawn;
   case 4:
     return EditorTool::Light;
+  case 5:
+    return EditorTool::Decal;
   default:
       return EditorTool::Wall;
   }
@@ -114,6 +118,26 @@ void draw(LevelEditor &editor, Level &level) {
   GuiCheckBox({28.0f, 316.0f, 20.0f, 20.0f}, "Show spawns",
               &settings.showSpawns);
 
+  if (settings.tool == EditorTool::Decal) {
+    DrawText("Wall Decal", 28, 352, 18, GREEN);
+    DrawText("Texture", 28, 380, 14, GREEN);
+
+    if (GuiTextBox({92.0f, 376.0f, 212.0f, 24.0f},
+                   settings.decalTexturePath,
+                   static_cast<int>(sizeof(settings.decalTexturePath)),
+                   settings.decalPathEditMode)) {
+      settings.decalPathEditMode = !settings.decalPathEditMode;
+    }
+
+    GuiSliderBar({100.0f, 412.0f, 204.0f, 20.0f}, "Width", nullptr,
+                 &settings.decalSize.x, 0.25f, 8.0f);
+    GuiSliderBar({100.0f, 440.0f, 204.0f, 20.0f}, "Height", nullptr,
+                 &settings.decalSize.y, 0.25f, 8.0f);
+
+    DrawText(TextFormat("%.1f", settings.decalSize.x), 36, 412, 18, GREEN);
+    DrawText(TextFormat("%.1f", settings.decalSize.y), 36, 440, 18, GREEN);
+  }
+
   if (editor.getSelection().hasLight()) {
     std::vector<Lighting::PointLight> &lights = level.getMutableLights();
     int index = editor.getSelection().getLightIndex();
@@ -167,7 +191,7 @@ void draw(LevelEditor &editor, Level &level) {
 
   int toolIndex = toolToIndex(settings.tool);
   if (GuiDropdownBox({28.0f, 76.0f, 276.0f, 28.0f},
-                     "Select;Wall;Enemy;Player;Light", &toolIndex,
+                     "Select;Wall;Enemy;Player;Light;Decal", &toolIndex,
                      settings.toolDropdownOpen)) {
     settings.toolDropdownOpen = !settings.toolDropdownOpen;
     settings.tool = indexToTool(toolIndex);

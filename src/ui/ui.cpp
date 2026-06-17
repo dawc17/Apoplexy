@@ -13,6 +13,7 @@
 #include "raygui/raygui.h"
 #endif
 #include "raylib.h"
+#include "rlgl.h"
 
 #include <cmath>
 
@@ -62,6 +63,37 @@ constexpr float HUD_HEADER_HEIGHT = 34.0f;
 constexpr float HUD_HEADER_FONT_SIZE = 21.0f;
 constexpr float HUD_LABEL_FONT_SIZE = 22.0f;
 constexpr float HUD_VALUE_FONT_SIZE = 31.0f;
+constexpr int HUD_REFERENCE_WIDTH = 2560;
+constexpr int HUD_REFERENCE_HEIGHT = 1440;
+
+float hudScale() {
+  float scaleX = static_cast<float>(GetScreenWidth()) /
+                 static_cast<float>(HUD_REFERENCE_WIDTH);
+  float scaleY = static_cast<float>(GetScreenHeight()) /
+                 static_cast<float>(HUD_REFERENCE_HEIGHT);
+  return std::min(scaleX, scaleY);
+}
+
+float hudOffsetX(float scale) {
+  return (static_cast<float>(GetScreenWidth()) -
+          static_cast<float>(HUD_REFERENCE_WIDTH) * scale) *
+         0.5f;
+}
+
+float hudOffsetY(float scale) {
+  return (static_cast<float>(GetScreenHeight()) -
+          static_cast<float>(HUD_REFERENCE_HEIGHT) * scale) *
+         0.5f;
+}
+
+void beginHudScale() {
+  float scale = hudScale();
+  rlPushMatrix();
+  rlTranslatef(hudOffsetX(scale), hudOffsetY(scale), 0.0f);
+  rlScalef(scale, scale, 1.0f);
+}
+
+void endHudScale() { rlPopMatrix(); }
 
 void drawHudText(const Font &font, const char *text, Vector2 position,
                  float fontSize, Color color) {
@@ -232,8 +264,7 @@ void drawWatermark(const Font &font, int screenWidth) {
   };
 
   drawRightAligned("APOPLEXY [PRE-PRE-ALPHA] v.0.3", y, textColor);
-  drawRightAligned("USER : OPERATOR_01 (000000000)", y + lineHeight,
-                   textColor);
+  drawRightAligned("USER : OPERATOR_01 (000000000)", y + lineHeight, textColor);
   drawRightAligned("MADE BY CZAPLA", y + lineHeight * 2.0f, textColor);
 }
 
@@ -312,8 +343,8 @@ void drawHealthBar(const Game &game, const Font &font,
     healthPercent = 1.0f;
   }
 
-  int screenWidth = GetScreenWidth();
-  int screenHeight = GetScreenHeight();
+  int screenWidth = HUD_REFERENCE_WIDTH;
+  int screenHeight = HUD_REFERENCE_HEIGHT;
   float width = 620.0f;
   float x = static_cast<float>(screenWidth) * 0.5f - width * 0.5f;
   float y = static_cast<float>(screenHeight) - 94.0f;
@@ -475,15 +506,16 @@ void drawStateOverlay(const Game &game, int screenWidth, int screenHeight) {
 
 namespace UI {
 void draw(const Game &game) {
-  int width = GetScreenWidth();
-  int height = GetScreenHeight();
-
   if (game.isEditorEnabled()) {
     return;
   }
 
+  int width = HUD_REFERENCE_WIDTH;
+  int height = HUD_REFERENCE_HEIGHT;
   const Font &font = game.getAssets().getTerminalFont();
   const Font &japaneseFont = game.getAssets().getJapaneseFont();
+
+  beginHudScale();
 
   drawHealthBar(game, font, japaneseFont);
   drawWatermark(font, width);
@@ -496,5 +528,7 @@ void draw(const Game &game) {
 #endif
   drawStateOverlay(game, width, height);
   drawScanlines(width, height);
+
+  endHudScale();
 }
 } // namespace UI

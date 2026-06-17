@@ -10,6 +10,7 @@ public:
 
   const Model &getWeaponModel(WeaponModelId modelId) const;
   Shader getMonoShader() const;
+  Shader getPsxGlobalShader() const;
   Shader getViewmodelShader() const;
   Shader getWorldLitShader() const;
   const Font &getTerminalFont() const;
@@ -23,6 +24,7 @@ private:
   Model shotgunModel{};
   Model skyboxModel{};
   Shader monoShader{};
+  Shader psxGlobalShader{};
   Shader viewmodelShader{};
   Shader worldLitShader{};
   Shader skyboxShader{};

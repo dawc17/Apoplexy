@@ -36,6 +36,55 @@ void drawRadialVignette(Color color, float opacity, float radiusScale) {
   DrawCircleGradient({halfWidth, halfHeight}, radius, Fade(color, 0.0f),
                      Fade(color, opacity));
 }
+
+void setShaderFloat(Shader shader, const char *name, float value) {
+  SetShaderValue(shader, GetShaderLocation(shader, name), &value,
+                 SHADER_UNIFORM_FLOAT);
+}
+
+void setShaderVec2(Shader shader, const char *name, Vector2 value) {
+  SetShaderValue(shader, GetShaderLocation(shader, name), &value,
+                 SHADER_UNIFORM_VEC2);
+}
+
+void setShaderVec3(Shader shader, const char *name, Vector3 value) {
+  SetShaderValue(shader, GetShaderLocation(shader, name), &value,
+                 SHADER_UNIFORM_VEC3);
+}
+
+void configurePsxGlobalShader(Shader shader, Vector2 virtualResolution) {
+  Vector2 screenSize{static_cast<float>(GetScreenWidth()),
+                     static_cast<float>(GetScreenHeight())};
+  Vector3 colorTint{1.0f, 0.98f, 0.94f};
+  Vector3 fogColor{0.42f, 0.46f, 0.50f};
+
+  setShaderVec2(shader, "virtualResolution", virtualResolution);
+  setShaderVec2(shader, "screenSize", screenSize);
+  setShaderVec3(shader, "colorTint", colorTint);
+  setShaderVec3(shader, "fogColor", fogColor);
+
+  setShaderFloat(shader, "time", static_cast<float>(GetTime()));
+  setShaderFloat(shader, "intensity", 0.82f);
+  setShaderFloat(shader, "pixelScale", 1.0f);
+  setShaderFloat(shader, "fixedVerticalResolution", 240.0f);
+  setShaderFloat(shader, "useFixedVerticalResolution", 0.0f);
+  setShaderFloat(shader, "colorSteps", 24.0f);
+  setShaderFloat(shader, "ditherStrength", 0.18f);
+  setShaderFloat(shader, "ditherScale", 1.0f);
+  setShaderFloat(shader, "scanlineStrength", 0.10f);
+  setShaderFloat(shader, "vignetteStrength", 0.16f);
+  setShaderFloat(shader, "saturation", 1.08f);
+  setShaderFloat(shader, "contrast", 1.10f);
+  setShaderFloat(shader, "colorBleed", 0.10f);
+  setShaderFloat(shader, "gammaValue", 1.0f);
+  setShaderFloat(shader, "blackLevel", 0.02f);
+  setShaderFloat(shader, "chromaticOffset", 0.16f);
+  setShaderFloat(shader, "noiseStrength", 0.025f);
+  setShaderFloat(shader, "horizontalJitter", 0.02f);
+  setShaderFloat(shader, "curvature", 0.0f);
+  setShaderFloat(shader, "fogAmount", 0.0f);
+  setShaderFloat(shader, "vertexSnapStrength", 1.0f);
+}
 } // namespace
 
 Game::Game() {
@@ -133,19 +182,20 @@ void Game::updatePlaying(float dt) {
 #ifdef DEBUG
   if (IsKeyPressed(KEY_F2)) {
     ViewmodelDebug::panelOpen = !ViewmodelDebug::panelOpen;
-
-    if (ViewmodelDebug::panelOpen) {
-      EnableCursor();
-    } else {
-      DisableCursor();
-    }
   }
 
   if (ViewmodelDebug::panelOpen) {
     camera = player.getCamera();
     audio.stop(AudioId::PistolReloadStart);
     audio.stop(AudioId::PlayerFootstep);
+
+    if (IsCursorHidden()) {
+      EnableCursor();
+    }
+
     return;
+  } else if (!IsCursorHidden()) {
+    DisableCursor();
   }
 
   if (IsKeyPressed(KEY_X)) {
@@ -248,24 +298,17 @@ void Game::draw() {
   BeginTextureMode(sceneTarget);
   ClearBackground(BLACK);
 
-  Shader monoShader = assets.getMonoShader();
+  Shader psxShader = assets.getPsxGlobalShader();
   Vector2 virtualResolution = {static_cast<float>(PSX_RENDER_WIDTH),
                                static_cast<float>(PSX_RENDER_HEIGHT)};
-  float colorLevels = 25.0f;
-  float ditherStrength = 0.18f;
-
-  SetShaderValue(monoShader, GetShaderLocation(monoShader, "virtualResolution"),
-                 &virtualResolution, SHADER_UNIFORM_VEC2);
-  SetShaderValue(monoShader, GetShaderLocation(monoShader, "colorLevels"),
-                 &colorLevels, SHADER_UNIFORM_FLOAT);
-  SetShaderValue(monoShader, GetShaderLocation(monoShader, "ditherStrength"),
-                 &ditherStrength, SHADER_UNIFORM_FLOAT);
 
   Renderer::drawWorld(*this);
 
   EndTextureMode();
 
-  BeginShaderMode(monoShader);
+  configurePsxGlobalShader(psxShader, virtualResolution);
+
+  BeginShaderMode(psxShader);
   DrawTexturePro(sceneTarget.texture,
                  {0.0f, 0.0f, static_cast<float>(sceneTarget.texture.width),
                   -static_cast<float>(sceneTarget.texture.height)},

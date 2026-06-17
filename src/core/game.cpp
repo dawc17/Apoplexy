@@ -4,7 +4,6 @@
 #include "../render/renderer.hpp"
 #include "../ui/ui.hpp"
 #ifdef DEBUG
-#include "raygui/raygui.h"
 #include "../viewmodel/viewmodeldebug.hpp"
 #endif
 
@@ -17,7 +16,6 @@
 #include "weapon/weapondata.hpp"
 #include "weapon/weaponinventory.hpp"
 
-#include <algorithm>
 #include <cmath>
 
 namespace {
@@ -25,80 +23,6 @@ constexpr int PSX_RENDER_WIDTH = 640;
 constexpr int PSX_RENDER_HEIGHT = 320;
 constexpr float WIN_SEQUENCE_SLOWMO_SCALE = 0.18f;
 constexpr float WIN_SEQUENCE_MAX_DIM = 0.76f;
-
-struct PsxShaderPreset {
-  const char *name;
-  float intensity;
-  float pixelScale;
-  float fixedVerticalResolution;
-  float useFixedVerticalResolution;
-  float colorSteps;
-  float ditherStrength;
-  float ditherScale;
-  float scanlineStrength;
-  float vignetteStrength;
-  float saturation;
-  float contrast;
-  float colorBleed;
-  Vector3 colorTint;
-  float gammaValue;
-  float blackLevel;
-  float chromaticOffset;
-  float noiseStrength;
-  float horizontalJitter;
-  float curvature;
-  Vector3 fogColor;
-  float fogAmount;
-  float vertexSnapStrength;
-};
-
-constexpr PsxShaderPreset PSX_SHADER_PRESETS[] = {
-    {
-        "Off/Neutral",
-        0.0f, 1.0f, 240.0f, 0.0f, 32.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        1.0f, 0.0f, {1.0f, 1.0f, 1.0f}, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, {0.42f, 0.46f, 0.50f}, 0.0f, 0.0f,
-    },
-    {
-        "Clean PS2",
-        0.55f, 1.0f, 360.0f, 0.0f, 42.0f, 0.05f, 1.0f, 0.035f, 0.05f,
-        1.05f, 1.04f, 0.03f, {1.0f, 1.0f, 1.0f}, 1.0f, 0.0f, 0.04f,
-        0.005f, 0.0f, 0.0f, {0.42f, 0.46f, 0.50f}, 0.0f, 0.35f,
-    },
-    {
-        "Crunchy PSX",
-        0.82f, 1.0f, 240.0f, 0.0f, 24.0f, 0.18f, 1.0f, 0.10f, 0.16f,
-        1.08f, 1.10f, 0.10f, {1.0f, 0.98f, 0.94f}, 1.0f, 0.02f, 0.16f,
-        0.025f, 0.02f, 0.0f, {0.42f, 0.46f, 0.50f}, 0.0f, 1.0f,
-    },
-    {
-        "Horror PSX",
-        0.90f, 1.0f, 220.0f, 0.0f, 18.0f, 0.24f, 1.2f, 0.12f, 0.28f,
-        0.78f, 1.22f, 0.14f, {0.92f, 0.95f, 1.0f}, 1.08f, 0.08f, 0.18f,
-        0.045f, 0.035f, 0.03f, {0.08f, 0.10f, 0.12f}, 0.16f, 1.0f,
-    },
-    {
-        "Dark Fantasy",
-        0.82f, 1.0f, 260.0f, 0.0f, 22.0f, 0.18f, 1.0f, 0.08f, 0.22f,
-        0.86f, 1.18f, 0.08f, {1.0f, 0.92f, 0.82f}, 1.02f, 0.06f, 0.10f,
-        0.02f, 0.015f, 0.0f, {0.20f, 0.16f, 0.22f}, 0.12f, 0.85f,
-    },
-    {
-        "VHS/CRT",
-        0.88f, 1.0f, 240.0f, 0.0f, 28.0f, 0.13f, 1.0f, 0.18f, 0.18f,
-        1.12f, 1.08f, 0.22f, {1.0f, 0.96f, 0.92f}, 0.98f, 0.025f, 0.28f,
-        0.05f, 0.06f, 0.18f, {0.42f, 0.46f, 0.50f}, 0.0f, 0.7f,
-    },
-    {
-        "Mobile Fast",
-        0.48f, 1.0f, 320.0f, 0.0f, 32.0f, 0.04f, 1.0f, 0.025f, 0.04f,
-        1.0f, 1.03f, 0.0f, {1.0f, 1.0f, 1.0f}, 1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, {0.42f, 0.46f, 0.50f}, 0.0f, 0.25f,
-    },
-};
-
-constexpr int PSX_SHADER_PRESET_COUNT =
-    static_cast<int>(sizeof(PSX_SHADER_PRESETS) / sizeof(PSX_SHADER_PRESETS[0]));
 
 void drawRadialVignette(Color color, float opacity, float radiusScale) {
   int width = GetScreenWidth();
@@ -128,39 +52,38 @@ void setShaderVec3(Shader shader, const char *name, Vector3 value) {
                  SHADER_UNIFORM_VEC3);
 }
 
-void configurePsxGlobalShader(Shader shader, Vector2 virtualResolution,
-                              const PsxShaderPreset &preset) {
+void configurePsxGlobalShader(Shader shader, Vector2 virtualResolution) {
   Vector2 screenSize{static_cast<float>(GetScreenWidth()),
                      static_cast<float>(GetScreenHeight())};
+  Vector3 colorTint{1.0f, 0.98f, 0.94f};
+  Vector3 fogColor{0.42f, 0.46f, 0.50f};
 
   setShaderVec2(shader, "virtualResolution", virtualResolution);
   setShaderVec2(shader, "screenSize", screenSize);
-  setShaderVec3(shader, "colorTint", preset.colorTint);
-  setShaderVec3(shader, "fogColor", preset.fogColor);
+  setShaderVec3(shader, "colorTint", colorTint);
+  setShaderVec3(shader, "fogColor", fogColor);
 
   setShaderFloat(shader, "time", static_cast<float>(GetTime()));
-  setShaderFloat(shader, "intensity", preset.intensity);
-  setShaderFloat(shader, "pixelScale", preset.pixelScale);
-  setShaderFloat(shader, "fixedVerticalResolution",
-                 preset.fixedVerticalResolution);
-  setShaderFloat(shader, "useFixedVerticalResolution",
-                 preset.useFixedVerticalResolution);
-  setShaderFloat(shader, "colorSteps", preset.colorSteps);
-  setShaderFloat(shader, "ditherStrength", preset.ditherStrength);
-  setShaderFloat(shader, "ditherScale", preset.ditherScale);
-  setShaderFloat(shader, "scanlineStrength", preset.scanlineStrength);
-  setShaderFloat(shader, "vignetteStrength", preset.vignetteStrength);
-  setShaderFloat(shader, "saturation", preset.saturation);
-  setShaderFloat(shader, "contrast", preset.contrast);
-  setShaderFloat(shader, "colorBleed", preset.colorBleed);
-  setShaderFloat(shader, "gammaValue", preset.gammaValue);
-  setShaderFloat(shader, "blackLevel", preset.blackLevel);
-  setShaderFloat(shader, "chromaticOffset", preset.chromaticOffset);
-  setShaderFloat(shader, "noiseStrength", preset.noiseStrength);
-  setShaderFloat(shader, "horizontalJitter", preset.horizontalJitter);
-  setShaderFloat(shader, "curvature", preset.curvature);
-  setShaderFloat(shader, "fogAmount", preset.fogAmount);
-  setShaderFloat(shader, "vertexSnapStrength", preset.vertexSnapStrength);
+  setShaderFloat(shader, "intensity", 0.82f);
+  setShaderFloat(shader, "pixelScale", 1.0f);
+  setShaderFloat(shader, "fixedVerticalResolution", 240.0f);
+  setShaderFloat(shader, "useFixedVerticalResolution", 0.0f);
+  setShaderFloat(shader, "colorSteps", 24.0f);
+  setShaderFloat(shader, "ditherStrength", 0.18f);
+  setShaderFloat(shader, "ditherScale", 1.0f);
+  setShaderFloat(shader, "scanlineStrength", 0.10f);
+  setShaderFloat(shader, "vignetteStrength", 0.16f);
+  setShaderFloat(shader, "saturation", 1.08f);
+  setShaderFloat(shader, "contrast", 1.10f);
+  setShaderFloat(shader, "colorBleed", 0.10f);
+  setShaderFloat(shader, "gammaValue", 1.0f);
+  setShaderFloat(shader, "blackLevel", 0.02f);
+  setShaderFloat(shader, "chromaticOffset", 0.16f);
+  setShaderFloat(shader, "noiseStrength", 0.025f);
+  setShaderFloat(shader, "horizontalJitter", 0.02f);
+  setShaderFloat(shader, "curvature", 0.0f);
+  setShaderFloat(shader, "fogAmount", 0.0f);
+  setShaderFloat(shader, "vertexSnapStrength", 1.0f);
 }
 } // namespace
 
@@ -261,11 +184,7 @@ void Game::updatePlaying(float dt) {
     ViewmodelDebug::panelOpen = !ViewmodelDebug::panelOpen;
   }
 
-  if (IsKeyPressed(KEY_F3)) {
-    shaderPresetPanelOpen = !shaderPresetPanelOpen;
-  }
-
-  if (ViewmodelDebug::panelOpen || shaderPresetPanelOpen) {
+  if (ViewmodelDebug::panelOpen) {
     camera = player.getCamera();
     audio.stop(AudioId::PistolReloadStart);
     audio.stop(AudioId::PlayerFootstep);
@@ -387,9 +306,7 @@ void Game::draw() {
 
   EndTextureMode();
 
-  int presetIndex = std::clamp(psxShaderPresetIndex, 0, PSX_SHADER_PRESET_COUNT - 1);
-  configurePsxGlobalShader(psxShader, virtualResolution,
-                           PSX_SHADER_PRESETS[presetIndex]);
+  configurePsxGlobalShader(psxShader, virtualResolution);
 
   BeginShaderMode(psxShader);
   DrawTexturePro(sceneTarget.texture,
@@ -407,50 +324,6 @@ void Game::draw() {
   drawWinSequenceDim();
 
   EditorUI::draw(levelEditor, level);
-
-#ifdef DEBUG
-  drawShaderPresetDebugPanel();
-#endif
-}
-
-void Game::drawShaderPresetDebugPanel() {
-#ifdef DEBUG
-  if (!shaderPresetPanelOpen) {
-    DrawText("F3 PSX Presets", GetScreenWidth() - 172, 24, 18,
-             Fade(WHITE, 0.65f));
-    return;
-  }
-
-  Rectangle panel{static_cast<float>(GetScreenWidth()) - 302.0f, 62.0f,
-                  278.0f, 300.0f};
-  DrawRectangleRec(panel, Fade(BLACK, 0.82f));
-  DrawRectangleLinesEx(panel, 1.0f, Fade(WHITE, 0.35f));
-  DrawText("PSX SHADER PRESET (F3)", static_cast<int>(panel.x + 14.0f),
-           static_cast<int>(panel.y + 12.0f), 18, WHITE);
-
-  for (int i = 0; i < PSX_SHADER_PRESET_COUNT; ++i) {
-    Rectangle button{panel.x + 14.0f, panel.y + 44.0f + i * 32.0f,
-                     panel.width - 28.0f, 25.0f};
-    bool selected = i == psxShaderPresetIndex;
-    const char *label =
-        TextFormat("%s%s", selected ? "> " : "  ", PSX_SHADER_PRESETS[i].name);
-
-    if (selected) {
-      DrawRectangleRec(button, Fade(WHITE, 0.16f));
-    }
-
-    if (GuiButton(button, label)) {
-      psxShaderPresetIndex = i;
-    }
-  }
-
-  DrawText("Unity-inspired approximation",
-           static_cast<int>(panel.x + 14.0f),
-           static_cast<int>(panel.y + panel.height - 28.0f), 14,
-           Fade(WHITE, 0.62f));
-#else
-  (void)shaderPresetPanelOpen;
-#endif
 }
 
 void Game::drawWinSequenceDim() const {

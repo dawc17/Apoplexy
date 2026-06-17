@@ -36,6 +36,7 @@ public:
   void update(float dt, const Player &player, std::vector<Enemy> &enemies,
               const Level &level, const Camera3D camera,
               ParticleSystem &particles, AudioSystem &audio);
+  void updatePresentation(float dt, const Player &player);
 
   void drawViewModel(const Camera3D &camera, const AssetManager &assets,
                      const Lighting::SceneLighting &lighting,

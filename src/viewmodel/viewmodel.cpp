@@ -106,10 +106,11 @@ void Viewmodel::reset() {
 
 void Viewmodel::update(float dt, bool playerSprinting, bool weaponReloading,
                        bool weaponMeleeing, float weaponMeleeProgress,
-                       const ProceduralWeaponAnimationData &procedural) {
+                       const ProceduralWeaponAnimationData &procedural,
+                       bool useMouseSway) {
   recoilTimer = std::min(procedural.recoilDuration, recoilTimer + dt);
 
-  Vector2 mouseDelta = GetMouseDelta();
+  Vector2 mouseDelta = useMouseSway ? GetMouseDelta() : Vector2{};
 
   Vector2 targetOffset{
       std::clamp(-mouseDelta.x * procedural.swayPositionAmount,

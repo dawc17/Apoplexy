@@ -23,6 +23,7 @@ public:
   void update(float dt, const Player &player, std::vector<Enemy> &enemies,
               const Level &level, const Camera3D camera,
               ParticleSystem &particles, AudioSystem &audio);
+  void updatePresentation(float dt, const Player &player);
 
   Weapon &getActiveWeapon();
   const Weapon &getActiveWeapon() const;

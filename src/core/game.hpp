@@ -46,7 +46,9 @@ public:
 private:
   void reset();
   void updatePlaying(float dt);
+  void updateWinSequence(float dt);
   void drawPlaying();
+  void drawWinSequenceDim() const;
   void updateFootsteps(float dt);
   void updateEnemies(float dt);
   void updateEditorTest(float dt);
@@ -54,6 +56,7 @@ private:
   void startCameraShake(float strength, float duration);
   void updateCameraShake(float dt);
   void drawDamageVignette() const;
+  void drawCrouchVignette() const;
 
 private:
   GameState state = GameState::Menu;
@@ -77,6 +80,8 @@ private:
   float footstepNoiseTimer = 0.0f;
   float damageVignetteTimer = 0.0f;
   float damageVignetteDuration = 0.45f;
+  float winSequenceTimer = 0.0f;
+  float winSequenceDuration = 4.35f;
   bool enemiesFrozen = false;
 
   Camera3D camera{};

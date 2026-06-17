@@ -16,9 +16,26 @@
 #include "weapon/weapondata.hpp"
 #include "weapon/weaponinventory.hpp"
 
+#include <cmath>
+
 namespace {
 constexpr int PSX_RENDER_WIDTH = 640;
 constexpr int PSX_RENDER_HEIGHT = 320;
+constexpr float WIN_SEQUENCE_SLOWMO_SCALE = 0.18f;
+constexpr float WIN_SEQUENCE_MAX_DIM = 0.76f;
+
+void drawRadialVignette(Color color, float opacity, float radiusScale) {
+  int width = GetScreenWidth();
+  int height = GetScreenHeight();
+  float halfWidth = static_cast<float>(width) * 0.5f;
+  float halfHeight = static_cast<float>(height) * 0.5f;
+  float cornerRadius =
+      std::sqrtf(halfWidth * halfWidth + halfHeight * halfHeight);
+  float radius = cornerRadius * radiusScale;
+
+  DrawCircleGradient({halfWidth, halfHeight}, radius, Fade(color, 0.0f),
+                     Fade(color, opacity));
+}
 } // namespace
 
 Game::Game() {
@@ -43,6 +60,7 @@ Game::~Game() {
 void Game::reset() {
   state = GameState::Playing;
   damageVignetteTimer = 0.0f;
+  winSequenceTimer = 0.0f;
   footstepStopGraceTimer = 0.0f;
   footstepNoiseTimer = 0.0f;
   audio.stop(AudioId::PistolReloadStart);
@@ -77,6 +95,10 @@ void Game::update(float dt) {
 
   case GameState::Playing:
     updatePlaying(dt);
+    break;
+
+  case GameState::WinSequence:
+    updateWinSequence(dt);
     break;
 
   case GameState::Dead:
@@ -186,6 +208,24 @@ void Game::updatePlaying(float dt) {
   if (allEnemiesDead) {
     audio.stop(AudioId::PistolReloadStart);
     audio.stop(AudioId::PlayerFootstep);
+    state = GameState::WinSequence;
+    winSequenceTimer = 0.0f;
+  }
+}
+
+void Game::updateWinSequence(float dt) {
+  float slowDt = dt * WIN_SEQUENCE_SLOWMO_SCALE;
+
+  winSequenceTimer += dt;
+  camera = player.getCamera();
+  weapons.updatePresentation(slowDt, player);
+  particles.update(slowDt);
+  updateCameraShake(slowDt);
+
+  damageVignetteTimer =
+      Clamp(damageVignetteTimer - slowDt, 0.0f, damageVignetteDuration);
+
+  if (winSequenceTimer >= winSequenceDuration) {
     state = GameState::Win;
   }
 }
@@ -193,9 +233,15 @@ void Game::updatePlaying(float dt) {
 void Game::draw() {
   if (levelEditor.isEnabled()) {
     ClearBackground(BLACK);
+
     Renderer::drawWorld(*this);
+
     UI::draw(*this);
+
+    drawWinSequenceDim();
+
     EditorUI::draw(levelEditor, level);
+
     return;
   }
 
@@ -228,11 +274,34 @@ void Game::draw() {
                  {0.0f, 0.0f}, 0.0f, WHITE);
   EndShaderMode();
 
+  drawCrouchVignette();
   drawDamageVignette();
 
   UI::draw(*this);
+  drawWinSequenceDim();
 
   EditorUI::draw(levelEditor, level);
+}
+
+void Game::drawWinSequenceDim() const {
+  if (state != GameState::WinSequence) {
+    return;
+  }
+
+  float fadeT = Clamp(winSequenceTimer / winSequenceDuration, 0.0f, 1.0f);
+  float smoothT =
+      fadeT * fadeT * fadeT * (fadeT * (fadeT * 6.0f - 15.0f) + 10.0f);
+
+  DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(),
+                Fade(BLACK, WIN_SEQUENCE_MAX_DIM * smoothT));
+}
+
+void Game::drawCrouchVignette() const {
+  if (!player.isCrouching() || state != GameState::Playing) {
+    return;
+  }
+
+  drawRadialVignette(BLACK, 0.42f, 1.28f);
 }
 
 void Game::drawDamageVignette() const {
@@ -241,30 +310,7 @@ void Game::drawDamageVignette() const {
   }
 
   float t = Clamp(damageVignetteTimer / damageVignetteDuration, 0.0f, 1.0f);
-  int width = GetScreenWidth();
-  int height = GetScreenHeight();
-
-  Color bloodRed{95, 0, 0, 255};
-  DrawRectangle(0, 0, width, height, Fade(bloodRed, 0.12f * t));
-
-  int maxThickness = static_cast<int>(static_cast<float>(height) * 0.26f);
-  constexpr int rings = 10;
-
-  for (int i = 0; i < rings; ++i) {
-    float ringT = static_cast<float>(i + 1) / static_cast<float>(rings);
-    float alpha = t * ringT * ringT * 0.28f;
-    float thickness =
-        static_cast<float>(maxThickness) / static_cast<float>(rings);
-
-    Rectangle edge{
-        thickness * static_cast<float>(i) * 0.5f,
-        thickness * static_cast<float>(i) * 0.5f,
-        static_cast<float>(width) - thickness * static_cast<float>(i),
-        static_cast<float>(height) - thickness * static_cast<float>(i),
-    };
-
-    DrawRectangleLinesEx(edge, thickness, Fade(bloodRed, alpha));
-  }
+  drawRadialVignette({95, 0, 0, 255}, 0.58f * t, 1.24f);
 }
 
 void Game::updateFootsteps(float dt) {

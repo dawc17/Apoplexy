@@ -60,6 +60,25 @@ void WeaponInventory::update(float dt, const Player &player,
   }
 }
 
+void WeaponInventory::updatePresentation(float dt, const Player &player) {
+  if (switchTimer > 0.0f) {
+    switchTimer = std::max(0.0f, switchTimer - dt);
+
+    if (!switchCommited && switchTimer <= switchDuration * 0.5f) {
+      activeWeaponIndex = pendingWeaponIndex;
+      switchCommited = true;
+    }
+  }
+
+  if (weapons.empty()) {
+    return;
+  }
+
+  if (switchTimer <= 0.0f) {
+    getActiveWeapon().updatePresentation(dt, player);
+  }
+}
+
 Weapon &WeaponInventory::getActiveWeapon() {
   return weapons[activeWeaponIndex];
 }

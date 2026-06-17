@@ -153,6 +153,34 @@ void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
   }
 }
 
+void Weapon::updatePresentation(float dt, const Player &player) {
+  cooldown = std::max(0.0f, cooldown - dt);
+  muzzleFlashTimer = std::max(0.0f, muzzleFlashTimer - dt);
+  spreadBloom =
+      std::max(0.0f, spreadBloom - data->fire.spreadRecoverySpeed * dt);
+
+  for (DebugShotRay &ray : debugRays) {
+    ray.timer = std::max(0.0f, ray.timer - dt);
+  }
+
+  debugRays.erase(
+      std::remove_if(debugRays.begin(), debugRays.end(),
+                     [](const DebugShotRay &ray) { return ray.timer <= 0.0f; }),
+      debugRays.end());
+
+  if (isMeleeing()) {
+    meleeTimer = std::max(0.0f, meleeTimer - dt);
+
+    if (meleeTimer <= 0.0f) {
+      meleeDuration = 0.0f;
+      meleeHasHit = false;
+    }
+  }
+
+  viewmodel.update(dt, player.isSprinting(), reloading, isMeleeing(),
+                   getMeleeProgress(), *proceduralAnimation, false);
+}
+
 void Weapon::drawViewModel(const Camera3D &camera, const AssetManager &assets,
                            const Lighting::SceneLighting &lighting,
                            Vector3 pointLightContribution,

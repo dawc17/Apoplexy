@@ -14,7 +14,8 @@ public:
   void reset();
   void update(float dt, bool playerSprinting, bool weaponReloading,
               bool weaponMeleeing, float weaponMeleeProgress,
-              const ProceduralWeaponAnimationData &procedural);
+              const ProceduralWeaponAnimationData &procedural,
+              bool useMouseSway = true);
   void addRecoil(float amount);
   void clearMelee();
 

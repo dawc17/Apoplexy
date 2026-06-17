@@ -283,9 +283,8 @@ void drawWeaponStatus(const Game &game, const Hud::Context &ctx) {
   const Hud::Style &style = ctx.style;
   const Weapon &weapon = game.getWeapon();
   const WeaponInventory &inventory = game.getWeaponInventory();
-  Rectangle bounds =
-      Hud::anchoredRect(ctx.screen, Hud::Anchor::BottomRight,
-                        {459.0f, 201.0f}, {22.0f, 24.0f});
+  Rectangle bounds = Hud::anchoredRect(ctx.screen, Hud::Anchor::BottomRight,
+                                       {459.0f, 201.0f}, {22.0f, 24.0f});
   Hud::Panel panel{bounds, bounds.y + 72.0f};
   Color neutralColor = Fade(style.dimText, 0.82f);
   Color panelColor = weapon.isReloading() ? style.danger : neutralColor;
@@ -320,12 +319,9 @@ void drawDebugOverlay(const Game &game, const Hud::Context &ctx) {
   panel.draw(ctx, Fade(style.dimText, 0.82f));
   panel.header(ctx, "DEBUG", "診断", style.dimText);
 
-  panel.message(ctx, TextFormat("X  % .3f", position.x), 24.0f,
-                style.dimText);
-  panel.message(ctx, TextFormat("Z  % .3f", position.z), 24.0f,
-                style.dimText);
-  panel.message(ctx, TextFormat("Y  % .3f", position.y), 24.0f,
-                style.dimText);
+  panel.message(ctx, TextFormat("X  % .3f", position.x), 24.0f, style.dimText);
+  panel.message(ctx, TextFormat("Z  % .3f", position.z), 24.0f, style.dimText);
+  panel.message(ctx, TextFormat("Y  % .3f", position.y), 24.0f, style.dimText);
 
   if (game.areEnemiesFrozen()) {
     Hud::text(ctx, ctx.font, "ENEMIES FROZEN",
@@ -349,7 +345,7 @@ void drawStateOverlay(const Game &game, const Hud::Context &ctx) {
   }
 
   bool dead = game.getState() == GameState::Dead;
-  const char *title = dead ? "SIGNAL LOST" : "AREA CLEAR";
+  const char *title = dead ? "SIGNAL LOST" : "you! !!won";
   const char *accent = dead ? "断線" : "完了";
   Color color = dead ? style.danger : style.text;
   Rectangle panel = Hud::anchoredRect(ctx.screen, Hud::Anchor::Center,
@@ -358,10 +354,10 @@ void drawStateOverlay(const Game &game, const Hud::Context &ctx) {
 
   DrawRectangleRec(ctx.screen, Fade(BLACK, overlayDim));
   Hud::panel(ctx, panel, color);
-  Hud::systemHeader(ctx, panel, "OPERATOR LINK", accent, color);
+  Hud::systemHeader(ctx, panel, "futuristic text here", accent, color);
   Hud::text(ctx, ctx.font, title, {panel.x + 48.0f, panel.y + 80.0f}, 58.0f,
             color);
-  Hud::text(ctx, ctx.font, "PRESS R TO REBOOT",
+  Hud::text(ctx, ctx.font, "r to reboot or sum",
             {panel.x + 48.0f, panel.y + 158.0f}, 31.0f, style.text);
 }
 } // namespace
@@ -376,9 +372,11 @@ void draw(const Game &game) {
   int height = Hud::REFERENCE_HEIGHT;
   const Font &font = game.getAssets().getTerminalFont();
   const Font &japaneseFont = game.getAssets().getJapaneseFont();
-  Hud::Context ctx{font, japaneseFont, Hud::style(),
-                   {0.0f, 0.0f, static_cast<float>(width),
-                    static_cast<float>(height)}};
+  Hud::Context ctx{
+      font,
+      japaneseFont,
+      Hud::style(),
+      {0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height)}};
 
   Hud::beginScale();
 

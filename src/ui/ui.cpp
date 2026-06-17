@@ -1,4 +1,5 @@
 #include "ui.hpp"
+#include "hud.hpp"
 
 #include "../core/game.hpp"
 #include "../core/gamestate.hpp"
@@ -13,7 +14,6 @@
 #include "raygui/raygui.h"
 #endif
 #include "raylib.h"
-#include "rlgl.h"
 
 #include <cmath>
 
@@ -30,117 +30,8 @@ namespace {
 //   return count;
 // }
 
-struct HudStyle {
-  Color text;
-  Color dimText;
-  Color panel;
-  Color panelBorder;
-  Color terminal;
-  Color warning;
-  Color danger;
-  Color reticle;
-  Color status;
-  Color shadow;
-};
-
-const HudStyle &hudStyle() {
-  static const HudStyle style{{235, 235, 225, 255}, {132, 132, 126, 255},
-                              {0, 0, 0, 196},       {218, 218, 206, 220},
-                              {235, 235, 225, 255}, {245, 245, 235, 255},
-                              {210, 24, 28, 255},   {235, 235, 225, 220},
-                              {210, 24, 28, 255},   {0, 0, 0, 230}};
-
-  return style;
-}
-
 float pulse(float speed) {
   return 0.5f + 0.5f * std::sinf(static_cast<float>(GetTime()) * speed);
-}
-
-constexpr float HUD_SCALE = 1.7f;
-constexpr float HUD_PAD = 24.0f;
-constexpr float HUD_HEADER_HEIGHT = 34.0f;
-constexpr float HUD_HEADER_FONT_SIZE = 21.0f;
-constexpr float HUD_LABEL_FONT_SIZE = 22.0f;
-constexpr float HUD_VALUE_FONT_SIZE = 31.0f;
-constexpr int HUD_REFERENCE_WIDTH = 2560;
-constexpr int HUD_REFERENCE_HEIGHT = 1440;
-
-float hudScale() {
-  float scaleX = static_cast<float>(GetScreenWidth()) /
-                 static_cast<float>(HUD_REFERENCE_WIDTH);
-  float scaleY = static_cast<float>(GetScreenHeight()) /
-                 static_cast<float>(HUD_REFERENCE_HEIGHT);
-  return std::min(scaleX, scaleY);
-}
-
-float hudOffsetX(float scale) {
-  return (static_cast<float>(GetScreenWidth()) -
-          static_cast<float>(HUD_REFERENCE_WIDTH) * scale) *
-         0.5f;
-}
-
-float hudOffsetY(float scale) {
-  return (static_cast<float>(GetScreenHeight()) -
-          static_cast<float>(HUD_REFERENCE_HEIGHT) * scale) *
-         0.5f;
-}
-
-void beginHudScale() {
-  float scale = hudScale();
-  rlPushMatrix();
-  rlTranslatef(hudOffsetX(scale), hudOffsetY(scale), 0.0f);
-  rlScalef(scale, scale, 1.0f);
-}
-
-void endHudScale() { rlPopMatrix(); }
-
-void drawHudText(const Font &font, const char *text, Vector2 position,
-                 float fontSize, Color color) {
-  const HudStyle &style = hudStyle();
-  DrawTextEx(font, text, {position.x + 2.0f, position.y + 2.0f}, fontSize, 1.0f,
-             Fade(style.shadow, 0.85f));
-  DrawTextEx(font, text, position, fontSize, 1.0f, color);
-}
-
-void drawHudPanel(Rectangle bounds, Color borderColor) {
-  const HudStyle &style = hudStyle();
-  constexpr float tick = 24.0f;
-
-  DrawRectangleRec(bounds, style.panel);
-  DrawRectangleLinesEx(bounds, 2.0f, Fade(borderColor, 0.72f));
-  DrawRectangleRec({bounds.x, bounds.y, bounds.width, 5.0f},
-                   Fade(borderColor, 0.92f));
-  DrawRectangleRec(
-      {bounds.x, bounds.y + bounds.height - 5.0f, bounds.width, 5.0f},
-      Fade(borderColor, 0.58f));
-
-  DrawLineEx({bounds.x, bounds.y}, {bounds.x + tick, bounds.y}, 3.0f,
-             borderColor);
-  DrawLineEx({bounds.x, bounds.y}, {bounds.x, bounds.y + tick}, 3.0f,
-             borderColor);
-  DrawLineEx({bounds.x + bounds.width - tick, bounds.y},
-             {bounds.x + bounds.width, bounds.y}, 3.0f, borderColor);
-  DrawLineEx({bounds.x + bounds.width, bounds.y},
-             {bounds.x + bounds.width, bounds.y + tick}, 3.0f, borderColor);
-  DrawLineEx({bounds.x, bounds.y + bounds.height - tick},
-             {bounds.x, bounds.y + bounds.height}, 3.0f, borderColor);
-  DrawLineEx({bounds.x, bounds.y + bounds.height},
-             {bounds.x + tick, bounds.y + bounds.height}, 3.0f, borderColor);
-  DrawLineEx({bounds.x + bounds.width - tick, bounds.y + bounds.height},
-             {bounds.x + bounds.width, bounds.y + bounds.height}, 3.0f,
-             borderColor);
-  DrawLineEx({bounds.x + bounds.width, bounds.y + bounds.height - tick},
-             {bounds.x + bounds.width, bounds.y + bounds.height}, 3.0f,
-             borderColor);
-}
-
-void drawLabelValue(const Font &font, const char *label, const char *value,
-                    Vector2 position, float valueX, Color valueColor) {
-  const HudStyle &style = hudStyle();
-  drawHudText(font, label, position, HUD_LABEL_FONT_SIZE, style.dimText);
-  drawHudText(font, value, {valueX, position.y - 4.0f}, HUD_VALUE_FONT_SIZE,
-              valueColor);
 }
 
 void drawScanlines(int screenWidth, int screenHeight) {
@@ -151,29 +42,6 @@ void drawScanlines(int screenWidth, int screenHeight) {
   int sweepY = static_cast<int>(
       std::fmod(GetTime() * 46.0, static_cast<double>(screenHeight)));
   DrawRectangle(0, sweepY, screenWidth, 2, Fade(WHITE, 0.08f));
-}
-
-void drawSystemHeader(const Font &font, const Font &japaneseFont,
-                      Rectangle bounds, const char *title, const char *accent,
-                      Color color) {
-  const HudStyle &style = hudStyle();
-  DrawRectangleRec({bounds.x + 12.0f, bounds.y + 12.0f, bounds.width - 24.0f,
-                    HUD_HEADER_HEIGHT},
-                   Fade(style.text, 0.12f));
-  DrawLineEx({bounds.x + 12.0f, bounds.y + 12.0f + HUD_HEADER_HEIGHT + 2.0f},
-             {bounds.x + bounds.width - 12.0f,
-              bounds.y + 12.0f + HUD_HEADER_HEIGHT + 2.0f},
-             1.0f, Fade(style.text, 0.62f));
-
-  drawHudText(font, title, {bounds.x + 24.0f, bounds.y + 17.0f},
-              HUD_HEADER_FONT_SIZE, color);
-
-  Vector2 accentSize =
-      MeasureTextEx(japaneseFont, accent, HUD_HEADER_FONT_SIZE, 1.0f);
-  drawHudText(
-      japaneseFont, accent,
-      {bounds.x + bounds.width - accentSize.x - 24.0f, bounds.y + 17.0f},
-      HUD_HEADER_FONT_SIZE, Fade(style.dimText, 0.88f));
 }
 
 const char *awarenessAccent(const char *label) {
@@ -190,9 +58,8 @@ const char *awarenessAccent(const char *label) {
   return "聴音";
 }
 
-void drawAwarenessIndicator(const Game &game, const Font &font,
-                            const Font &japaneseFont, int screenWidth) {
-  const HudStyle &style = hudStyle();
+void drawAwarenessIndicator(const Game &game, const Hud::Context &ctx) {
+  const Hud::Style &style = ctx.style;
   const char *label = nullptr;
   Color color = style.text;
 
@@ -229,38 +96,40 @@ void drawAwarenessIndicator(const Game &game, const Font &font,
   float accentFontSize = 24.0f;
   float textGap = 34.0f;
   const char *accent = awarenessAccent(label);
-  Vector2 textSize = MeasureTextEx(font, label, fontSize, 1.0f);
+  Vector2 textSize = MeasureTextEx(ctx.font, label, fontSize, 1.0f);
   Vector2 accentSize =
-      MeasureTextEx(japaneseFont, accent, accentFontSize, 1.0f);
+      MeasureTextEx(ctx.japaneseFont, accent, accentFontSize, 1.0f);
   float contentWidth = accentSize.x + textGap + textSize.x;
   float horizontalPadding = 36.0f;
-  Rectangle panel{screenWidth / 2.0f - contentWidth / 2.0f - horizontalPadding,
-                  24.0f, contentWidth + horizontalPadding * 2.0f, 78.0f};
+  Rectangle panel = Hud::anchoredRect(
+      ctx.screen, Hud::Anchor::TopLeft,
+      {contentWidth + horizontalPadding * 2.0f, 78.0f},
+      {ctx.screen.width * 0.5f - contentWidth * 0.5f - horizontalPadding,
+       24.0f});
   DrawRectangleRec({panel.x, panel.y, panel.width, panel.height},
                    Fade(style.shadow, 0.82f));
 
-  drawHudPanel(panel, color);
+  Hud::panel(ctx, panel, color);
   float contentX = panel.x + panel.width / 2.0f - contentWidth / 2.0f;
   float labelY = panel.y + 16.0f;
   float accentY = labelY + textSize.y / 2.0f - accentSize.y / 2.0f;
-  drawHudText(japaneseFont, accent, {contentX, accentY}, accentFontSize,
-              Fade(color, 0.72f));
-  drawHudText(font, label, {contentX + accentSize.x + textGap, labelY},
-              fontSize, color);
+  Hud::text(ctx, ctx.japaneseFont, accent, {contentX, accentY}, accentFontSize,
+            Fade(color, 0.72f));
+  Hud::text(ctx, ctx.font, label, {contentX + accentSize.x + textGap, labelY},
+            fontSize, color);
 }
 
-void drawWatermark(const Font &font, int screenWidth) {
-  const HudStyle &style = hudStyle();
+void drawWatermark(const Hud::Context &ctx) {
+  const Hud::Style &style = ctx.style;
   float fontSize = 25.0f;
   float lineHeight = 28.0f;
-  float right = static_cast<float>(screenWidth) - 24.0f;
+  float right = ctx.screen.width - 24.0f;
   float y = 45.0f;
   Color textColor = Fade(style.text, 0.50f);
-  Color signalColor = {226, 207, 38, 190};
 
   auto drawRightAligned = [&](const char *text, float lineY, Color color) {
-    Vector2 size = MeasureTextEx(font, text, fontSize, 1.0f);
-    drawHudText(font, text, {right - size.x, lineY}, fontSize, color);
+    Vector2 size = MeasureTextEx(ctx.font, text, fontSize, 1.0f);
+    Hud::text(ctx, ctx.font, text, {right - size.x, lineY}, fontSize, color);
   };
 
   drawRightAligned("APOPLEXY [PRE-PRE-ALPHA] v.0.3", y, textColor);
@@ -330,9 +199,8 @@ void drawViewmodelDebugPanel(const Game &game) {
 }
 #endif
 
-void drawHealthBar(const Game &game, const Font &font,
-                   const Font &japaneseFont) {
-  const HudStyle &style = hudStyle();
+void drawHealthBar(const Game &game, const Hud::Context &ctx) {
+  const Hud::Style &style = ctx.style;
 
   int health = game.getPlayer().getHealth();
   float healthPercent = static_cast<float>(health) / 100.0f;
@@ -343,12 +211,12 @@ void drawHealthBar(const Game &game, const Font &font,
     healthPercent = 1.0f;
   }
 
-  int screenWidth = HUD_REFERENCE_WIDTH;
-  int screenHeight = HUD_REFERENCE_HEIGHT;
   float width = 620.0f;
-  float x = static_cast<float>(screenWidth) * 0.5f - width * 0.5f;
-  float y = static_cast<float>(screenHeight) - 94.0f;
   float height = 13.0f;
+  Rectangle bar = Hud::anchoredRect(ctx.screen, Hud::Anchor::BottomCenter,
+                                    {width, height}, {0.0f, 94.0f});
+  float x = bar.x;
+  float y = bar.y;
   float tick = 12.0f;
   float labelY = y - 35.0f;
 
@@ -379,24 +247,25 @@ void drawHealthBar(const Game &game, const Font &font,
              {x + width * 0.75f, y + height - 2.0f}, 1.0f,
              Fade(style.shadow, 0.52f));
 
-  drawHudText(font, "VITAL", {x, labelY}, 24.0f, Fade(style.text, 0.84f));
+  Hud::text(ctx, ctx.font, "VITAL", {x, labelY}, 24.0f,
+            Fade(style.text, 0.84f));
 
   const char *healthText = TextFormat("%03d", health);
-  Vector2 healthTextSize = MeasureTextEx(font, healthText, 21.0f, 1.0f);
-  drawHudText(font, healthText, {x + width - healthTextSize.x, labelY + 2.0f},
-              21.0f, fill);
+  Vector2 healthTextSize = MeasureTextEx(ctx.font, healthText, 21.0f, 1.0f);
+  Hud::text(ctx, ctx.font, healthText,
+            {x + width - healthTextSize.x, labelY + 2.0f}, 21.0f, fill);
 }
 
-void drawCrosshair(const Game &game, int screenWidth, int screenHeight) {
-  const HudStyle &style = hudStyle();
+void drawCrosshair(const Game &game, const Hud::Context &ctx) {
+  const Hud::Style &style = ctx.style;
   const Weapon &weapon = game.getWeapon();
 
   float spread = weapon.getCurrentSpreadDegrees(game.getPlayer());
   int gap = 5 + static_cast<int>(spread * 4.0f);
   int length = 10;
   int thickness = 2;
-  int centerX = screenWidth / 2;
-  int centerY = screenHeight / 2;
+  int centerX = static_cast<int>(ctx.screen.x + ctx.screen.width * 0.5f);
+  int centerY = static_cast<int>(ctx.screen.y + ctx.screen.height * 0.5f);
   Color reticle = Fade(style.reticle, 0.62f + pulse(7.0f) * 0.18f);
 
   DrawRectangle(centerX - gap - length, centerY - thickness / 2, length,
@@ -410,76 +279,70 @@ void drawCrosshair(const Game &game, int screenWidth, int screenHeight) {
   DrawRectangle(centerX - 1, centerY - 1, 2, 2, Fade(style.dimText, 0.7f));
 }
 
-void drawWeaponStatus(const Game &game, const Font &font,
-                      const Font &japaneseFont, int screenWidth,
-                      int screenHeight) {
-  const HudStyle &style = hudStyle();
+void drawWeaponStatus(const Game &game, const Hud::Context &ctx) {
+  const Hud::Style &style = ctx.style;
   const Weapon &weapon = game.getWeapon();
   const WeaponInventory &inventory = game.getWeaponInventory();
-  Rectangle panel{screenWidth - 481.0f, screenHeight - 225.0f, 459.0f, 201.0f};
+  Rectangle bounds =
+      Hud::anchoredRect(ctx.screen, Hud::Anchor::BottomRight,
+                        {459.0f, 201.0f}, {22.0f, 24.0f});
+  Hud::Panel panel{bounds, bounds.y + 72.0f};
   Color neutralColor = Fade(style.dimText, 0.82f);
   Color panelColor = weapon.isReloading() ? style.danger : neutralColor;
 
-  drawHudPanel(panel, panelColor);
-  drawSystemHeader(font, japaneseFont, panel, "WEAPON I/F", "弾薬", panelColor);
-  drawLabelValue(font, "MODEL", weapon.getData().name,
-                 {panel.x + HUD_PAD, panel.y + 72.0f}, panel.x + 190.0f,
-                 neutralColor);
-  drawLabelValue(font, "MAG",
-                 TextFormat("%02d / %03d", weapon.getAmmoInMagazine(),
-                            weapon.getReserveAmmo()),
-                 {panel.x + HUD_PAD, panel.y + 122.0f}, panel.x + 190.0f,
-                 panelColor);
+  panel.draw(ctx, panelColor);
+  panel.header(ctx, "WEAPON I/F", "弾薬", panelColor);
+  panel.labelValue(ctx, "MODEL", weapon.getData().name, neutralColor);
+  panel.labelValue(ctx, "MAG",
+                   TextFormat("%02d / %03d", weapon.getAmmoInMagazine(),
+                              weapon.getReserveAmmo()),
+                   panelColor);
 
   if (weapon.isReloading()) {
-    float progress = weapon.getReloadProgress();
-    Rectangle bar{panel.x + HUD_PAD, panel.y + 170.0f,
-                  (panel.width - HUD_PAD * 2.0f) * progress, 7.0f};
-    DrawRectangleRec({panel.x + HUD_PAD, panel.y + 170.0f,
-                      panel.width - HUD_PAD * 2.0f, 7.0f},
-                     Fade(style.dimText, 0.35f));
-    DrawRectangleRec(bar, style.danger);
+    panel.progress(ctx, weapon.getReloadProgress(), style.danger);
   } else {
-    drawHudText(font,
-                TextFormat("SLOT %d/%d", inventory.getActiveWeaponIndex() + 1,
-                           inventory.getWeaponCount()),
-                {panel.x + HUD_PAD, panel.y + 165.0f}, 24.0f, style.dimText);
+    panel.cursorY = bounds.y + 165.0f;
+    panel.message(ctx,
+                  TextFormat("SLOT %d/%d", inventory.getActiveWeaponIndex() + 1,
+                             inventory.getWeaponCount()),
+                  24.0f, style.dimText);
   }
 }
 
 #ifdef DEBUG
-void drawDebugOverlay(const Game &game, const Font &font,
-                      const Font &japaneseFont) {
-  const HudStyle &style = hudStyle();
-  Rectangle panel{18.0f, 18.0f, 381.0f, 177.0f};
+void drawDebugOverlay(const Game &game, const Hud::Context &ctx) {
+  const Hud::Style &style = ctx.style;
+  Rectangle bounds = Hud::anchoredRect(ctx.screen, Hud::Anchor::TopLeft,
+                                       {381.0f, 177.0f}, {18.0f, 18.0f});
+  Hud::Panel panel{bounds, bounds.y + 72.0f};
   Vector3 position = game.getPlayer().getPosition();
 
-  drawHudPanel(panel, Fade(style.dimText, 0.82f));
-  drawSystemHeader(font, japaneseFont, panel, "DEBUG", "診断", style.dimText);
+  panel.draw(ctx, Fade(style.dimText, 0.82f));
+  panel.header(ctx, "DEBUG", "診断", style.dimText);
 
-  drawHudText(font, TextFormat("X  % .3f", position.x),
-              {panel.x + HUD_PAD, panel.y + 72.0f}, 24.0f, style.dimText);
-  drawHudText(font, TextFormat("Z  % .3f", position.z),
-              {panel.x + HUD_PAD, panel.y + 106.0f}, 24.0f, style.dimText);
-  drawHudText(font, TextFormat("Y  % .3f", position.y),
-              {panel.x + HUD_PAD, panel.y + 140.0f}, 24.0f, style.dimText);
+  panel.message(ctx, TextFormat("X  % .3f", position.x), 24.0f,
+                style.dimText);
+  panel.message(ctx, TextFormat("Z  % .3f", position.z), 24.0f,
+                style.dimText);
+  panel.message(ctx, TextFormat("Y  % .3f", position.y), 24.0f,
+                style.dimText);
 
   if (game.areEnemiesFrozen()) {
-    drawHudText(font, "ENEMIES FROZEN", {panel.x + 190.0f, panel.y + 72.0f},
-                20.0f, style.status);
+    Hud::text(ctx, ctx.font, "ENEMIES FROZEN",
+              {bounds.x + 190.0f, bounds.y + 72.0f}, 20.0f, style.status);
   }
 
   if (Weapon::debugRaysEnabled) {
-    drawHudText(font, "SHOT RAYS F4", {panel.x + 190.0f, panel.y + 106.0f},
-                20.0f, style.status);
+    Hud::text(ctx, ctx.font, "SHOT RAYS F4",
+              {bounds.x + 190.0f, bounds.y + 106.0f}, 20.0f, style.status);
   }
 
   drawViewmodelDebugPanel(game);
 }
 #endif
 
-void drawStateOverlay(const Game &game, int screenWidth, int screenHeight) {
-  const HudStyle &style = hudStyle();
+void drawStateOverlay(const Game &game, const Hud::Context &ctx) {
+  const Hud::Style &style = ctx.style;
 
   if (game.getState() != GameState::Dead && game.getState() != GameState::Win) {
     return;
@@ -489,18 +352,17 @@ void drawStateOverlay(const Game &game, int screenWidth, int screenHeight) {
   const char *title = dead ? "SIGNAL LOST" : "AREA CLEAR";
   const char *accent = dead ? "断線" : "完了";
   Color color = dead ? style.danger : style.text;
-  const Font &font = game.getAssets().getTerminalFont();
-  const Font &japaneseFont = game.getAssets().getJapaneseFont();
-  Rectangle panel{screenWidth / 2.0f - 323.0f, screenHeight / 2.0f - 112.0f,
-                  646.0f, 224.0f};
+  Rectangle panel = Hud::anchoredRect(ctx.screen, Hud::Anchor::Center,
+                                      {646.0f, 224.0f}, {0.0f, 0.0f});
   float overlayDim = dead ? 0.52f : 0.76f;
 
-  DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, overlayDim));
-  drawHudPanel(panel, color);
-  drawSystemHeader(font, japaneseFont, panel, "OPERATOR LINK", accent, color);
-  drawHudText(font, title, {panel.x + 48.0f, panel.y + 80.0f}, 58.0f, color);
-  drawHudText(font, "PRESS R TO REBOOT", {panel.x + 48.0f, panel.y + 158.0f},
-              31.0f, style.text);
+  DrawRectangleRec(ctx.screen, Fade(BLACK, overlayDim));
+  Hud::panel(ctx, panel, color);
+  Hud::systemHeader(ctx, panel, "OPERATOR LINK", accent, color);
+  Hud::text(ctx, ctx.font, title, {panel.x + 48.0f, panel.y + 80.0f}, 58.0f,
+            color);
+  Hud::text(ctx, ctx.font, "PRESS R TO REBOOT",
+            {panel.x + 48.0f, panel.y + 158.0f}, 31.0f, style.text);
 }
 } // namespace
 
@@ -510,25 +372,28 @@ void draw(const Game &game) {
     return;
   }
 
-  int width = HUD_REFERENCE_WIDTH;
-  int height = HUD_REFERENCE_HEIGHT;
+  int width = Hud::REFERENCE_WIDTH;
+  int height = Hud::REFERENCE_HEIGHT;
   const Font &font = game.getAssets().getTerminalFont();
   const Font &japaneseFont = game.getAssets().getJapaneseFont();
+  Hud::Context ctx{font, japaneseFont, Hud::style(),
+                   {0.0f, 0.0f, static_cast<float>(width),
+                    static_cast<float>(height)}};
 
-  beginHudScale();
+  Hud::beginScale();
 
-  drawHealthBar(game, font, japaneseFont);
-  drawWatermark(font, width);
-  drawAwarenessIndicator(game, font, japaneseFont, width);
-  drawCrosshair(game, width, height);
-  drawWeaponStatus(game, font, japaneseFont, width, height);
+  drawHealthBar(game, ctx);
+  drawWatermark(ctx);
+  drawAwarenessIndicator(game, ctx);
+  drawCrosshair(game, ctx);
+  drawWeaponStatus(game, ctx);
 
 #ifdef DEBUG
-  drawDebugOverlay(game, font, japaneseFont);
+  drawDebugOverlay(game, ctx);
 #endif
-  drawStateOverlay(game, width, height);
+  drawStateOverlay(game, ctx);
   drawScanlines(width, height);
 
-  endHudScale();
+  Hud::endScale();
 }
 } // namespace UI

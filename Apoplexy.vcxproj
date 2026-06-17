@@ -335,13 +335,10 @@
     <None Include="resources\audio\weapons\pistol_fire.wav" />
     <None Include="resources\audio\weapons\pistol_reload_start.wav" />
     <None Include="resources\levels\test_arena.json" />
-    <None Include="resources\models\Shotgun.fbx" />
-    <None Include="resources\models\USP-S.fbx" />
     <None Include="resources\models\USP-S.mtl" />
     <None Include="resources\models\USP-S.obj" />
-    <None Include="resources\models\gun.glb" />
-    <None Include="resources\shaders\monochrome.fs" />
-    <None Include="resources\shaders\monochrome.vs" />
+    <None Include="resources\shaders\psx_global.fs" />
+    <None Include="resources\shaders\psx_global.vs" />
     <None Include="resources\shaders\skybox.fs" />
     <None Include="resources\shaders\skybox.vs" />
     <None Include="resources\shaders\viewmodel.fs" />

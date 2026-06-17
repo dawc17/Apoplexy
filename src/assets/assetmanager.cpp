@@ -55,9 +55,8 @@ void AssetManager::load() {
   pistolModel = LoadModel("models/USP-S.obj");
   shotgunModel = LoadModel("models/Shotgun.glb");
 
-  monoShader = LoadShader("shaders/monochrome.vs", "shaders/monochrome.fs");
   psxGlobalShader =
-      LoadShader("expriments/psx_global.vs", "expriments/psx_global.fs");
+      LoadShader("shaders/psx_global.vs", "shaders/psx_global.fs");
   viewmodelShader = LoadShader("shaders/viewmodel.vs", "shaders/viewmodel.fs");
   worldLitShader = LoadShader("shaders/world_lit.vs", "shaders/world_lit.fs");
   muzzleFlashTexture = LoadTexture("textures/muzzleflash.png");
@@ -144,7 +143,6 @@ void AssetManager::unload() {
 
   UnloadModel(pistolModel);
   UnloadModel(shotgunModel);
-  UnloadShader(monoShader);
   UnloadShader(psxGlobalShader);
   UnloadShader(viewmodelShader);
   UnloadShader(worldLitShader);
@@ -184,8 +182,6 @@ const Model &AssetManager::getWeaponModel(WeaponModelId modelId) const {
     return pistolModel;
   }
 }
-
-Shader AssetManager::getMonoShader() const { return monoShader; }
 
 Shader AssetManager::getPsxGlobalShader() const { return psxGlobalShader; }
 

@@ -286,25 +286,16 @@
     <None Include="resources\levels\test_arena.json">
       <Filter>Game Resource Files\levels</Filter>
     </None>
-    <None Include="resources\models\Shotgun.fbx">
-      <Filter>Game Resource Files\models</Filter>
-    </None>
-    <None Include="resources\models\USP-S.fbx">
-      <Filter>Game Resource Files\models</Filter>
-    </None>
     <None Include="resources\models\USP-S.mtl">
       <Filter>Game Resource Files\models</Filter>
     </None>
     <None Include="resources\models\USP-S.obj">
       <Filter>Game Resource Files\models</Filter>
     </None>
-    <None Include="resources\models\gun.glb">
-      <Filter>Game Resource Files\models</Filter>
-    </None>
-    <None Include="resources\shaders\monochrome.fs">
+    <None Include="resources\shaders\psx_global.fs">
       <Filter>Game Resource Files\shaders</Filter>
     </None>
-    <None Include="resources\shaders\monochrome.vs">
+    <None Include="resources\shaders\psx_global.vs">
       <Filter>Game Resource Files\shaders</Filter>
     </None>
     <None Include="resources\shaders\skybox.fs">

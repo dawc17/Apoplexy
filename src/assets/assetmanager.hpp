@@ -9,7 +9,6 @@ public:
   void unload();
 
   const Model &getWeaponModel(WeaponModelId modelId) const;
-  Shader getMonoShader() const;
   Shader getPsxGlobalShader() const;
   Shader getViewmodelShader() const;
   Shader getWorldLitShader() const;
@@ -23,7 +22,6 @@ private:
   Model pistolModel{};
   Model shotgunModel{};
   Model skyboxModel{};
-  Shader monoShader{};
   Shader psxGlobalShader{};
   Shader viewmodelShader{};
   Shader worldLitShader{};

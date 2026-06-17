@@ -57,6 +57,7 @@ private:
   void updateCameraShake(float dt);
   void drawDamageVignette() const;
   void drawCrouchVignette() const;
+  void drawShaderPresetDebugPanel();
 
 private:
   GameState state = GameState::Menu;
@@ -82,6 +83,8 @@ private:
   float damageVignetteDuration = 0.45f;
   float winSequenceTimer = 0.0f;
   float winSequenceDuration = 4.35f;
+  int psxShaderPresetIndex = 2;
+  bool shaderPresetPanelOpen = false;
   bool enemiesFrozen = false;
 
   Camera3D camera{};

@@ -12,7 +12,9 @@
 #include "../weapon/weapon.hpp"
 #include "../weapon/weaponinventory.hpp"
 
+#include <cstddef>
 #include <raylib.h>
+#include <string_view>
 #include <vector>
 
 class Game {
@@ -43,8 +45,10 @@ public:
 
 private:
   void reset();
+  void updateMenu();
   void updatePlaying(float dt);
   void updateWinSequence(float dt);
+  void drawMenu() const;
   void drawPlaying();
   void drawWinSequenceDim() const;
   void updateFootsteps(float dt);
@@ -80,6 +84,8 @@ private:
   float damageVignetteDuration = 0.45f;
   float winSequenceTimer = 0.0f;
   float winSequenceDuration = 4.35f;
+  std::size_t selectedLevelIndex = 1;
+  std::string_view activeLevelPath = "levels/stealth_compound.json";
   bool enemiesFrozen = false;
 
   Camera3D camera{};

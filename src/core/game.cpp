@@ -3,7 +3,9 @@
 #include "../editor/editorui.hpp"
 #include "../render/renderer.hpp"
 #include "../ui/ui.hpp"
+#include <cstddef>
 #include <cstdlib>
+#include <iterator>
 #include <numbers>
 #ifdef DEBUG
 #include "../viewmodel/viewmodeldebug.hpp"
@@ -18,13 +20,34 @@
 #include "weapon/weapondata.hpp"
 #include "weapon/weaponinventory.hpp"
 
+#include <array>
 #include <cmath>
+#include <string_view>
 
 namespace {
 constexpr int PSX_RENDER_WIDTH = 640;
 constexpr int PSX_RENDER_HEIGHT = 320;
 constexpr float WIN_SEQUENCE_SLOWMO_SCALE = 0.18f;
 constexpr float WIN_SEQUENCE_MAX_DIM = 0.76f;
+
+struct LevelOption {
+  std::string_view name;
+  std::string_view path;
+  std::string_view description;
+};
+
+constexpr std::array<LevelOption, 2> LEVEL_OPTIONS{{
+    {
+        "Killhouse",
+        "levels/test_arena.json",
+        "Compact combat sandbox",
+    },
+    {
+        "Stealth Compound",
+        "levels/stealth_compound.json",
+        "Larger infiltration simulation",
+    },
+}};
 
 AudioId randomFootstep(int &lastFootstepIndex) {
   int index = GetRandomValue(0, 4);
@@ -122,7 +145,6 @@ Game::Game() {
                     ProceduralWeaponAnimationCatalog::Pistol);
   weapons.addWeapon(WeaponCatalog::Shotgun,
                     ProceduralWeaponAnimationCatalog::Pistol);
-  reset();
 }
 
 Game::~Game() {
@@ -133,13 +155,14 @@ Game::~Game() {
 
 void Game::reset() {
   state = GameState::Playing;
+  activeLevelPath = LEVEL_OPTIONS[selectedLevelIndex].path;
   damageVignetteTimer = 0.0f;
   winSequenceTimer = 0.0f;
   footstepDistance = 0.0f;
   lastFootstepIndex = -1;
   audio.stop(AudioId::PistolReloadStart);
 
-  if (auto result = level.loadFromFile("levels/test_arena.json"); !result) {
+  if (auto result = level.loadFromFile(activeLevelPath); !result) {
     TraceLog(LOG_WARNING, "%s", result.error().c_str());
     level.loadTestArena();
   }
@@ -162,9 +185,7 @@ void Game::update(float dt) {
 
   switch (state) {
   case GameState::Menu:
-    if (IsKeyPressed(KEY_ENTER)) {
-      reset();
-    }
+    updateMenu();
     break;
 
   case GameState::Playing:
@@ -186,6 +207,21 @@ void Game::update(float dt) {
       reset();
     }
     break;
+  }
+}
+
+void Game::updateMenu() {
+  if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) {
+    selectedLevelIndex = (selectedLevelIndex + 1) % LEVEL_OPTIONS.size();
+  }
+
+  if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)) {
+    selectedLevelIndex = selectedLevelIndex == 0 ? LEVEL_OPTIONS.size() - 1
+                                                 : selectedLevelIndex - 1;
+  }
+
+  if (IsKeyPressed(KEY_ENTER)) {
+    reset();
   }
 }
 
@@ -302,6 +338,12 @@ void Game::updateWinSequence(float dt) {
 }
 
 void Game::draw() {
+  if (state == GameState::Menu) {
+    ClearBackground(BLACK);
+    drawMenu();
+    return;
+  }
+
   if (levelEditor.isEnabled()) {
     ClearBackground(BLACK);
 
@@ -345,6 +387,33 @@ void Game::draw() {
   drawWinSequenceDim();
 
   EditorUI::draw(levelEditor, level);
+}
+
+void Game::drawMenu() const {
+  int width = GetScreenWidth();
+  int height = GetScreenHeight();
+  int centerX = width / 2;
+  int startY = height / 2 - 24;
+
+  DrawText("APOPLEXY", centerX - MeasureText("APOPLEXY", 48) / 2, 96, 48, RED);
+  DrawText("SELECT MISSION", centerX - MeasureText("SELECT MISSION", 18) / 2,
+           154, 18, RED);
+
+  for (std::size_t i = 0; i < LEVEL_OPTIONS.size(); ++i) {
+    const LevelOption &option = LEVEL_OPTIONS[i];
+    bool selected = i == selectedLevelIndex;
+    Color nameColor = selected ? RED : MAROON;
+    Color descColor = selected ? RAYWHITE : DARKGRAY;
+    int y = startY + static_cast<int>(i) * 58;
+    const char *prefix = selected ? "> " : " ";
+    const char *name = TextFormat("%s%s", prefix, option.name.data());
+
+    DrawText(name, centerX - 190, y, 24, nameColor);
+    DrawText(option.description.data(), centerX - 160, y + 28, 14, descColor);
+  }
+
+  DrawText("W/S or arrows to select", centerX - 132, height - 96, 16, MAROON);
+  DrawText("enter to load level", centerX - 74, height - 70, 16, RED);
 }
 
 void Game::drawWinSequenceDim() const {

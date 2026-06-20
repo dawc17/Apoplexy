@@ -13,7 +13,7 @@
 #include <vector>
 
 namespace {
-constexpr const char *LEVEL_PATH = "levels/test_arena.json";
+constexpr const char *LEVEL_PATH = "levels/stealth_compound.json";
 
 int toolToIndex(EditorTool tool) {
   switch (tool) {

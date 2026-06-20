@@ -6,11 +6,17 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <utility>
 
 namespace {
 float clamp01(float value) { return std::clamp(value, 0.0f, 1.0f); }
 
 float clampPitch(float value) { return std::clamp(value, 0.25f, 4.0f); }
+
+template <std::size_t N>
+float busVolume(const std::array<float, N> &volumes, AudioBus bus) {
+  return volumes[std::to_underlying(bus)];
+}
 } // namespace
 
 AudioSystem::~AudioSystem() { unload(); }
@@ -21,7 +27,7 @@ void AudioSystem::load() {
   }
 
   busVolumes.fill(1.0f);
-  busVolumes[static_cast<int>(AudioBus::Bgm)] = 0.0f;
+  busVolumes[std::to_underlying(AudioBus::Bgm)] = 0.0f;
 
   loadClip(AudioId::PistolFire, "audio/weapons/pistol_fire.wav",
            AudioBus::Weapons, 0.85f);
@@ -49,8 +55,8 @@ void AudioSystem::load() {
 
     if (musicLoaded) {
       music.looping = true;
-      SetMusicVolume(music, busVolumes[static_cast<int>(AudioBus::Master)] *
-                                busVolumes[static_cast<int>(AudioBus::Bgm)]);
+      SetMusicVolume(music, busVolume(busVolumes, AudioBus::Master) *
+                                busVolume(busVolumes, AudioBus::Bgm));
     } else {
       std::cout << "Failed to load music file: music.mp3" << std::endl;
     }
@@ -84,17 +90,17 @@ void AudioSystem::update() {
     return;
   }
 
-  SetMusicVolume(music, busVolumes[static_cast<int>(AudioBus::Master)] *
-                            busVolumes[static_cast<int>(AudioBus::Bgm)]);
+  SetMusicVolume(music, busVolume(busVolumes, AudioBus::Master) *
+                            busVolume(busVolumes, AudioBus::Bgm));
   UpdateMusicStream(music);
 }
 
 void AudioSystem::setBusVolume(AudioBus bus, float volume) {
-  busVolumes[static_cast<int>(bus)] = clamp01(volume);
+  busVolumes[std::to_underlying(bus)] = clamp01(volume);
 }
 
 float AudioSystem::getBusVolume(AudioBus bus) const {
-  return busVolumes[static_cast<int>(bus)];
+  return busVolumes[std::to_underlying(bus)];
 }
 
 void AudioSystem::setListener(const AudioListener &newListener) {
@@ -189,7 +195,7 @@ bool AudioSystem::isLoaded(AudioId id) const {
 
 void AudioSystem::loadClip(AudioId id, std::string_view path, AudioBus bus,
                            float baseVolume) {
-  AudioClip &clip = clips[static_cast<int>(id)];
+  AudioClip &clip = clips[std::to_underlying(id)];
 
   clip.path = std::string(path);
   clip.bus = bus;
@@ -228,8 +234,8 @@ bool AudioSystem::canPlay(AudioClip *clip) {
 
 float AudioSystem::resolveVolume(const AudioClip &clip,
                                  float playbackVolume) const {
-  return clamp01(busVolumes[static_cast<int>(AudioBus::Master)] *
-                 busVolumes[static_cast<int>(clip.bus)] * clip.baseVolume *
+  return clamp01(busVolume(busVolumes, AudioBus::Master) *
+                 busVolume(busVolumes, clip.bus) * clip.baseVolume *
                  playbackVolume);
 }
 
@@ -270,7 +276,7 @@ float AudioSystem::resolveDistanceVolume(Vector3 position, float minDistance,
 }
 
 AudioSystem::AudioClip *AudioSystem::getClip(AudioId id) {
-  int index = static_cast<int>(id);
+  int index = std::to_underlying(id);
 
   if (index < 0 || index >= audioIdCount) {
     return nullptr;
@@ -280,7 +286,7 @@ AudioSystem::AudioClip *AudioSystem::getClip(AudioId id) {
 }
 
 const AudioSystem::AudioClip *AudioSystem::getClip(AudioId id) const {
-  int index = static_cast<int>(id);
+  int index = std::to_underlying(id);
 
   if (index < 0 || index >= audioIdCount) {
     return nullptr;

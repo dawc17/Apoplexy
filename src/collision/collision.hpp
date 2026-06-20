@@ -1,11 +1,11 @@
 #pragma once
 
 #include "raylib.h"
+#include <optional>
+#include <span>
 
 class Level;
 class Enemy;
-
-#include <vector>
 
 namespace Collision {
 struct MoveResult {
@@ -20,9 +20,18 @@ bool cylinderLevel(Vector3 position, float radius, float height,
 MoveResult moveCylinderLevel(Vector3 position, Vector3 velocity, float radius,
                              float height, const Level &level, float dt);
 
-bool rayEnemies(Ray ray, std::vector<Enemy> &enemies, int &hitEnemyIndex,
-                Vector3 &hitPoint);
+struct EnemyHit {
+  int enemyIndex = -1;
+  Vector3 point{};
+  float distance = 0.0f;
+};
 
-bool rayLevel(Ray ray, const Level &level, Vector3 &hitPoint,
-              float &hitDistance);
+struct LevelHit {
+  Vector3 point{};
+  float distance = 0.0f;
+};
+
+std::optional<EnemyHit> rayEnemies(Ray ray, std::span<Enemy> enemies);
+std::optional<LevelHit> rayLevel(Ray ray, const Level &level);
+
 } // namespace Collision

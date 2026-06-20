@@ -4,6 +4,8 @@
 
 #include "raylib.h"
 
+#include <expected>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -22,8 +24,8 @@ struct WallDecal {
 
 class Level {
 public:
-  bool loadFromFile(const char *path);
-  bool saveToFile(const char *path) const;
+  std::expected<void, std::string> loadFromFile(std::filesystem::path path);
+  std::expected<void, std::string> saveToFile(std::filesystem::path path) const;
 
   void loadTestArena();
   void unload();

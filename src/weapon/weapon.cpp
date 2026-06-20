@@ -86,10 +86,8 @@ void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
     ray.timer = std::max(0.0f, ray.timer - dt);
   }
 
-  debugRays.erase(
-      std::remove_if(debugRays.begin(), debugRays.end(),
-                     [](const DebugShotRay &ray) { return ray.timer <= 0.0f; }),
-      debugRays.end());
+  std::erase_if(debugRays,
+                [](const DebugShotRay &ray) { return ray.timer <= 0.0f; });
 
   bool wantsToFire = data->fire.automatic
                          ? IsMouseButtonDown(MOUSE_BUTTON_LEFT)
@@ -163,10 +161,8 @@ void Weapon::updatePresentation(float dt, const Player &player) {
     ray.timer = std::max(0.0f, ray.timer - dt);
   }
 
-  debugRays.erase(
-      std::remove_if(debugRays.begin(), debugRays.end(),
-                     [](const DebugShotRay &ray) { return ray.timer <= 0.0f; }),
-      debugRays.end());
+  std::erase_if(debugRays,
+                [](const DebugShotRay &ray) { return ray.timer <= 0.0f; });
 
   if (isMeleeing()) {
     meleeTimer = std::max(0.0f, meleeTimer - dt);
@@ -432,21 +428,19 @@ void Weapon::performMeleeHit(const Camera3D &camera,
     enemyHitDistance = hit.distance;
   }
 
-  Vector3 levelHitPoint{};
-  float levelHitDistance = FLT_MAX;
-  bool hitLevel =
-      Collision::rayLevel(ray, level, levelHitPoint, levelHitDistance);
+  std::optional<Collision::LevelHit> levelHit =
+      Collision::rayLevel(ray, level);
 
   if (hitEnemyIndex < 0) {
-    float debugDistance =
-        hitLevel ? std::min(levelHitDistance, data->melee.range)
-                 : data->melee.range;
-    addDebugRay(ray, debugDistance, hitLevel);
+    float debugDistance = levelHit
+                              ? std::min(levelHit->distance, data->melee.range)
+                              : data->melee.range;
+    addDebugRay(ray, debugDistance, levelHit.has_value());
     return;
   }
 
-  if (hitLevel && levelHitDistance < enemyHitDistance) {
-    addDebugRay(ray, levelHitDistance, true);
+  if (levelHit && levelHit->distance < enemyHitDistance) {
+    addDebugRay(ray, levelHit->distance, true);
     return;
   }
 
@@ -503,56 +497,50 @@ Ray Weapon::makeShootRay(const Camera3D &camera, float spreadDegrees) const {
 void Weapon::firePelletRay(Ray ray, std::vector<Enemy> &enemies,
                            const Level &level, ParticleSystem &particles,
                            AudioSystem &audio) {
-  int hitEnemyIndex = -1;
-  Vector3 enemyHitPoint{};
-  Vector3 levelHitPoint{};
-  float enemyHitDistance = FLT_MAX;
-  float levelHitDistance = FLT_MAX;
+  std::optional<Collision::EnemyHit> enemyHit =
+      Collision::rayEnemies(ray, enemies);
+  std::optional<Collision::LevelHit> levelHit =
+      Collision::rayLevel(ray, level);
 
-  bool hitEnemy =
-      Collision::rayEnemies(ray, enemies, hitEnemyIndex, enemyHitPoint);
-  bool hitLevel =
-      Collision::rayLevel(ray, level, levelHitPoint, levelHitDistance);
-
-  if (!hitEnemy) {
-    float debugDistance = hitLevel
-                              ? std::min(levelHitDistance, data->fire.range)
+  if (!enemyHit) {
+    float debugDistance = levelHit
+                              ? std::min(levelHit->distance, data->fire.range)
                               : data->fire.range;
-    addDebugRay(ray, debugDistance, hitLevel);
+    addDebugRay(ray, debugDistance, levelHit.has_value());
     return;
   }
 
-  enemyHitDistance = Vector3Distance(ray.position, enemyHitPoint);
-  if (enemyHitDistance > data->fire.range) {
+  if (enemyHit->distance > data->fire.range) {
     addDebugRay(ray, data->fire.range, false);
     return;
   }
 
-  if (hitLevel && levelHitDistance < enemyHitDistance) {
-    addDebugRay(ray, levelHitDistance, true);
+  if (levelHit && levelHit->distance < enemyHit->distance) {
+    addDebugRay(ray, levelHit->distance, true);
     return;
   }
 
-  addDebugRay(ray, enemyHitDistance, true);
+  addDebugRay(ray, enemyHit->distance, true);
 
-  if (hitEnemyIndex < 0) {
+  if (enemyHit->enemyIndex < 0) {
     return;
   }
 
-  Vector3 hitNormal = Vector3Normalize(
-      Vector3Subtract(enemyHitPoint, enemies[hitEnemyIndex].getPosition()));
+  Vector3 hitNormal = Vector3Normalize(Vector3Subtract(
+      enemyHit->point, enemies[enemyHit->enemyIndex].getPosition()));
 
-  particles.spawnEnemyHit(enemyHitPoint, hitNormal,
-                          enemies[hitEnemyIndex].getVelocity());
+  particles.spawnEnemyHit(enemyHit->point, hitNormal,
+                          enemies[enemyHit->enemyIndex].getVelocity());
 
   audio.play(
       AudioId::EnemyHit,
       {1.0f, 0.96f + static_cast<float>(GetRandomValue(0, 8)) / 100.0f, 0.0f});
 
-  Vector3 enemyPosition = enemies[hitEnemyIndex].getPosition();
-  Vector3 enemyVelocity = enemies[hitEnemyIndex].getVelocity();
+  Vector3 enemyPosition = enemies[enemyHit->enemyIndex].getPosition();
+  Vector3 enemyVelocity = enemies[enemyHit->enemyIndex].getVelocity();
 
-  if (enemies[hitEnemyIndex].applyDamage(data->fire.damage, ray.position)) {
+  if (enemies[enemyHit->enemyIndex].applyDamage(data->fire.damage,
+                                                ray.position)) {
     particles.spawnEnemyDeath(
         {enemyPosition.x, enemyPosition.y + 0.75f, enemyPosition.z},
         enemyVelocity);

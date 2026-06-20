@@ -28,8 +28,6 @@ ifeq ($(origin AR), default)
   AR = ar
 endif
 RESCOMP = windres
-WINDOWS_LIBS = -lwinmm -lgdi32 -lopengl32
-LINUX_LIBS = -lpthread -lm -ldl -lrt -lX11
 INCLUDES += -Isrc -Iinclude -Iinclude/raygui -Ibuild/external/raylib-master/src
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
@@ -47,8 +45,8 @@ TARGETDIR = bin/Debug
 TARGET = $(TARGETDIR)/apoplexy
 OBJDIR = obj/x64/Debug/Apoplexy
 DEFINES += -DDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_GLFW_X11
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -g -std=c17
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -g -std=c++17
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -g -std=c17 -std=c++26
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -g -std=c++26
 LIBS += bin/Debug/libraylib.a -lpthread -lm -ldl -lrt -lX11
 LDDEPS += bin/Debug/libraylib.a
 ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64
@@ -58,8 +56,8 @@ TARGETDIR = bin/Debug
 TARGET = $(TARGETDIR)/apoplexy
 OBJDIR = obj/x86/Debug/Apoplexy
 DEFINES += -DDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_GLFW_X11
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -g -std=c17
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -g -std=c++17
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -g -std=c17 -std=c++26
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -g -std=c++26
 LIBS += bin/Debug/libraylib.a -lpthread -lm -ldl -lrt -lX11
 LDDEPS += bin/Debug/libraylib.a
 ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -m32
@@ -69,8 +67,8 @@ TARGETDIR = bin/Debug
 TARGET = $(TARGETDIR)/apoplexy
 OBJDIR = obj/ARM64/Debug/Apoplexy
 DEFINES += -DDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_GLFW_X11
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -Wshadow -g -std=c17
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -Wshadow -g -std=c++17
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -Wshadow -g -std=c17 -std=c++26
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -Wshadow -g -std=c++26
 LIBS += bin/Debug/libraylib.a -lpthread -lm -ldl -lrt -lX11
 LDDEPS += bin/Debug/libraylib.a
 ALL_LDFLAGS += $(LDFLAGS)
@@ -80,8 +78,8 @@ TARGETDIR = bin/Release
 TARGET = $(TARGETDIR)/apoplexy
 OBJDIR = obj/x64/Release/Apoplexy
 DEFINES += -DNDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_GLFW_X11
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -O2 -std=c17
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -O2 -std=c++17
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -O2 -std=c17 -std=c++26
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -O2 -std=c++26
 LIBS += bin/Release/libraylib.a -lpthread -lm -ldl -lrt -lX11
 LDDEPS += bin/Release/libraylib.a
 ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
@@ -91,8 +89,8 @@ TARGETDIR = bin/Release
 TARGET = $(TARGETDIR)/apoplexy
 OBJDIR = obj/x86/Release/Apoplexy
 DEFINES += -DNDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_GLFW_X11
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -O2 -std=c17
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -O2 -std=c++17
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -O2 -std=c17 -std=c++26
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -O2 -std=c++26
 LIBS += bin/Release/libraylib.a -lpthread -lm -ldl -lrt -lX11
 LDDEPS += bin/Release/libraylib.a
 ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -m32 -s
@@ -102,19 +100,12 @@ TARGETDIR = bin/Release
 TARGET = $(TARGETDIR)/apoplexy
 OBJDIR = obj/ARM64/Release/Apoplexy
 DEFINES += -DNDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_GLFW_X11
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -Wshadow -O2 -std=c17
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -Wshadow -O2 -std=c++17
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -Wshadow -O2 -std=c17 -std=c++26
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -Wshadow -O2 -std=c++26
 LIBS += bin/Release/libraylib.a -lpthread -lm -ldl -lrt -lX11
 LDDEPS += bin/Release/libraylib.a
 ALL_LDFLAGS += $(LDFLAGS) -s
 
-endif
-
-ifeq ($(OS),Windows_NT)
-  TARGET := $(TARGET).exe
-  DEFINES := $(filter-out -D_GLFW_X11 -D_GLFW_WAYLAND,$(DEFINES)) -D_WIN32
-  LIBS := $(filter-out $(LINUX_LIBS),$(LIBS)) $(WINDOWS_LIBS)
-  ALL_LDFLAGS := $(filter-out -L/usr/lib64 -L/usr/lib32,$(ALL_LDFLAGS)) -static -static-libgcc -static-libstdc++
 endif
 
 # Per File Configurations

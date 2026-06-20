@@ -1,6 +1,7 @@
 CompileFlags:
   CompilationDatabase: build/
   Add:
+    - -std=c++26
     - -I/home/czapla/apoplexy/build/external/raylib-master/src
     - -I/home/czapla/apoplexy/src
     - -I/home/czapla/apoplexy/include

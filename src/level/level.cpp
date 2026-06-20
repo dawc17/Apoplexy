@@ -6,6 +6,7 @@
 #include "rlgl.h"
 
 #include <cstdint>
+#include <expected>
 #include <fstream>
 #include <map>
 #include <string>
@@ -186,75 +187,81 @@ void drawDecalQuad(const WallDecal &decal) {
 }
 } // namespace
 
-bool Level::loadFromFile(const char *path) {
+std::expected<void, std::string> Level::loadFromFile(
+    std::filesystem::path path) {
   std::ifstream file(path);
   if (!file) {
-    return false;
+    return std::unexpected("Failed to open level file: " + path.string());
   }
 
   json data = json::parse(file, nullptr, false);
   if (data.is_discarded()) {
-    return false;
+    return std::unexpected("Failed to parse level JSON: " + path.string());
   }
 
   unload();
 
-  playerSpawn = readVec3(data.at("playerSpawn"));
+  try {
+    playerSpawn = readVec3(data.at("playerSpawn"));
 
-  if (data.contains("lighting") && data.at("lighting").is_object()) {
-    const json &lightingData = data.at("lighting");
-    lighting.ambientColor =
-        readColor(lightingData.value("ambientColor",
-                                     json::array({255, 255, 255, 255})));
-    lighting.ambientIntensity =
-        lightingData.value("ambientIntensity", lighting.ambientIntensity);
+    if (data.contains("lighting") && data.at("lighting").is_object()) {
+      const json &lightingData = data.at("lighting");
+      lighting.ambientColor =
+          readColor(lightingData.value("ambientColor",
+                                       json::array({255, 255, 255, 255})));
+      lighting.ambientIntensity =
+          lightingData.value("ambientIntensity", lighting.ambientIntensity);
 
-    if (lightingData.contains("sun") && lightingData.at("sun").is_object()) {
-      const json &sunData = lightingData.at("sun");
-      lighting.sun.direction =
-          readVec3(sunData.value("direction", writeVec3(lighting.sun.direction)));
-      lighting.sun.color =
-          readColor(sunData.value("color", json::array({255, 255, 255, 255})));
-      lighting.sun.intensity =
-          sunData.value("intensity", lighting.sun.intensity);
+      if (lightingData.contains("sun") && lightingData.at("sun").is_object()) {
+        const json &sunData = lightingData.at("sun");
+        lighting.sun.direction = readVec3(
+            sunData.value("direction", writeVec3(lighting.sun.direction)));
+        lighting.sun.color = readColor(
+            sunData.value("color", json::array({255, 255, 255, 255})));
+        lighting.sun.intensity =
+            sunData.value("intensity", lighting.sun.intensity);
+      }
     }
-  }
 
-  for (const json &wall : data.at("walls")) {
-    addWall((readVec3(wall.at("position"))), readVec3(wall.at("size")));
-  }
-
-  if (data.contains("wallDecals") && data.at("wallDecals").is_array()) {
-    for (const json &decal : data.at("wallDecals")) {
-      addWallDecal(readVec3(decal.at("position")),
-                   readVec3(decal.at("normal")),
-                   readVec2(decal.value("size", json::array({1.5f, 1.5f}))),
-                   decal.value("texture", "textures/decal.png").c_str());
+    for (const json &wall : data.at("walls")) {
+      addWall((readVec3(wall.at("position"))), readVec3(wall.at("size")));
     }
-  }
 
-  for (const json &spawn : data.at("enemySpawns")) {
-    enemySpawns.push_back(readVec3(spawn));
-  }
-
-  if (data.contains("lights") && data.at("lights").is_array()) {
-    for (const json &lightData : data.at("lights")) {
-      Lighting::PointLight light{};
-      light.position = readVec3(lightData.at("position"));
-      light.color =
-          readColor(lightData.value("color",
-                                    json::array({255, 214, 160, 255})));
-      light.intensity = lightData.value("intensity", light.intensity);
-      light.radius = lightData.value("radius", light.radius);
-      light.enabled = lightData.value("enabled", light.enabled);
-      addLight(light);
+    if (data.contains("wallDecals") && data.at("wallDecals").is_array()) {
+      for (const json &decal : data.at("wallDecals")) {
+        addWallDecal(readVec3(decal.at("position")),
+                     readVec3(decal.at("normal")),
+                     readVec2(decal.value("size", json::array({1.5f, 1.5f}))),
+                     decal.value("texture", "textures/decal.png").c_str());
+      }
     }
+
+    for (const json &spawn : data.at("enemySpawns")) {
+      enemySpawns.push_back(readVec3(spawn));
+    }
+
+    if (data.contains("lights") && data.at("lights").is_array()) {
+      for (const json &lightData : data.at("lights")) {
+        Lighting::PointLight light{};
+        light.position = readVec3(lightData.at("position"));
+        light.color = readColor(
+            lightData.value("color", json::array({255, 214, 160, 255})));
+        light.intensity = lightData.value("intensity", light.intensity);
+        light.radius = lightData.value("radius", light.radius);
+        light.enabled = lightData.value("enabled", light.enabled);
+        addLight(light);
+      }
+    }
+  } catch (const json::exception &error) {
+    return std::unexpected("Invalid level data in " + path.string() + ": " +
+                           error.what());
   }
 
-  return true;
+  return {};
 }
 
-bool Level::saveToFile(const char *path) const {
+std::expected<void, std::string> Level::saveToFile(
+    std::filesystem::path path) const {
   json data;
   data["playerSpawn"] = writeVec3(playerSpawn);
   data["walls"] = json::array();
@@ -304,11 +311,12 @@ bool Level::saveToFile(const char *path) const {
 
   std::ofstream file(path);
   if (!file) {
-    return false;
+    return std::unexpected("Failed to open level file for writing: " +
+                           path.string());
   }
 
   file << data.dump(2);
-  return true;
+  return {};
 }
 
 void Level::addEnemySpawn(Vector3 position) {

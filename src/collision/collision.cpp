@@ -5,7 +5,7 @@
 
 #include "raymath.h"
 
-#include <cfloat>
+#include <limits>
 #include <raylib.h>
 
 namespace {
@@ -108,10 +108,9 @@ MoveResult moveCylinderLevel(Vector3 position, Vector3 velocity, float radius,
   return {next, nextVelocity, grounded};
 }
 
-bool rayEnemies(Ray ray, std::vector<Enemy> &enemies, int &hitEnemyIndex,
-                Vector3 &hitPoint) {
-  hitEnemyIndex = -1;
-  float closestDistance = FLT_MAX;
+std::optional<EnemyHit> rayEnemies(Ray ray, std::span<Enemy> enemies) {
+  std::optional<EnemyHit> closestHit;
+  float closestDistance = std::numeric_limits<float>::max();
 
   for (int i = 0; i < static_cast<int>(enemies.size()); ++i) {
     if (!enemies[i].isAlive()) {
@@ -122,18 +121,16 @@ bool rayEnemies(Ray ray, std::vector<Enemy> &enemies, int &hitEnemyIndex,
 
     if (hit.hit && hit.distance < closestDistance) {
       closestDistance = hit.distance;
-      hitEnemyIndex = i;
-      hitPoint = hit.point;
+      closestHit = EnemyHit{i, hit.point, hit.distance};
     }
   }
 
-  return hitEnemyIndex >= 0;
+  return closestHit;
 }
 
-bool rayLevel(Ray ray, const Level &level, Vector3 &hitPoint,
-              float &hitDistance) {
-  bool didHit = false;
-  float closestDistance = FLT_MAX;
+std::optional<LevelHit> rayLevel(Ray ray, const Level &level) {
+  std::optional<LevelHit> closestHit;
+  float closestDistance = std::numeric_limits<float>::max();
 
   for (const Wall &wall : level.getWalls()) {
     RayCollision collision = GetRayCollisionBox(ray, wall.bounds);
@@ -150,12 +147,10 @@ bool rayLevel(Ray ray, const Level &level, Vector3 &hitPoint,
       continue;
     }
 
-    didHit = true;
     closestDistance = collision.distance;
-    hitPoint = collision.point;
+    closestHit = LevelHit{collision.point, collision.distance};
   }
 
-  hitDistance = closestDistance;
-  return didHit;
+  return closestHit;
 }
 } // namespace Collision

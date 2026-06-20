@@ -115,7 +115,8 @@ void Game::reset() {
   audio.stop(AudioId::PistolReloadStart);
   audio.stop(AudioId::PlayerFootstep);
 
-  if (!level.loadFromFile("levels/test_arena.json")) {
+  if (auto result = level.loadFromFile("levels/test_arena.json"); !result) {
+    TraceLog(LOG_WARNING, "%s", result.error().c_str());
     level.loadTestArena();
   }
 

@@ -46,7 +46,7 @@ private:
 
   float radius = 0.35f;
   float height = 1.8f;
-  float moveSpeed = 6.0f;
+  float moveSpeed = 4.0f;
   float gravity = 24.0f;
   bool grounded = false;
 

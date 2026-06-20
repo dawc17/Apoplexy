@@ -1,5 +1,8 @@
 # Apoplexy
 
+## What is this game made in!??!?!?
+I use C++26 and raylib.
+
 ## What is Apoplexy **right now?**
 It is a prototype, a MVP of what I eventually want this project to evolve into.
 ### What features exist at the moment?

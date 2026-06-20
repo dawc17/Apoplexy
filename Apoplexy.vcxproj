@@ -147,7 +147,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -167,7 +167,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -187,7 +187,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -210,7 +210,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -236,7 +236,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -262,7 +262,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -297,6 +297,7 @@
     <ClInclude Include="src\player\player.hpp" />
     <ClInclude Include="src\render\lighting.hpp" />
     <ClInclude Include="src\render\renderer.hpp" />
+    <ClInclude Include="src\ui\hud.hpp" />
     <ClInclude Include="src\ui\ui.hpp" />
     <ClInclude Include="src\util\math.hpp" />
     <ClInclude Include="src\viewmodel\proceduralweaponanimation.hpp" />
@@ -331,10 +332,17 @@
     <ClCompile Include="src\weapon\weaponinventory.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\audio\enemies\hit.wav" />
     <None Include="resources\audio\footsteps.wav" />
+    <None Include="resources\audio\music\music.mp3" />
+    <None Include="resources\audio\player\hurt.wav" />
     <None Include="resources\audio\weapons\pistol_fire.wav" />
     <None Include="resources\audio\weapons\pistol_reload_start.wav" />
+    <None Include="resources\audio\weapons\shotgun_fire.wav" />
+    <None Include="resources\audio\weapons\switch.wav" />
+    <None Include="resources\fonts\NotoSansJP-Regular.ttf" />
     <None Include="resources\levels\test_arena.json" />
+    <None Include="resources\models\Shotgun.glb" />
     <None Include="resources\models\USP-S.mtl" />
     <None Include="resources\models\USP-S.obj" />
     <None Include="resources\shaders\psx_global.fs" />
@@ -347,10 +355,13 @@
     <None Include="resources\shaders\world_lit.vs" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="resources\textures\Shotgun_Texture.png" />
+    <Image Include="resources\textures\Shotgun.png" />
     <Image Include="resources\textures\USP-S.png" />
+    <Image Include="resources\textures\decal.png" />
     <Image Include="resources\textures\muzzleflash.png" />
+    <Image Include="resources\textures\omni.gif" />
     <Image Include="resources\textures\skybox.png" />
+    <Image Include="resources\textures\tf2.gif" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="raylib.vcxproj">

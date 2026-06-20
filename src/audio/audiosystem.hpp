@@ -5,6 +5,7 @@
 #include <array>
 #include <string>
 #include <string_view>
+#include <utility>
 
 enum class AudioId {
   PistolFire,
@@ -88,8 +89,8 @@ private:
     bool warnedOnPlayback = false;
   };
 
-  static constexpr int audioIdCount = static_cast<int>(AudioId::Count);
-  static constexpr int audioBusCount = static_cast<int>(AudioBus::Count);
+  static constexpr int audioIdCount = std::to_underlying(AudioId::Count);
+  static constexpr int audioBusCount = std::to_underlying(AudioBus::Count);
 
   void loadClip(AudioId id, std::string_view path, AudioBus bus,
                 float baseVolume = 1.0f);

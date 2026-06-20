@@ -451,11 +451,15 @@ void LevelEditor::update(Level &level, float dt) {
   }
 
   if (IsKeyPressed(KEY_F5)) {
-    level.loadFromFile(LEVEL_PATH);
+    if (auto result = level.loadFromFile(LEVEL_PATH); !result) {
+      TraceLog(LOG_WARNING, "%s", result.error().c_str());
+    }
   }
 
   if (IsKeyPressed(KEY_F6)) {
-    level.saveToFile(LEVEL_PATH);
+    if (auto result = level.saveToFile(LEVEL_PATH); !result) {
+      TraceLog(LOG_WARNING, "%s", result.error().c_str());
+    }
   }
 
   updateCamera();

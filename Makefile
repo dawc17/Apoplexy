@@ -38,30 +38,9 @@ endif
 
 PROJECTS := Apoplexy raylib
 
-ifeq ($(OS),Windows_NT)
-  EXEEXT = .exe
-  RUN_PREFIX =
-else
-  EXEEXT =
-  RUN_PREFIX = ./
-endif
-
-ifneq (,$(findstring release,$(config)))
-  APOPLEXY_BINDIR = bin/Release
-else
-  APOPLEXY_BINDIR = bin/Debug
-endif
-
-APOPLEXY_EXE = $(APOPLEXY_BINDIR)/apoplexy$(EXEEXT)
-
-.PHONY: all clean help run $(PROJECTS) 
+.PHONY: all clean help $(PROJECTS) 
 
 all: $(PROJECTS)
-	@echo "Built $(APOPLEXY_EXE)"
-	@echo "Run it with: $(RUN_PREFIX)$(APOPLEXY_EXE)"
-
-run: all
-	@$(RUN_PREFIX)$(APOPLEXY_EXE)
 
 Apoplexy: raylib
 ifneq (,$(Apoplexy_config))
@@ -92,7 +71,6 @@ help:
 	@echo ""
 	@echo "TARGETS:"
 	@echo "   all (default)"
-	@echo "   run"
 	@echo "   clean"
 	@echo "   Apoplexy"
 	@echo "   raylib"

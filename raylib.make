@@ -98,11 +98,6 @@ ALL_LDFLAGS += $(LDFLAGS) -s
 
 endif
 
-ifeq ($(OS),Windows_NT)
-  DEFINES := $(filter-out -D_GLFW_X11 -D_GLFW_WAYLAND,$(DEFINES)) -D_WIN32
-  ALL_LDFLAGS := $(filter-out -L/usr/lib64 -L/usr/lib32,$(ALL_LDFLAGS))
-endif
-
 # Per File Configurations
 # #############################################
 

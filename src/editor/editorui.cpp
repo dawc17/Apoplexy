@@ -182,11 +182,15 @@ void draw(LevelEditor &editor, Level &level) {
       std::clamp(lighting.sun.intensity, 0.0f, 2.0f);
 
   if (GuiButton({28.0f, 648.0f, 132.0f, 28.0f}, "Reload")) {
-    level.loadFromFile(LEVEL_PATH);
+    if (auto result = level.loadFromFile(LEVEL_PATH); !result) {
+      TraceLog(LOG_WARNING, "%s", result.error().c_str());
+    }
   }
 
   if (GuiButton({172.0f, 648.0f, 132.0f, 28.0f}, "Save")) {
-    level.saveToFile(LEVEL_PATH);
+    if (auto result = level.saveToFile(LEVEL_PATH); !result) {
+      TraceLog(LOG_WARNING, "%s", result.error().c_str());
+    }
   }
 
   int toolIndex = toolToIndex(settings.tool);

@@ -11,11 +11,9 @@ void ParticleSystem::update(float dt) {
         Vector3Add(particle.position, Vector3Scale(particle.velocity, dt));
   }
 
-  particles.erase(std::remove_if(particles.begin(), particles.end(),
-                                 [](const Particle &particle) {
-                                   return particle.lifetime <= 0.0f;
-                                 }),
-                  particles.end());
+  std::erase_if(particles, [](const Particle &particle) {
+    return particle.lifetime <= 0.0f;
+  });
 }
 
 void ParticleSystem::draw() const {

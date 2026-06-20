@@ -308,11 +308,9 @@ bool Enemy::hearNoise(Vector3 sourcePosition, float noiseRadius,
     ray.position = ear;
     ray.direction = Vector3Scale(toSource, 1.0f / sourceDistance);
 
-    Vector3 wallHit{};
-    float wallDistance = 0.0f;
-
-    if (Collision::rayLevel(ray, level, wallHit, wallDistance) &&
-        wallDistance < sourceDistance - 0.05f &&
+    std::optional<Collision::LevelHit> wallHit =
+        Collision::rayLevel(ray, level);
+    if (wallHit && wallHit->distance < sourceDistance - 0.05f &&
         distance > noiseRadius * 0.35f) {
       return false;
     }
@@ -456,11 +454,9 @@ bool Enemy::canSeePlayer(const Player &player, const Level &level) const {
   ray.position = eye;
   ray.direction = Vector3Scale(toPlayer, 1.0f / distance);
 
-  Vector3 wallHit{};
-  float wallDistance = 0.0f;
-
-  if (Collision::rayLevel(ray, level, wallHit, wallDistance) &&
-      wallDistance < distance - 0.05f) {
+  std::optional<Collision::LevelHit> wallHit =
+      Collision::rayLevel(ray, level);
+  if (wallHit && wallHit->distance < distance - 0.05f) {
     return false;
   }
 
@@ -522,18 +518,16 @@ Vector3 Enemy::steerAroundWalls(Vector3 desiredDirection,
     ray.position = rayOrigin;
     ray.direction = Vector3Normalize(rayDirection);
 
-    Vector3 hitPoint{};
-    float hitDistance = 0.0f;
-
-    if (!Collision::rayLevel(ray, level, hitPoint, hitDistance)) {
+    std::optional<Collision::LevelHit> hit = Collision::rayLevel(ray, level);
+    if (!hit) {
       return;
     }
 
-    if (hitDistance > rayLength) {
+    if (hit->distance > rayLength) {
       return;
     }
 
-    float urgency = 1.0f - hitDistance / rayLength;
+    float urgency = 1.0f - hit->distance / rayLength;
     steering =
         Vector3Add(steering, Vector3Scale(avoidDirection, urgency * weight));
   };

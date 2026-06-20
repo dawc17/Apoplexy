@@ -4,6 +4,7 @@
 #include "raymath.h"
 
 #include <algorithm>
+#include <span>
 #include <vector>
 
 namespace Lighting {
@@ -52,7 +53,7 @@ inline Vector3 colorToVec3(Color color) {
 }
 
 inline Vector3 samplePointLightsAt(Vector3 position,
-                                   const std::vector<PointLight> &pointLights) {
+                                   std::span<const PointLight> pointLights) {
   Vector3 contribution{};
 
   for (const PointLight &light : pointLights) {
@@ -74,7 +75,7 @@ inline Vector3 samplePointLightsAt(Vector3 position,
 }
 
 inline void uploadSceneLighting(Shader shader, const SceneLighting &scene,
-                                const std::vector<PointLight> &pointLights) {
+                                std::span<const PointLight> pointLights) {
   Vector3 ambientColor = colorToVec3(scene.ambientColor);
   Vector3 sunDirection = Vector3Normalize(scene.sun.direction);
   Vector3 sunColor = colorToVec3(scene.sun.color);

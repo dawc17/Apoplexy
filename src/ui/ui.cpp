@@ -132,7 +132,7 @@ void drawWatermark(const Hud::Context &ctx) {
     Hud::text(ctx, ctx.font, text, {right - size.x, lineY}, fontSize, color);
   };
 
-  drawRightAligned("APOPLEXY [PRE-PRE-ALPHA] v.0.3", y, textColor);
+  drawRightAligned("APOPLEXY [PRE-PRE-ALPHA] v.0.7", y, textColor);
   drawRightAligned("USER : OPERATOR_01 (000000000)", y + lineHeight, textColor);
   drawRightAligned("MADE BY CZAPLA", y + lineHeight * 2.0f, textColor);
 }

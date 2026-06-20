@@ -6,6 +6,8 @@
 #include "../level/level.hpp"
 #include "raylib.h"
 
+#include <string_view>
+
 class LevelEditor {
 public:
   enum class GizmoAxis { None, X, Y, Z };
@@ -16,7 +18,7 @@ public:
     float radius = 0.0f;
   };
 
-  void update(Level &level, float dt);
+  void update(Level &level, float dt, std::string_view levelPath);
   void draw(const Level &level) const;
 
   bool isEnabled() const;

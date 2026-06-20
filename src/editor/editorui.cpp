@@ -13,8 +13,6 @@
 #include <vector>
 
 namespace {
-constexpr const char *LEVEL_PATH = "levels/stealth_compound.json";
-
 int toolToIndex(EditorTool tool) {
   switch (tool) {
   case EditorTool::Select:
@@ -59,7 +57,7 @@ const char *modeLabel(LevelEditor::Mode mode) {
 } // namespace
 
 namespace EditorUI {
-void draw(LevelEditor &editor, Level &level) {
+void draw(LevelEditor &editor, Level &level, std::string_view levelPath) {
   if (!editor.isEnabled()) {
     return;
   }
@@ -182,13 +180,13 @@ void draw(LevelEditor &editor, Level &level) {
       std::clamp(lighting.sun.intensity, 0.0f, 2.0f);
 
   if (GuiButton({28.0f, 648.0f, 132.0f, 28.0f}, "Reload")) {
-    if (auto result = level.loadFromFile(LEVEL_PATH); !result) {
+    if (auto result = level.loadFromFile(levelPath); !result) {
       TraceLog(LOG_WARNING, "%s", result.error().c_str());
     }
   }
 
   if (GuiButton({172.0f, 648.0f, 132.0f, 28.0f}, "Save")) {
-    if (auto result = level.saveToFile(LEVEL_PATH); !result) {
+    if (auto result = level.saveToFile(levelPath); !result) {
       TraceLog(LOG_WARNING, "%s", result.error().c_str());
     }
   }

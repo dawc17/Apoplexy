@@ -226,7 +226,7 @@ void Game::updateMenu() {
 }
 
 void Game::updatePlaying(float dt) {
-  levelEditor.update(level, dt);
+  levelEditor.update(level, dt, activeLevelPath);
 
   if (levelEditor.isEnabled()) {
     camera = levelEditor.getCamera();
@@ -353,7 +353,7 @@ void Game::draw() {
 
     drawWinSequenceDim();
 
-    EditorUI::draw(levelEditor, level);
+    EditorUI::draw(levelEditor, level, activeLevelPath);
 
     return;
   }
@@ -386,7 +386,7 @@ void Game::draw() {
   UI::draw(*this);
   drawWinSequenceDim();
 
-  EditorUI::draw(levelEditor, level);
+  EditorUI::draw(levelEditor, level, activeLevelPath);
 }
 
 void Game::drawMenu() const {

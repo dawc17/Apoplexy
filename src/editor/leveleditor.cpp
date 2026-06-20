@@ -12,8 +12,6 @@ namespace {
 constexpr float EDITOR_ZOOM_SPEED = 18.0f;
 constexpr float MOUSE_WHEEL_ZOOM_SPEED = 2.0f;
 constexpr float EDITOR_ROTATE_SPEED = 0.008f;
-constexpr const char *LEVEL_PATH = "levels/stealth_compound.json";
-
 constexpr Rectangle EDITOR_PANEL_BOUNDS{16.0f, 16.0f, 320.0f, 680.0f};
 constexpr float GIZMO_AXIS_LENGTH = 2.5f;
 constexpr float GIZMO_PICK_PIXELS = 12.0f;
@@ -264,7 +262,7 @@ LevelEditor::GizmoAxis pickGizmoAxis(Camera3D camera, Vector3 origin) {
 }
 } // namespace
 
-void LevelEditor::update(Level &level, float dt) {
+void LevelEditor::update(Level &level, float dt, std::string_view levelPath) {
   if (IsKeyPressed(KEY_F1)) {
     enabled = !enabled;
 
@@ -451,13 +449,13 @@ void LevelEditor::update(Level &level, float dt) {
   }
 
   if (IsKeyPressed(KEY_F5)) {
-    if (auto result = level.loadFromFile(LEVEL_PATH); !result) {
+    if (auto result = level.loadFromFile(levelPath); !result) {
       TraceLog(LOG_WARNING, "%s", result.error().c_str());
     }
   }
 
   if (IsKeyPressed(KEY_F6)) {
-    if (auto result = level.saveToFile(LEVEL_PATH); !result) {
+    if (auto result = level.saveToFile(levelPath); !result) {
       TraceLog(LOG_WARNING, "%s", result.error().c_str());
     }
   }

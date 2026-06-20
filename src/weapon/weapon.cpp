@@ -107,7 +107,7 @@ void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
 
   if (wasMeleeing || isMeleeing()) {
     viewmodel.update(dt, player.isSprinting(), reloading, true,
-                     getMeleeProgress(),
+                     getMeleeProgress(), player.getHorizontalSpeed(),
                      *proceduralAnimation);
     return;
   }
@@ -135,7 +135,7 @@ void Weapon::update(float dt, const Player &player, std::vector<Enemy> &enemies,
   }
 
   viewmodel.update(dt, player.isSprinting(), reloading, false, 1.0f,
-                   *proceduralAnimation);
+                   player.getHorizontalSpeed(), *proceduralAnimation);
 
   if (IsKeyPressed(KEY_R)) {
     startReload();
@@ -174,7 +174,8 @@ void Weapon::updatePresentation(float dt, const Player &player) {
   }
 
   viewmodel.update(dt, player.isSprinting(), reloading, isMeleeing(),
-                   getMeleeProgress(), *proceduralAnimation, false);
+                   getMeleeProgress(), player.getHorizontalSpeed(),
+                   *proceduralAnimation, false);
 }
 
 void Weapon::drawViewModel(const Camera3D &camera, const AssetManager &assets,
@@ -428,8 +429,7 @@ void Weapon::performMeleeHit(const Camera3D &camera,
     enemyHitDistance = hit.distance;
   }
 
-  std::optional<Collision::LevelHit> levelHit =
-      Collision::rayLevel(ray, level);
+  std::optional<Collision::LevelHit> levelHit = Collision::rayLevel(ray, level);
 
   if (hitEnemyIndex < 0) {
     float debugDistance = levelHit
@@ -458,8 +458,7 @@ void Weapon::performMeleeHit(const Camera3D &camera,
 
   Vector3 enemyPosition = enemies[hitEnemyIndex].getPosition();
   Vector3 enemyVelocity = enemies[hitEnemyIndex].getVelocity();
-  Vector3 knockbackDirection =
-      Vector3Subtract(enemyPosition, camera.position);
+  Vector3 knockbackDirection = Vector3Subtract(enemyPosition, camera.position);
 
   enemies[hitEnemyIndex].applyKnockback(
       knockbackDirection, data->melee.knockbackImpulse * knockbackMultiplier,
@@ -499,8 +498,7 @@ void Weapon::firePelletRay(Ray ray, std::vector<Enemy> &enemies,
                            AudioSystem &audio) {
   std::optional<Collision::EnemyHit> enemyHit =
       Collision::rayEnemies(ray, enemies);
-  std::optional<Collision::LevelHit> levelHit =
-      Collision::rayLevel(ray, level);
+  std::optional<Collision::LevelHit> levelHit = Collision::rayLevel(ray, level);
 
   if (!enemyHit) {
     float debugDistance = levelHit

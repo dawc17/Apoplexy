@@ -106,6 +106,7 @@ void Viewmodel::reset() {
 
 void Viewmodel::update(float dt, bool playerSprinting, bool weaponReloading,
                        bool weaponMeleeing, float weaponMeleeProgress,
+                       float playerHorizontalSpeed,
                        const ProceduralWeaponAnimationData &procedural,
                        bool useMouseSway) {
   recoilTimer = std::min(procedural.recoilDuration, recoilTimer + dt);
@@ -144,25 +145,35 @@ void Viewmodel::update(float dt, bool playerSprinting, bool weaponReloading,
   swayRotation.x += (0.0f - swayRotation.x) * settle;
   swayRotation.y += (0.0f - swayRotation.y) * settle;
 
-  bool walking = IsKeyDown(KEY_W) || IsKeyDown(KEY_A) || IsKeyDown(KEY_S) ||
-                 IsKeyDown(KEY_D);
+  constexpr float referenceWalkSpeed = 4.0f;
+  constexpr float referenceSprintSpeed = referenceWalkSpeed * 1.45f;
+  constexpr float weaponBobRadiansPerUnit = 0.85f;
+
+  float movementAmount =
+      std::clamp(playerHorizontalSpeed / referenceWalkSpeed, 0.0f, 1.0f);
+  float sprintMotionAmount =
+      playerSprinting
+          ? std::clamp(playerHorizontalSpeed / referenceSprintSpeed, 0.0f, 1.0f)
+          : 0.0f;
 
   idleBobTimer += dt * procedural.idleBobSpeed;
 
-  bool idle = !walking && !playerSprinting && !weaponReloading && !weaponMeleeing;
+  bool moving = playerHorizontalSpeed > 0.08f;
+  bool idle =
+      !moving && !playerSprinting && !weaponReloading && !weaponMeleeing;
   float targetIdleBobAmount = idle ? 1.0f : 0.0f;
   float idleBobEase = 1.0f - std::expf(-procedural.idleBobEaseSpeed * dt);
   idleBobAmount += (targetIdleBobAmount - idleBobAmount) * idleBobEase;
 
-  if (walking) {
-    walkBobTimer += dt * procedural.walkBobSpeed;
+  if (moving) {
+    walkBobTimer += dt * procedural.walkBobSpeed * weaponBobRadiansPerUnit;
   }
 
-  float targetWalkBobAmount = walking ? 1.0f : 0.0f;
+  float targetWalkBobAmount = moving ? movementAmount : 0.0f;
   float walkBobEase = 1.0f - std::expf(-procedural.walkBobEaseSpeed * dt);
   walkBobAmount += (targetWalkBobAmount - walkBobAmount) * walkBobEase;
 
-  float targetSprintAmount = playerSprinting ? 1.0f : 0.0f;
+  float targetSprintAmount = sprintMotionAmount;
   float sprintEase = 1.0f - std::expf(-procedural.sprintEaseSpeed * dt);
   sprintAmount += (targetSprintAmount - sprintAmount) * sprintEase;
 
@@ -193,8 +204,8 @@ void Viewmodel::update(float dt, bool playerSprinting, bool weaponReloading,
   }
 
   float targetMeleeAmount = weaponMeleeing ? 1.0f : 0.0f;
-  float meleeEaseSpeed =
-      weaponMeleeing ? procedural.meleeEaseInSpeed : procedural.meleeEaseOutSpeed;
+  float meleeEaseSpeed = weaponMeleeing ? procedural.meleeEaseInSpeed
+                                        : procedural.meleeEaseOutSpeed;
   float meleeEase = 1.0f - std::expf(-meleeEaseSpeed * dt);
   meleeAmount += (targetMeleeAmount - meleeAmount) * meleeEase;
 
@@ -296,14 +307,13 @@ void Viewmodel::draw(const Camera3D &, const WeaponData &weapon,
   Vector3 position{
       viewModel.holdPosition.x + sprintOffset.x + switchOffset.x +
           procedural.meleeExtendOffset.x * meleeExtend +
-          procedural.meleeSwingOffset.x * meleeSwing +
-          swayOffset.x + bobX - recoilKick * procedural.recoilKickOffset.x +
+          procedural.meleeSwingOffset.x * meleeSwing + swayOffset.x + bobX -
+          recoilKick * procedural.recoilKickOffset.x +
           recoilFollowThrough * procedural.recoilFollowThroughOffset.x,
       viewModel.holdPosition.y + sprintOffset.y + switchOffset.y +
           procedural.meleeExtendOffset.y * meleeExtend +
-          procedural.meleeSwingOffset.y * meleeSwing +
-          swayOffset.y - bobY - idleBobY -
-          recoilKick * procedural.recoilKickOffset.y +
+          procedural.meleeSwingOffset.y * meleeSwing + swayOffset.y - bobY -
+          idleBobY - recoilKick * procedural.recoilKickOffset.y +
           recoilFollowThrough * procedural.recoilFollowThroughOffset.y,
       viewModel.holdPosition.z + sprintOffset.z + switchOffset.z +
           procedural.meleeExtendOffset.z * meleeExtend +

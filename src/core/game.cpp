@@ -3,6 +3,8 @@
 #include "../editor/editorui.hpp"
 #include "../render/renderer.hpp"
 #include "../ui/ui.hpp"
+#include <cstdlib>
+#include <numbers>
 #ifdef DEBUG
 #include "../viewmodel/viewmodeldebug.hpp"
 #endif
@@ -23,6 +25,29 @@ constexpr int PSX_RENDER_WIDTH = 640;
 constexpr int PSX_RENDER_HEIGHT = 320;
 constexpr float WIN_SEQUENCE_SLOWMO_SCALE = 0.18f;
 constexpr float WIN_SEQUENCE_MAX_DIM = 0.76f;
+
+AudioId randomFootstep(int &lastFootstepIndex) {
+  int index = GetRandomValue(0, 4);
+
+  if (index == lastFootstepIndex) {
+    index = (index + GetRandomValue(1, 4)) % 5;
+  }
+
+  lastFootstepIndex = index;
+
+  switch (index) {
+  case 0:
+    return AudioId::PlayerFootstep1;
+  case 1:
+    return AudioId::PlayerFootstep2;
+  case 2:
+    return AudioId::PlayerFootstep3;
+  case 3:
+    return AudioId::PlayerFootstep4;
+  default:
+    return AudioId::PlayerFootstep5;
+  }
+}
 
 void drawRadialVignette(Color color, float opacity, float radiusScale) {
   int width = GetScreenWidth();
@@ -110,10 +135,9 @@ void Game::reset() {
   state = GameState::Playing;
   damageVignetteTimer = 0.0f;
   winSequenceTimer = 0.0f;
-  footstepStopGraceTimer = 0.0f;
-  footstepNoiseTimer = 0.0f;
+  footstepDistance = 0.0f;
+  lastFootstepIndex = -1;
   audio.stop(AudioId::PistolReloadStart);
-  audio.stop(AudioId::PlayerFootstep);
 
   if (auto result = level.loadFromFile("levels/test_arena.json"); !result) {
     TraceLog(LOG_WARNING, "%s", result.error().c_str());
@@ -171,7 +195,6 @@ void Game::updatePlaying(float dt) {
   if (levelEditor.isEnabled()) {
     camera = levelEditor.getCamera();
     audio.stop(AudioId::PistolReloadStart);
-    audio.stop(AudioId::PlayerFootstep);
 
     if (levelEditor.isTestMode()) {
       updateEditorTest(dt);
@@ -188,7 +211,6 @@ void Game::updatePlaying(float dt) {
   if (ViewmodelDebug::panelOpen) {
     camera = player.getCamera();
     audio.stop(AudioId::PistolReloadStart);
-    audio.stop(AudioId::PlayerFootstep);
 
     if (IsCursorHidden()) {
       EnableCursor();
@@ -243,7 +265,6 @@ void Game::updatePlaying(float dt) {
 
   if (player.isDead()) {
     audio.stop(AudioId::PistolReloadStart);
-    audio.stop(AudioId::PlayerFootstep);
     state = GameState::Dead;
   }
 
@@ -258,7 +279,6 @@ void Game::updatePlaying(float dt) {
 
   if (allEnemiesDead) {
     audio.stop(AudioId::PistolReloadStart);
-    audio.stop(AudioId::PlayerFootstep);
     state = GameState::WinSequence;
     winSequenceTimer = 0.0f;
   }
@@ -359,50 +379,38 @@ void Game::drawDamageVignette() const {
 
 void Game::updateFootsteps(float dt) {
   constexpr float startStepSpeed = 1.2f;
-  constexpr float keepStepSpeed = 0.35f;
-  constexpr float stopGraceDuration = 0.16f;
+  constexpr float walkStepDistance = 1.72f;
+  constexpr float sprintStepDistance = 1.92f;
+  constexpr float crouchStepDistance = 1.42f;
 
   float speed = player.getHorizontalSpeed();
-  bool shouldStart = player.isGrounded() && speed >= startStepSpeed;
-  bool shouldKeepPlaying = player.isGrounded() && speed >= keepStepSpeed;
 
-  if (!shouldKeepPlaying) {
-    footstepStopGraceTimer -= dt;
-
-    if (footstepStopGraceTimer <= 0.0f) {
-      audio.stop(AudioId::PlayerFootstep);
-    }
-
+  if (!player.isGrounded() || speed < startStepSpeed) {
+    footstepDistance = 0.0f;
     return;
   }
-
-  if (!shouldStart && footstepStopGraceTimer <= 0.0f) {
-    audio.stop(AudioId::PlayerFootstep);
-    return;
-  }
-
-  footstepStopGraceTimer = stopGraceDuration;
 
   float pitch = player.isSprinting() ? 1.08f : 1.0f;
   float volume = player.isSprinting() ? 0.85f : 0.68f;
+  float stepDistance =
+      player.isSprinting() ? sprintStepDistance : walkStepDistance;
+  float noiseRadius = player.isSprinting() ? 8.0f : 4.5f;
 
   if (player.isCrouching()) {
     pitch = 0.92f;
     volume = 0.32f;
+    stepDistance = crouchStepDistance;
+    noiseRadius = 1.35f;
   }
 
-  audio.playLooping(AudioId::PlayerFootstep, {volume, pitch, 0.0f});
+  footstepDistance += speed * dt;
 
-  footstepNoiseTimer -= dt;
-
-  if (footstepNoiseTimer <= 0.0f) {
-    float noiseRadius = player.isSprinting() ? 8.0f : 4.5f;
-    footstepNoiseTimer = player.isSprinting() ? 0.30f : 0.46f;
-
-    if (player.isCrouching()) {
-      noiseRadius = 1.35f;
-      footstepNoiseTimer = 0.72f;
-    }
+  while (footstepDistance >= stepDistance) {
+    footstepDistance -= stepDistance;
+    float pitchJitter = static_cast<float>(GetRandomValue(-4, 4)) / 100.0f;
+    float panJitter = static_cast<float>(GetRandomValue(-10, 10)) / 100.0f;
+    AudioId footstep = randomFootstep(lastFootstepIndex);
+    audio.play(footstep, {volume, pitch + pitchJitter, panJitter});
     notifyEnemiesOfNoise(player.getPosition(), noiseRadius);
   }
 }

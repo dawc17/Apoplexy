@@ -78,8 +78,8 @@ Vector3 Player::getPosition() const { return position; }
 Vector3 Player::getEyePosition() const {
   float standingEyeHeight = height * 0.85f;
   float crouchingEyeHeight = height * 0.5f;
-  float eyeHeight =
-      standingEyeHeight + (crouchingEyeHeight - standingEyeHeight) * crouchAmount;
+  float eyeHeight = standingEyeHeight +
+                    (crouchingEyeHeight - standingEyeHeight) * crouchAmount;
   return {position.x, position.y + eyeHeight, position.z};
 }
 
@@ -160,8 +160,8 @@ void Player::updateMovement(float dt, const Level &level) {
     sprintBlockedByShot = true;
   }
 
-  sprinting =
-      holdingSprint && !crouching && !sprintBlockedByShot && Vector3Length(moveDir) > 0.0f;
+  sprinting = holdingSprint && !crouching && !sprintBlockedByShot &&
+              Vector3Length(moveDir) > 0.0f;
 
   if (sprinting) {
     targetSpeed = moveSpeed * 1.45f;
@@ -199,14 +199,18 @@ void Player::updateMovement(float dt, const Level &level) {
 
   if (horizontalSpeed > 0.1f) {
     // bob speed
-    headBobTimer += dt * (10.0f + 8.0f * speedPercent);
+    constexpr float headBobRadiansPerUnit = 3.1f;
+    headBobTimer += dt * horizontalSpeed * headBobRadiansPerUnit;
   }
 
-  float sprintBobBoost = sprinting ? 1.18f : 1.0f;
+  constexpr float referenceSprintSpeed = 4.0f * 1.45f;
+  float sprintSpeedAmount =
+      std::clamp(horizontalSpeed / referenceSprintSpeed, 0.0f, 1.0f);
+  float sprintBobBoost = sprinting ? 1.0f + 0.18f * sprintSpeedAmount : 1.0f;
   float crouchBobScale = crouching ? 0.35f : 1.0f;
   float targetHeadBobAmount = speedPercent * sprintBobBoost;
   targetHeadBobAmount *= crouchBobScale;
-  float headBobEase = 1.0f - std::expf(-8.0f * dt);
+  float headBobEase = 1.0f - std::expf(-10.0f * dt);
   headBobAmount += (targetHeadBobAmount - headBobAmount) * headBobEase;
 
   Collision::MoveResult move = Collision::moveCylinderLevel(

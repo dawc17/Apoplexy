@@ -9,9 +9,7 @@
 #include "../enemy/enemy.hpp"
 #include "../level/level.hpp"
 #include "../player/player.hpp"
-#include "../viewmodel/proceduralweaponanimationcatalog.hpp"
 #include "../weapon/weapon.hpp"
-#include "../weapon/weaponcatalog.hpp"
 #include "../weapon/weaponinventory.hpp"
 
 #include <raylib.h>
@@ -76,8 +74,8 @@ private:
   float cameraShakeTimer = 0.0f;
   float cameraShakeDuration = 0.0f;
   float cameraShakeStrength = 0.0f;
-  float footstepStopGraceTimer = 0.0f;
-  float footstepNoiseTimer = 0.0f;
+  float footstepDistance = 0.0f;
+  int lastFootstepIndex = -1;
   float damageVignetteTimer = 0.0f;
   float damageVignetteDuration = 0.45f;
   float winSequenceTimer = 0.0f;

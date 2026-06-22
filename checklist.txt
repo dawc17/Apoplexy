@@ -1,6 +1,0 @@
-- hit reactions
-- a second enemy type
-- health and ammo pickups
-above is on hold
-
-- replace debug ui

@@ -10,7 +10,9 @@ struct PointLight {
 in vec3 fragPosition;
 in vec3 fragNormal;
 in vec4 fragColor;
+in vec2 fragTexCoord;
 
+uniform sampler2D texture0;
 uniform vec4 colDiffuse;
 uniform vec3 ambientColor;
 uniform float ambientIntensity;
@@ -24,7 +26,7 @@ out vec4 finalColor;
 
 void main()
 {
-    vec4 baseColor = colDiffuse*fragColor;
+    vec4 baseColor = texture(texture0, fragTexCoord)*colDiffuse*fragColor;
     vec3 normal = normalize(fragNormal);
 
     vec3 lighting = ambientColor*ambientIntensity;

@@ -16,12 +16,14 @@ public:
   const Font &getJapaneseFont() const;
   const Texture2D &getMuzzleFlashTexture() const;
   const Model &getSkyboxModel() const;
+  const Model &getEnemyModel() const;
   bool hasSkybox() const;
 
 private:
   Model pistolModel{};
   Model shotgunModel{};
   Model skyboxModel{};
+  Model enemyModel{};
   Shader psxGlobalShader{};
   Shader viewmodelShader{};
   Shader worldLitShader{};
@@ -30,10 +32,12 @@ private:
   Font japaneseFont{};
   Texture2D pistolTexture{};
   Texture2D shotgunTexture{};
+  Texture2D enemyTexture{};
   Texture2D muzzleFlashTexture{};
   TextureCubemap skyboxCubemap{};
   bool pistolTextureLoaded = false;
   bool shotgunTextureLoaded = false;
+  bool enemyTextureLoaded = false;
   bool skyboxLoaded = false;
   bool terminalFontLoaded = false;
   bool japaneseFontLoaded = false;

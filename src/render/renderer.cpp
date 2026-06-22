@@ -97,7 +97,7 @@ void drawWorld(const Game &game) {
   game.getLevel().draw();
 
   for (const Enemy &enemy : game.getEnemies()) {
-    enemy.draw();
+    enemy.draw(game.getAssets().getEnemyModel());
   }
 
   EndShaderMode();

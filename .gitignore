@@ -409,3 +409,4 @@ Makefile
 *.swn
 /build/compile_commands.json
 
+/out/

@@ -191,52 +191,30 @@ void Enemy::updateEditorTest(float dt, const Level &level) {
   updateHitbox();
 }
 
-void Enemy::draw() const {
+void Enemy::draw(const Model &model) const {
   if (!isAlive()) {
     return;
   }
 
-  // woke enemy foid out to kill you (changes color)
-  Color color = MAROON;
-
-  if (state == EnemyState::Suspicious) {
-    color = YELLOW;
-  } else if (state == EnemyState::Alert || state == EnemyState::Search) {
-    color = ORANGE;
-  } else if (state == EnemyState::Chase) {
-    color = RED;
-  } else if (state == EnemyState::AttackWindup) {
-    color = YELLOW;
-  } else if (state == EnemyState::AttackRecovery) {
-    color = DARKPURPLE;
-  }
-
-  if (hitFlashTimer > 0.0f) {
-    color = WHITE;
-  }
-
   Vector3 forward{facingDirection.x, 0.0f, facingDirection.z};
+
   if (Vector3LengthSqr(forward) <= 0.001f) {
     forward = {0.0f, 0.0f, 1.0f};
   }
+
   forward = Vector3Normalize(forward);
 
-  float yawDegrees = std::atan2f(forward.x, forward.z) * RAD2DEG;
+  constexpr float MODEL_HEIGHT = 1.878f;
+  float modelScale = height / MODEL_HEIGHT;
+  constexpr float MODEL_YAW_OFFSET = 0.0f;
 
-  rlPushMatrix();
-  rlTranslatef(position.x, position.y + height * 0.5f, position.z);
-  rlRotatef(yawDegrees, 0.0f, 1.0f, 0.0f);
+  float yawDegrees =
+      std::atan2f(forward.x, forward.z) * RAD2DEG + MODEL_YAW_OFFSET;
 
-  DrawCube({0.0f, 0.0f, 0.0f}, radius * 2.0f, height, radius * 2.0f, color);
-  DrawCubeWires({0.0f, 0.0f, 0.0f}, radius * 2.0f, height, radius * 2.0f,
-                BLACK);
+  Color tint = hitFlashTimer > 0.0f ? Color{255, 150, 150, 255} : WHITE;
 
-  DrawCube({-0.13f, height * 0.22f, radius + 0.025f}, 0.10f, 0.10f, 0.035f,
-           YELLOW);
-  DrawCube({0.13f, height * 0.22f, radius + 0.025f}, 0.10f, 0.10f, 0.035f,
-           YELLOW);
-
-  rlPopMatrix();
+  DrawModelEx(model, position, {0.0f, 1.0f, 0.0f}, yawDegrees,
+              {modelScale, modelScale, modelScale}, tint);
 }
 
 void Enemy::resolveOverlap(Enemy &other) {
@@ -454,8 +432,7 @@ bool Enemy::canSeePlayer(const Player &player, const Level &level) const {
   ray.position = eye;
   ray.direction = Vector3Scale(toPlayer, 1.0f / distance);
 
-  std::optional<Collision::LevelHit> wallHit =
-      Collision::rayLevel(ray, level);
+  std::optional<Collision::LevelHit> wallHit = Collision::rayLevel(ray, level);
   if (wallHit && wallHit->distance < distance - 0.05f) {
     return false;
   }

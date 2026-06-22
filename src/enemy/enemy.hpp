@@ -22,7 +22,7 @@ public:
 
   void update(float dt, Player &player, const Level &level);
   void updateEditorTest(float dt, const Level &level);
-  void draw() const;
+  void draw(const Model &model) const;
 
   void resolveOverlap(Enemy &other);
 
@@ -56,7 +56,7 @@ private:
   Vector3 facingDirection{0.0f, 0.0f, 1.0f};
 
   float radius = 0.4f;
-  float height = 1.5f;
+  float height = 1.88f;
   float speed = 2.5f;
   float searchSpeed = 1.8f;
   float acceleration = 14.0f;

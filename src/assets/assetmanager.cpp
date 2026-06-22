@@ -52,6 +52,7 @@ void AssetManager::load() {
     return;
   }
 
+  enemyModel = LoadModel("models/soldier/Soldier.glb");
   pistolModel = LoadModel("models/USP-S.obj");
   shotgunModel = LoadModel("models/Shotgun.glb");
 
@@ -59,6 +60,25 @@ void AssetManager::load() {
       LoadShader("shaders/psx_global.vs", "shaders/psx_global.fs");
   viewmodelShader = LoadShader("shaders/viewmodel.vs", "shaders/viewmodel.fs");
   worldLitShader = LoadShader("shaders/world_lit.vs", "shaders/world_lit.fs");
+  worldLitShader.locs[SHADER_LOC_MAP_DIFFUSE] =
+      GetShaderLocation(worldLitShader, "texture0");
+
+  if (FileExists("models/soldier/Color_B_Gradient.jpg")) {
+    enemyTexture = LoadTexture("models/soldier/Color_B_Gradient.jpg");
+    SetTextureFilter(enemyTexture, TEXTURE_FILTER_POINT);
+    enemyTextureLoaded = true;
+  }
+
+  for (int i = 0; i < enemyModel.materialCount; ++i) {
+    enemyModel.materials[i].shader = worldLitShader;
+    enemyModel.materials[i].maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
+
+    if (enemyTextureLoaded) {
+      enemyModel.materials[i].maps[MATERIAL_MAP_DIFFUSE].texture =
+          enemyTexture;
+    }
+  }
+
   muzzleFlashTexture = LoadTexture("textures/muzzleflash.png");
 
   if (FileExists("/usr/share/fonts/Adwaita/AdwaitaMono-Regular.ttf")) {
@@ -141,6 +161,7 @@ void AssetManager::unload() {
     return;
   }
 
+  UnloadModel(enemyModel);
   UnloadModel(pistolModel);
   UnloadModel(shotgunModel);
   UnloadShader(psxGlobalShader);
@@ -162,6 +183,10 @@ void AssetManager::unload() {
   if (shotgunTextureLoaded) {
     UnloadTexture(shotgunTexture);
     shotgunTextureLoaded = false;
+  }
+  if (enemyTextureLoaded) {
+    UnloadTexture(enemyTexture);
+    enemyTextureLoaded = false;
   }
   if (skyboxLoaded) {
     UnloadShader(skyboxShader);
@@ -198,5 +223,7 @@ const Texture2D &AssetManager::getMuzzleFlashTexture() const {
 }
 
 const Model &AssetManager::getSkyboxModel() const { return skyboxModel; }
+
+const Model &AssetManager::getEnemyModel() const { return enemyModel; }
 
 bool AssetManager::hasSkybox() const { return skyboxLoaded; }

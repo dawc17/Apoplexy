@@ -22,12 +22,12 @@ MonoBehaviour:
   m_Version: 1
   settings:
     enabled: 1
-    intensity: 0.82
+    intensity: 0.731
     pixelScale: 1
     pixelationMode: 1
-    fixedVerticalResolution: 320
-    colorSteps: 24
-    ditherStrength: 0.18
+    fixedVerticalResolution: 451
+    colorSteps: 64
+    ditherStrength: 0.61
     ditherPatternMode: 0
     ditherPatternTexture: {fileID: 0}
     ditherPatternScale: 1
@@ -61,7 +61,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d95dd643a8c8419c866af2e278483765, type: 3}
   m_Name: PSX PS2 Screen Outline
   m_EditorClassIdentifier: Borzblade.RetroRenderToolkit.Runtime::Borzblade.RetroRenderToolkit.PSXPS2ScreenOutlineRendererFeature
-  m_Active: 0
+  m_Active: 1
   injectionPoint: 550
   fetchColorBuffer: 1
   requirements: 3
@@ -70,13 +70,13 @@ MonoBehaviour:
   bindDepthStencilAttachment: 0
   m_Version: 1
   settings:
-    enabled: 0
+    enabled: 1
     passEvent: 550
     outlineColor: {r: 0.015, g: 0.012, b: 0.01, a: 1}
     intensity: 1
-    thickness: 1
+    thickness: 0.5
     depthSensitivity: 2.9
-    normalSensitivity: 4.13
+    normalSensitivity: 11.6
     distanceFadeStart: 12
     distanceFadeEnd: 85
     blend: 1

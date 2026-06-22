@@ -40,6 +40,7 @@ namespace Apoplexy.Weapons
         [SerializeField] private Vector3 holdRotation = new(2.8f, 7.4f, 1.9f);
 
         [SerializeField] private Vector3 viewModelScale = Vector3.one * 0.104f;
+        [SerializeField] private ProceduralWeaponAnimationSettings animation = new();
 
         [SerializeField] private AudioClip fireSound;
         [SerializeField] private AudioClip reloadSound;
@@ -62,9 +63,10 @@ namespace Apoplexy.Weapons
         public bool AutoReloadWhenEmpty => autoReloadWhenEmpty;
         public GameObject ViewModelPrefab => viewModelPrefab;
         public Material ViewModelMaterial => viewModelMaterial;
-        public Vector3 HoldPotision => holdPosition;
+        public Vector3 HoldPosition => holdPosition;
         public Vector3 HoldRotation => holdRotation;
         public Vector3 ViewModelScale => viewModelScale;
+        public ProceduralWeaponAnimationSettings Animation => animation;
         public AudioClip FireSound => fireSound;
         public AudioClip ReloadSound => reloadSound;
     }

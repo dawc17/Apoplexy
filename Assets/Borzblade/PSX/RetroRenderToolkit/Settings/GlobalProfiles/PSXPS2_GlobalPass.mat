@@ -30,31 +30,31 @@ Material:
     m_Ints: []
     m_Floats:
     - _BlackLevel: 0.02
-    - _Bleed: 0.14
-    - _ChromaticOffset: 0.08
-    - _ColorSteps: 12
-    - _Contrast: 1.14
-    - _CrtMaskStrength: 0.08
+    - _Bleed: 0
+    - _ChromaticOffset: 0
+    - _ColorSteps: 64
+    - _Contrast: 1.1
+    - _CrtMaskStrength: 0
     - _Curvature: 0
     - _DitherPatternMode: 0
     - _DitherPatternScale: 1
     - _DitherScale: 1
-    - _DitherStrength: 0.34
+    - _DitherStrength: 0.61
     - _DitherThreshold: 0.5
-    - _FixedVerticalResolution: 240
-    - _Gamma: 1.05
+    - _FixedVerticalResolution: 451
+    - _Gamma: 1
     - _GlobalFogEnabled: 0
     - _GlobalFogIntensity: 0
-    - _HorizontalJitter: 0.04
-    - _Intensity: 0.85
-    - _NoiseStrength: 0.08
-    - _PixelScale: 3
-    - _PixelationMode: 0
-    - _Saturation: 0.95
-    - _ScanlineStrength: 0.15
-    - _VignetteStrength: 0.18
+    - _HorizontalJitter: 0.02
+    - _Intensity: 0.731
+    - _NoiseStrength: 0.025
+    - _PixelScale: 1
+    - _PixelationMode: 1
+    - _Saturation: 1.08
+    - _ScanlineStrength: 0.1
+    - _VignetteStrength: 0.16
     m_Colors:
-    - _ColorTint: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorTint: {r: 1, g: 0.98, b: 0.94, a: 1}
     - _GlobalFogColor: {r: 0.42, g: 0.46, b: 0.5, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

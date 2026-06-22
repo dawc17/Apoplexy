@@ -32,6 +32,18 @@ namespace Apoplexy.Weapons
         private float spreadBloom;
         private bool reloading;
 
+        private Vector2 swayPosition;
+        private Vector2 swayRotation;
+        private float idleBobTimer;
+        private float idleBobAmount;
+        private float walkBobTimer;
+        private float walkBobAmount;
+        private float sprintAmount;
+        private float recoilTimer;
+        private float recoilAmount;
+        private float reloadAmount;
+        private Vector3 reloadSpinRotation;
+
         public event Action AmmunitionChanged;
 
         public int Ammunition => ammunition;
@@ -48,7 +60,7 @@ namespace Apoplexy.Weapons
                 return;
             }
 
-            viewModelRoot.localPosition = weapon.HoldPotision;
+            viewModelRoot.localPosition = weapon.HoldPosition;
             viewModelRoot.localRotation = Quaternion.Euler(weapon.HoldRotation);
 
             viewModelInstance.transform.localScale = weapon.ViewModelScale;
@@ -118,6 +130,8 @@ namespace Apoplexy.Weapons
             {
                 StartReload();
             }
+
+            UpdateViewModelMotion(deltaTime);
         }
 
         private void TryFire()
@@ -135,6 +149,8 @@ namespace Apoplexy.Weapons
 
             ammunition--;
             cooldown = 1f / weapon.FireRate;
+            recoilTimer = 0f;
+            recoilAmount = 1f;
 
             float spread = CalculateSpread();
 
@@ -253,6 +269,221 @@ namespace Apoplexy.Weapons
             }
         }
 
+        private void UpdateViewModelMotion(float deltaTime)
+        {
+            if (viewModelRoot == null || viewModelInstance == null)
+            {
+                return;
+            }
+
+            ProceduralWeaponAnimationSettings motion = weapon.Animation;
+
+            UpdateSway(motion, deltaTime);
+            UpdateBob(motion, deltaTime);
+            UpdateReloadMotion(motion, deltaTime);
+
+            recoilTimer = Mathf.Min(motion.recoilDuration, recoilTimer + deltaTime);
+
+            float recoilProgress = motion.recoilDuration > 0f
+                ? recoilTimer / motion.recoilDuration
+                : 1f;
+
+            float recoilKick = RecoilKickCurve(recoilProgress) * recoilAmount;
+            float recoilFollowThrough = RecoilFollowThroughCurve(recoilProgress) * recoilAmount;
+
+            float bobX = Mathf.Sin(walkBobTimer) * motion.walkBobX * walkBobAmount;
+            float bobY = Mathf.Abs(Mathf.Cos(walkBobTimer)) * motion.walkBobY * walkBobAmount;
+            float idleBobY = Mathf.Sin(idleBobTimer) * motion.idleBobY * idleBobAmount;
+
+            bobX += Mathf.Sin(walkBobTimer * motion.sprintBobSpeedScale)
+                * motion.sprintBobX * sprintAmount;
+            bobY += Mathf.Abs(Mathf.Cos(walkBobTimer * motion.sprintBobSpeedScale))
+                * motion.sprintBobY * sprintAmount;
+
+            Vector3 position = weapon.HoldPosition + motion.sprintOffset * sprintAmount;
+            position.x += swayPosition.x + bobX;
+            position.y += swayPosition.y - bobY - idleBobY;
+            position.x += -recoilKick * motion.recoilKickOffset.x
+                + recoilFollowThrough * motion.recoilFollowThroughOffset.x;
+            position.y += -recoilKick * motion.recoilKickOffset.y
+                + recoilFollowThrough * motion.recoilFollowThroughOffset.y;
+            position.z += recoilKick * motion.recoilKickOffset.z
+                + recoilFollowThrough * motion.recoilFollowThroughOffset.z;
+
+            Vector3 rotation = weapon.HoldRotation;
+            rotation += new Vector3(
+                swayRotation.y,
+                swayRotation.x,
+                swayRotation.x * motion.swayRollAmount);
+            rotation += motion.recoilKickRotation * recoilKick
+                + motion.recoilFollowThroughRotation * recoilFollowThrough;
+            rotation += reloadSpinRotation * EaseInOutCubic(reloadAmount);
+            rotation += motion.sprintRotation * sprintAmount;
+
+            viewModelRoot.localPosition = position;
+            viewModelRoot.localRotation = Quaternion.Euler(rotation);
+        }
+
+        private void UpdateSway(ProceduralWeaponAnimationSettings motion, float deltaTime)
+        {
+            Vector2 mouseDelta = Vector2.zero;
+
+            if (Cursor.lockState == CursorLockMode.Locked && Mouse.current != null)
+            {
+                mouseDelta = Mouse.current.delta.ReadValue();
+            }
+
+            Vector2 targetPosition = new(
+                Mathf.Clamp(
+                    -mouseDelta.x * motion.swayPositionAmount,
+                    -motion.swayPositionClamp.x,
+                    motion.swayPositionClamp.x),
+                Mathf.Clamp(
+                    mouseDelta.y * motion.swayPositionAmount,
+                    -motion.swayPositionClamp.y,
+                    motion.swayPositionClamp.y));
+
+            Vector2 targetRotation = new(
+                Mathf.Clamp(
+                    -mouseDelta.x * motion.swayRotationAmount,
+                    -motion.swayRotationClamp.x,
+                    motion.swayRotationClamp.x),
+                Mathf.Clamp(
+                    -mouseDelta.y * motion.swayRotationAmount,
+                    -motion.swayRotationClamp.y,
+                    motion.swayRotationClamp.y));
+
+            float follow = Mathf.Min(1f, deltaTime * motion.swayFollowSpeed);
+            float settle = Mathf.Min(1f, deltaTime * motion.swaySettleSpeed);
+
+            swayPosition = Vector2.Lerp(swayPosition, targetPosition, follow);
+            swayRotation = Vector2.Lerp(swayRotation, targetRotation, follow);
+            swayPosition = Vector2.Lerp(swayPosition, Vector2.zero, settle);
+            swayRotation = Vector2.Lerp(swayRotation, Vector2.zero, settle);
+        }
+
+        private void UpdateBob(ProceduralWeaponAnimationSettings motion, float deltaTime)
+        {
+            const float referenceWalkSpeed = 4f;
+            const float referenceSprintSpeed = referenceWalkSpeed * 1.45f;
+            const float weaponBobRadiansPerUnit = 0.85f;
+
+            float movementAmount = Mathf.Clamp01(player.HorizontalSpeed / referenceWalkSpeed);
+            float sprintMotionAmount = player.IsSprinting
+                ? Mathf.Clamp01(player.HorizontalSpeed / referenceSprintSpeed)
+                : 0f;
+
+            idleBobTimer += deltaTime * motion.idleBobSpeed;
+
+            bool moving = player.HorizontalSpeed > 0.08f;
+            bool idle = !moving && !player.IsSprinting && !reloading;
+            float idleTarget = idle ? 1f : 0f;
+            float idleEase = 1f - Mathf.Exp(-motion.idleBobEaseSpeed * deltaTime);
+            idleBobAmount = Mathf.Lerp(idleBobAmount, idleTarget, idleEase);
+
+            if (moving)
+            {
+                walkBobTimer += deltaTime * motion.walkBobSpeed * weaponBobRadiansPerUnit;
+            }
+
+            float walkEase = 1f - Mathf.Exp(-motion.walkBobEaseSpeed * deltaTime);
+            walkBobAmount = Mathf.Lerp(
+                walkBobAmount,
+                moving ? movementAmount : 0f,
+                walkEase);
+
+            float sprintEase = 1f - Mathf.Exp(-motion.sprintEaseSpeed * deltaTime);
+            sprintAmount = Mathf.Lerp(sprintAmount, sprintMotionAmount, sprintEase);
+        }
+
+        private void UpdateReloadMotion(ProceduralWeaponAnimationSettings motion, float deltaTime)
+        {
+            float targetAmount = reloading ? 1f : 0f;
+            float easeSpeed = reloading
+                ? motion.reloadSpinEaseInSpeed
+                : motion.reloadSpinEaseOutSpeed;
+            float ease = 1f - Mathf.Exp(-easeSpeed * deltaTime);
+
+            reloadAmount = Mathf.Lerp(reloadAmount, targetAmount, ease);
+
+            if (reloading)
+            {
+                float spinAmount = reloadAmount * reloadAmount;
+                reloadSpinRotation += motion.reloadSpinDegreesPerSecond * (deltaTime * spinAmount);
+                reloadSpinRotation.x = Mathf.Repeat(reloadSpinRotation.x, 360f);
+                reloadSpinRotation.y = Mathf.Repeat(reloadSpinRotation.y, 360f);
+                reloadSpinRotation.z = Mathf.Repeat(reloadSpinRotation.z, 360f);
+            }
+            else if (reloadAmount < 0.001f)
+            {
+                reloadAmount = 0f;
+                reloadSpinRotation = Vector3.zero;
+            }
+        }
+
+        private static float RecoilKickCurve(float time)
+        {
+            time = Mathf.Clamp01(time);
+
+            if (time < 0.10f)
+            {
+                return EaseOutCubic(time / 0.10f) * 1.18f;
+            }
+
+            if (time < 0.58f)
+            {
+                float recovery = EaseInOutSine((time - 0.10f) / 0.48f);
+                return Mathf.Lerp(1.18f, -0.16f, recovery);
+            }
+
+            float settle = EaseInOutSine((time - 0.58f) / 0.42f);
+            return Mathf.Lerp(-0.16f, 0f, settle);
+        }
+
+        private static float RecoilFollowThroughCurve(float time)
+        {
+            time = Mathf.Clamp01(time);
+
+            if (time < 0.08f)
+            {
+                return 0f;
+            }
+
+            if (time < 0.46f)
+            {
+                return EaseOutCubic((time - 0.08f) / 0.38f);
+            }
+
+            float recovery = EaseInOutSine((time - 0.46f) / 0.54f);
+            return 1f - recovery;
+        }
+
+        private static float EaseOutCubic(float time)
+        {
+            time = Mathf.Clamp01(time);
+            float inverse = 1f - time;
+            return 1f - inverse * inverse * inverse;
+        }
+
+        private static float EaseInOutCubic(float time)
+        {
+            time = Mathf.Clamp01(time);
+
+            if (time < 0.5f)
+            {
+                return 4f * time * time * time;
+            }
+
+            float value = -2f * time + 2f;
+            return 1f - value * value * value * 0.5f;
+        }
+
+        private static float EaseInOutSine(float time)
+        {
+            time = Mathf.Clamp01(time);
+            return -(Mathf.Cos(Mathf.PI * time) - 1f) * 0.5f;
+        }
+
         private void CreateViewModel()
         {
             if (weapon.ViewModelPrefab == null)
@@ -267,7 +498,7 @@ namespace Apoplexy.Weapons
                 viewModelRoot.SetParent(viewCamera.transform, false);
             }
 
-            viewModelRoot.localPosition = weapon.HoldPotision;
+            viewModelRoot.localPosition = weapon.HoldPosition;
             viewModelRoot.localRotation = Quaternion.Euler(weapon.HoldRotation);
 
             viewModelInstance = Instantiate(weapon.ViewModelPrefab, viewModelRoot);
@@ -297,6 +528,8 @@ namespace Apoplexy.Weapons
                     modelRenderer.sharedMaterial = weapon.ViewModelMaterial;
                 }
             }
+
+            recoilTimer = weapon.Animation.recoilDuration;
         }
     }
 }

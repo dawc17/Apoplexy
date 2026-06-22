@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c75d5f95489d1d5d92d03942fb4c6ea, type: 3}
+  m_Name: WeaponDefinition
+  m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.Weapons.WeaponDefinition
+  displayName: USP-S
+  damage: 15
+  range: 100
+  fireRate: 6
+  automatic: 0
+  pelletCount: 1
+  baseSpread: 0.15
+  movingSpread: 0.45
+  sprintSpread: 0.95
+  bloomPerShot: 0.25
+  maximumBloom: 1.25
+  bloomRecovery: 8
+  magazineSize: 12
+  reserveAmmo: 48
+  reloadDuration: 1.8
+  autoReloadWhenEmpty: 1
+  viewModelPrefab: {fileID: 919132149155446097, guid: d0ea89da2f125dc0cb5daa932ca98d8a, type: 3}
+  viewModelMaterial: {fileID: 0}
+  holdPosition: {x: 0.247, y: -0.147, z: 0.381}
+  holdRotation: {x: 2.8, y: -7.4, z: -1.9}
+  viewModelScale: {x: 0.104, y: 0.104, z: 0.104}
+  fireSound: {fileID: 8300000, guid: 9de262619224ff2c98fabb34d99a6091, type: 3}
+  reloadSound: {fileID: 8300000, guid: 28c117e3f6ff7a60599d8f896d1ce94b, type: 3}

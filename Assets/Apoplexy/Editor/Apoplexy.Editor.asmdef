@@ -1,0 +1,12 @@
+{
+  "name": "Apoplexy.Editor",
+  "rootNamespace": "Apoplexy.Editor",
+  "references": [
+    "Apoplexy.Runtime",
+    "Unity.Newtonsoft.Json"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": true
+}

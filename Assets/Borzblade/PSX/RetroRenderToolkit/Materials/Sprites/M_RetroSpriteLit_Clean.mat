@@ -1,0 +1,88 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: M_RetroSpriteLit_Clean
+  m_Shader: {fileID: 4800000, guid: 6eb24ca493ec42ed8b74060939959841, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _RETRO_DITHER
+  - _RETRO_POSTERIZE
+  - _RETRO_UV_PIXEL
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3000
+  stringTagMap:
+    RenderType: Transparent
+  disabledShaderPasses:
+  - ShadowCaster
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AffineEnabled: 0
+    - _AffineMode: 0
+    - _AffineStrength: 0.18
+    - _Cutoff: 0.01
+    - _DitherEnabled: 1
+    - _DitherScale: 1
+    - _DitherStrength: 0.08
+    - _DstBlend: 10
+    - _MipBias: 0
+    - _PaletteSteps: 32
+    - _PaletteStrength: 0.12
+    - _PosterizeEnabled: 1
+    - _PosterizeSteps: 28
+    - _QueueOffset: 0
+    - _ReceiveShadows: 0
+    - _RetroFogEnabled: 0
+    - _RetroLightingModel: 1
+    - _Smoothness: 0.25
+    - _SpecularIntensity: 0.25
+    - _SpecularPower: 24
+    - _SrcBlend: 5
+    - _UvPixelAspect: 1
+    - _UvPixelEnabled: 1
+    - _UvPixelResolution: 256
+    - _UvPixelStrength: 0.12
+    - _VertexDrawDistance: 0
+    - _VertexDrawDistanceEnabled: 0
+    - _VertexDrawDistanceFade: 0
+    - _VertexSnapDistanceFade: 0.35
+    - _VertexSnapEnabled: 0
+    - _VertexSnapFadeEnd: 45
+    - _VertexSnapFadeStart: 5
+    - _VertexSnapResolution: 240
+    - _VertexSnapSeamReduction: 0
+    - _VertexSnapSpace: 0
+    - _VertexSnapStrength: 0.08
+    - _VertexWobbleEnabled: 0
+    - _VertexWobbleScale: 4
+    - _VertexWobbleSpeed: 2.5
+    - _VertexWobbleStrength: 0.04
+    - _ZWrite: 0
+    m_Colors:
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
+    - _RetroFogColor: {r: 0.42, g: 0.46, b: 0.5, a: 1}
+    - _SpecColor: {r: 0.35, g: 0.35, b: 0.35, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

@@ -1,0 +1,148 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: M_RetroFoliage_Pine
+  m_Shader: {fileID: 4800000, guid: b2d47c0a6f7140c286d06e527df3cb4e, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _SURFACE_TYPE_TRANSPARENT
+  - _ALPHATEST_ON
+  - _RETRO_DITHER
+  - _RETRO_FOLIAGE_GRADIENT
+  - _RETRO_FOLIAGE_VARIATION
+  - _RETRO_FOLIAGE_WIND
+  - _RETRO_POSTERIZE
+  - _RETRO_RIM
+  - _RETRO_UV_PIXEL
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 1
+  m_CustomRenderQueue: 3000
+  stringTagMap:
+    RenderType: Transparent
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 2800000, guid: fc55d96735cec7747962caad6a3e741a, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AffineEnabled: 0
+    - _AffineStrength: 0.18
+    - _AlphaClip: 1
+    - _AlphaToMask: 0
+    - _BackfaceTintEnabled: 0
+    - _Blend: 0
+    - _BrightnessVariation: 0.12
+    - _BumpScale: 1
+    - _CameraFadeDistance: 0.4
+    - _CameraFadeEnabled: 0
+    - _Cull: 0
+    - _CullMode: 2
+    - _Cutoff: 0.5
+    - _DistanceFadeEnabled: 0
+    - _DitherCutoutFadeEnabled: 0
+    - _DitherEnabled: 1
+    - _DitherFadeAmount: 0
+    - _DitherFadeEnd: 60
+    - _DitherFadeStart: 25
+    - _DitherScale: 1
+    - _DitherStrength: 0.12
+    - _DstBlend: 10
+    - _DstBlendAlpha: 10
+    - _FoliageGradientEnabled: 1
+    - _FoliageMobileLighting: 0
+    - _FoliageVariationEnabled: 1
+    - _FoliageVariationStrength: 0.18
+    - _HueVariation: 0.08
+    - _LightBands: 0
+    - _MipBias: 0
+    - _PaletteSteps: 32
+    - _PaletteStrength: 0.2
+    - _PosterizeEnabled: 1
+    - _PosterizeSteps: 24
+    - _QueueOffset: 0
+    - _ReceiveShadows: 1
+    - _RimEnabled: 1
+    - _RimIntensity: 0.18
+    - _RimPower: 2.5
+    - _SaturationVariation: 0.08
+    - _ShadowBandStrength: 0.25
+    - _ShadowCutoff: 0.45
+    - _Smoothness: 0.35
+    - _SpecularIntensity: 0.45
+    - _SpecularPower: 28
+    - _SrcBlend: 5
+    - _SrcBlendAlpha: 1
+    - _Surface: 1
+    - _TwoSidedEnabled: 1
+    - _UvPixelAspect: 1
+    - _UvPixelEnabled: 1
+    - _UvPixelResolution: 384
+    - _UvPixelStrength: 0.16
+    - _VertexSnapDistanceFade: 0.6
+    - _VertexSnapEnabled: 0
+    - _VertexSnapFadeEnd: 45
+    - _VertexSnapFadeStart: 5
+    - _VertexSnapResolution: 320
+    - _VertexSnapStrength: 0.08
+    - _VertexWobbleEnabled: 0
+    - _VertexWobbleScale: 4
+    - _VertexWobbleSpeed: 1.5
+    - _VertexWobbleStrength: 0.04
+    - _WindEnabled: 1
+    - _WindScale: 1.2
+    - _WindSpeed: 1.4
+    - _WindStrength: 0.16
+    - _WindDistance: 0.05
+    - _WindUVHeightMask: 1
+    - _WindVertexColorMask: 0
+    - _ZWrite: 0
+    m_Colors:
+    - _BackfaceTint: {r: 0.68, g: 0.75, b: 0.62, a: 1}
+    - _BaseColor: {r: 0.82, g: 0.95, b: 0.8, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
+    - _FoliageBottomColor: {r: 0.05, g: 0.16, b: 0.11, a: 1}
+    - _FoliageTopColor: {r: 0.22, g: 0.42, b: 0.24, a: 1}
+    - _RimColor: {r: 0.45, g: 0.55, b: 0.8, a: 1}
+    - _SpecColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    - _WindDirection: {r: 1, g: 0.25, b: 0, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

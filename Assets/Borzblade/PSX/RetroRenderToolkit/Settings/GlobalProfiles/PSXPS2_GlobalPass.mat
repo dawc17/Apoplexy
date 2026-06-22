@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: PSXPS2_GlobalPass
+  m_Shader: {fileID: 4800000, guid: f3cfae87a97301c418fb1e51fdca5e20, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _DitherPatternTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _BlackLevel: 0.02
+    - _Bleed: 0.14
+    - _ChromaticOffset: 0.08
+    - _ColorSteps: 12
+    - _Contrast: 1.14
+    - _CrtMaskStrength: 0.08
+    - _Curvature: 0
+    - _DitherPatternMode: 0
+    - _DitherPatternScale: 1
+    - _DitherScale: 1
+    - _DitherStrength: 0.34
+    - _DitherThreshold: 0.5
+    - _FixedVerticalResolution: 240
+    - _Gamma: 1.05
+    - _GlobalFogEnabled: 0
+    - _GlobalFogIntensity: 0
+    - _HorizontalJitter: 0.04
+    - _Intensity: 0.85
+    - _NoiseStrength: 0.08
+    - _PixelScale: 3
+    - _PixelationMode: 0
+    - _Saturation: 0.95
+    - _ScanlineStrength: 0.15
+    - _VignetteStrength: 0.18
+    m_Colors:
+    - _ColorTint: {r: 1, g: 1, b: 1, a: 1}
+    - _GlobalFogColor: {r: 0.42, g: 0.46, b: 0.5, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

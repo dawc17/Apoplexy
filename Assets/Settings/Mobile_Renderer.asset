@@ -1,5 +1,85 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-7899309708816154245
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72ca117a42906534cb570c1f9fc3d2d3, type: 3}
+  m_Name: PSX PS2 Retro Pass
+  m_EditorClassIdentifier: Borzblade.RetroRenderToolkit.Runtime::PSXPS2RetroRendererFeature
+  m_Active: 1
+  injectionPoint: 600
+  fetchColorBuffer: 1
+  requirements: 0
+  passMaterial: {fileID: 2100000, guid: 82dbeae192dd4a649af44bcb914cba55, type: 2}
+  passIndex: 0
+  bindDepthStencilAttachment: 0
+  m_Version: 1
+  settings:
+    enabled: 1
+    intensity: 0.65
+    pixelScale: 1
+    pixelationMode: 0
+    fixedVerticalResolution: 240
+    colorSteps: 28
+    ditherStrength: 0.12
+    ditherPatternMode: 0
+    ditherPatternTexture: {fileID: 0}
+    ditherPatternScale: 1
+    ditherThreshold: 0.5
+    scanlineStrength: 0.08
+    vignetteStrength: 0.12
+    saturation: 1.05
+    contrast: 1.05
+    bleed: 0.08
+    colorTint: {r: 1, g: 1, b: 1, a: 1}
+    gamma: 1
+    blackLevel: 0
+    ditherScale: 1
+    crtMaskStrength: 0
+    chromaticOffset: 0
+    noiseStrength: 0
+    horizontalJitter: 0
+    curvature: 0
+    globalFogEnabled: 0
+    globalFogColor: {r: 0.42, g: 0.46, b: 0.5, a: 1}
+    globalFogIntensity: 0
+--- !u!114 &-2801152007497648624
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d95dd643a8c8419c866af2e278483765, type: 3}
+  m_Name: PSX PS2 Screen Outline
+  m_EditorClassIdentifier: Borzblade.RetroRenderToolkit.Runtime::Borzblade.RetroRenderToolkit.PSXPS2ScreenOutlineRendererFeature
+  m_Active: 1
+  injectionPoint: 550
+  fetchColorBuffer: 1
+  requirements: 3
+  passMaterial: {fileID: 0}
+  passIndex: 0
+  bindDepthStencilAttachment: 0
+  m_Version: 1
+  settings:
+    enabled: 1
+    passEvent: 550
+    outlineColor: {r: 0.015, g: 0.012, b: 0.01, a: 1}
+    intensity: 0.85
+    thickness: 1.25
+    depthSensitivity: 18
+    normalSensitivity: 4
+    distanceFadeStart: 12
+    distanceFadeEnd: 85
+    blend: 0.9
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13,11 +93,9 @@ MonoBehaviour:
   m_Name: Mobile_Renderer
   m_EditorClassIdentifier: 
   debugShaders:
-    debugReplacementPS: {fileID: 4800000, guid: cf852408f2e174538bcd9b7fda1c5ae7,
-      type: 3}
+    debugReplacementPS: {fileID: 4800000, guid: cf852408f2e174538bcd9b7fda1c5ae7, type: 3}
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
-    probeVolumeSamplingDebugComputeShader: {fileID: 7200000, guid: 53626a513ea68ce47b59dc1299fe3959,
-      type: 3}
+    probeVolumeSamplingDebugComputeShader: {fileID: 7200000, guid: 53626a513ea68ce47b59dc1299fe3959, type: 3}
   probeVolumeResources:
     probeVolumeDebugShader: {fileID: 0}
     probeVolumeFragmentationDebugShader: {fileID: 0}
@@ -26,11 +104,17 @@ MonoBehaviour:
     probeSamplingDebugMesh: {fileID: 0}
     probeSamplingDebugTexture: {fileID: 0}
     probeVolumeBlendStatesCS: {fileID: 0}
-  m_RendererFeatures: []
-  m_RendererFeatureMap: 
-  m_UseNativeRenderPass: 1
+  m_RendererFeatures:
+  - {fileID: -7899309708816154245}
+  - {fileID: 4344448042156946809}
+  - {fileID: -2801152007497648624}
+  m_RendererFeatureMap: 7b013813ac03609279f5e7f979944a3c10f63a1f174f20d9
+  xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
-  m_AssetVersion: 2
+  m_AssetVersion: 3
+  m_PrepassLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
   m_OpaqueLayerMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -48,5 +132,41 @@ MonoBehaviour:
   m_RenderingMode: 0
   m_DepthPrimingMode: 0
   m_CopyDepthMode: 0
+  m_DepthAttachmentFormat: 0
+  m_DepthTextureFormat: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 0
+  m_TileOnlyMode: 0
+--- !u!114 &4344448042156946809
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f4e44deacb472f9d151b6efc7d4db1, type: 3}
+  m_Name: PSX PS2 Depth Fog
+  m_EditorClassIdentifier: Borzblade.RetroRenderToolkit.Runtime::Borzblade.RetroRenderToolkit.PSXPS2DepthFogRendererFeature
+  m_Active: 1
+  injectionPoint: 550
+  fetchColorBuffer: 1
+  requirements: 1
+  passMaterial: {fileID: 2100000, guid: 66a989780e8e4cb6be5076e7857b963b, type: 2}
+  passIndex: 0
+  bindDepthStencilAttachment: 0
+  m_Version: 1
+  settings:
+    enabled: 1
+    passEvent: 550
+    fogColor: {r: 0.42, g: 0.46, b: 0.5, a: 1}
+    intensity: 0.45
+    startDistance: 18
+    endDistance: 85
+    density: 0.035
+    blendMode: 0
+    steps: 8
+    ditherStrength: 0.08
+    ditherScale: 1
+    affectSky: 0

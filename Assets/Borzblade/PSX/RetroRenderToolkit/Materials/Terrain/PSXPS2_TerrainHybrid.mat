@@ -1,0 +1,147 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: PSXPS2_TerrainHybrid
+  m_Shader: {fileID: 4800000, guid: a84eb435e65b4214aaca755160ac0a40, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _TERRAIN_RETRO_DITHER
+  - _TERRAIN_RETRO_LIGHT_BANDS
+  - _TERRAIN_RETRO_POSTERIZE
+  - _TERRAIN_RETRO_UV_PIXEL
+  - _TERRAIN_RETRO_VERTEX_SNAP
+  - _TERRAIN_RETRO_VERTEX_WOBBLE
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap:
+    RenderType: Opaque
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Control:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Mask0:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Mask1:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Mask2:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Mask3:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Normal0:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Normal1:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Normal2:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Normal3:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Splat0:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Splat1:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Splat2:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Splat3:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TerrainHolesTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _EnableHeightBlend: 0
+    - _EnableInstancedPerPixelNormal: 0
+    - _HeightTransition: 0
+    - _Metallic0: 0
+    - _Metallic1: 0
+    - _Metallic2: 0
+    - _Metallic3: 0
+    - _NumLayersCount: 1
+    - _Smoothness0: 0.5
+    - _Smoothness1: 0.5
+    - _Smoothness2: 0.5
+    - _Smoothness3: 0.5
+    - _TerrainRetroBandStrength: 0.45
+    - _TerrainRetroDitherEnabled: 1
+    - _TerrainRetroDitherScale: 1
+    - _TerrainRetroDitherStrength: 0.2
+    - _TerrainRetroFogBlendMode: 0
+    - _TerrainRetroFogDensity: 0.035
+    - _TerrainRetroFogEnabled: 0
+    - _TerrainRetroFogEnd: 70
+    - _TerrainRetroFogStart: 18
+    - _TerrainRetroFogSteps: 6
+    - _TerrainRetroLightBands: 4
+    - _TerrainRetroLightBandsEnabled: 1
+    - _TerrainRetroPaletteSteps: 64
+    - _TerrainRetroPaletteStrength: 0.4
+    - _TerrainRetroPosterizeEnabled: 1
+    - _TerrainRetroPosterizeSteps: 20
+    - _TerrainRetroUvPixelAspect: 1
+    - _TerrainRetroUvPixelEnabled: 1
+    - _TerrainRetroUvPixelResolution: 128
+    - _TerrainRetroUvPixelStrength: 0.55
+    - _TerrainRetroVertexSnapDistanceFade: 0.4
+    - _TerrainRetroVertexSnapEnabled: 1
+    - _TerrainRetroVertexSnapFadeEnd: 90
+    - _TerrainRetroVertexSnapFadeStart: 10
+    - _TerrainRetroVertexSnapResolution: 180
+    - _TerrainRetroVertexSnapSeamReduction: 0.1
+    - _TerrainRetroVertexSnapSpace: 1
+    - _TerrainRetroVertexSnapStrength: 0.3
+    - _TerrainRetroVertexWobbleEnabled: 1
+    - _TerrainRetroVertexWobbleScale: 3
+    - _TerrainRetroVertexWobbleSpeed: 1.5
+    - _TerrainRetroVertexWobbleStrength: 0.18
+    m_Colors:
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _TerrainRetroFogColor: {r: 0.42, g: 0.46, b: 0.5, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

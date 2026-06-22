@@ -23,6 +23,7 @@ namespace Apoplexy.Weapons
         private InputAction attackAction;
         private InputAction reloadAction;
         private AudioSource audioSource;
+        private GameObject viewModelInstance;
 
         private int ammunition;
         private int reserveAmmunition;
@@ -36,8 +37,22 @@ namespace Apoplexy.Weapons
         public int Ammunition => ammunition;
         public int ReserveAmmunition => reserveAmmunition;
         public bool IsReloading => reloading;
+        public WeaponDefinition Weapon => weapon;
 
         public float ReloadProgress => reloading ? 1f - reloadTimer / weapon.ReloadDuration : 0f;
+
+        public void ApplyViewModelPose()
+        {
+            if (viewModelRoot == null || viewModelInstance == null)
+            {
+                return;
+            }
+
+            viewModelRoot.localPosition = weapon.HoldPotision;
+            viewModelRoot.localRotation = Quaternion.Euler(weapon.HoldRotation);
+
+            viewModelInstance.transform.localScale = weapon.ViewModelScale;
+        }
 
         private void Awake()
         {
@@ -228,6 +243,16 @@ namespace Apoplexy.Weapons
             audioSource.PlayOneShot(clip);
         }
 
+        private static void SetLayerRecursively(GameObject target, int layer)
+        {
+            target.layer = layer;
+
+            foreach (Transform child in target.transform)
+            {
+                SetLayerRecursively(child.gameObject, layer);
+            }
+        }
+
         private void CreateViewModel()
         {
             if (weapon.ViewModelPrefab == null)
@@ -245,7 +270,20 @@ namespace Apoplexy.Weapons
             viewModelRoot.localPosition = weapon.HoldPotision;
             viewModelRoot.localRotation = Quaternion.Euler(weapon.HoldRotation);
 
-            GameObject instance = Instantiate(weapon.ViewModelPrefab, viewModelRoot);
+            viewModelInstance = Instantiate(weapon.ViewModelPrefab, viewModelRoot);
+
+            GameObject instance = viewModelInstance;
+
+            int viewModelLayer = LayerMask.NameToLayer("ViewModel");
+
+            if (viewModelLayer < 0)
+            {
+                Debug.LogError("The ViewModel layer does not exist.", this);
+            }
+            else
+            {
+                SetLayerRecursively(instance, viewModelLayer);
+            }
 
             instance.name = weapon.ViewModelPrefab.name;
             instance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);

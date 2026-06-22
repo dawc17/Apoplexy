@@ -29,7 +29,7 @@ MonoBehaviour:
   reloadDuration: 1.8
   autoReloadWhenEmpty: 1
   viewModelPrefab: {fileID: 919132149155446097, guid: d0ea89da2f125dc0cb5daa932ca98d8a, type: 3}
-  viewModelMaterial: {fileID: 0}
+  viewModelMaterial: {fileID: 2100000, guid: 5a49de3d1fce51a7d92768c7ca7bc2f5, type: 2}
   holdPosition: {x: 0.247, y: -0.147, z: 0.381}
   holdRotation: {x: 2.8, y: -7.4, z: -1.9}
   viewModelScale: {x: 0.104, y: 0.104, z: 0.104}

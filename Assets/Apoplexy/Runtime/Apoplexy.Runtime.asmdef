@@ -1,0 +1,8 @@
+{
+    "name": "Apoplexy.Runtime",
+    "rootNamespace": "Apoplexy",
+    "references": [
+      "Unity.InputSystem"
+    ],
+    "autoReferenced": true
+}

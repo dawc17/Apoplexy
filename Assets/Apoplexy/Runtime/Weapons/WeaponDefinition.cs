@@ -45,6 +45,13 @@ namespace Apoplexy.Weapons
         [SerializeField] private AudioClip fireSound;
         [SerializeField] private AudioClip reloadSound;
 
+        [Header("Muzzle Flash")]
+        [SerializeField] private Sprite muzzleFlashSprite;
+        [SerializeField] private Vector3 muzzlePosition = new(0.015f, 0.054f, 0.575f);
+        [SerializeField] private Vector2 muzzleFlashSize = new(1.478f, 0.657f);
+        [SerializeField, Min(0.001f)] private float muzzleFlashDuration = 0.025f;
+        [SerializeField] private Color muzzleFlashColor = Color.white;
+
         public string DisplayName => displayName;
         public int Damage => damage;
         public float Range => range;
@@ -69,5 +76,10 @@ namespace Apoplexy.Weapons
         public ProceduralWeaponAnimationSettings Animation => animation;
         public AudioClip FireSound => fireSound;
         public AudioClip ReloadSound => reloadSound;
+        public Sprite MuzzleFlashSprite => muzzleFlashSprite;
+        public Vector3 MuzzlePosition => muzzlePosition;
+        public Vector2 MuzzleFlashSize => muzzleFlashSize;
+        public float MuzzleFlashDuration => muzzleFlashDuration;
+        public Color MuzzleFlashColor => muzzleFlashColor;
     }
 }

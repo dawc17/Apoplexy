@@ -33,6 +33,11 @@ MonoBehaviour:
   holdPosition: {x: 0.19, y: -0.15, z: 0.38}
   holdRotation: {x: 0.23, y: 2.92, z: -2}
   viewModelScale: {x: 0.104, y: 0.104, z: 0.104}
+  muzzleFlashSprite: {fileID: 21300000, guid: 88a98999fcdb0b34cbaac4a500c03789, type: 3}
+  muzzlePosition: {x: 0.015, y: 0.054, z: 0.575}
+  muzzleFlashSize: {x: 1.478, y: 0.657}
+  muzzleFlashDuration: 0.025
+  muzzleFlashColor: {r: 1, g: 1, b: 1, a: 1}
   animation:
     swayPositionAmount: 0.0008
     swayRotationAmount: 0.045

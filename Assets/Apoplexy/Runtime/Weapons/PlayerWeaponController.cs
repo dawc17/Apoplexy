@@ -44,12 +44,22 @@ namespace Apoplexy.Weapons
         private float reloadAmount;
         private Vector3 reloadSpinRotation;
 
+        private GameObject viewModelModel;
+        private Transform muzzleSocket;
+        private Transform muzzleFlashTransform;
+        private SpriteRenderer muzzleFlashRenderer;
+
+        private float muzzleFlashTimer;
+        private float muzzleFlashRotation;
+        private bool muzzleFlashPreviewVisible;
+
         public event Action AmmunitionChanged;
 
         public int Ammunition => ammunition;
         public int ReserveAmmunition => reserveAmmunition;
         public bool IsReloading => reloading;
         public WeaponDefinition Weapon => weapon;
+        public Transform MuzzleSocket => muzzleSocket;
 
         public float ReloadProgress => reloading ? 1f - reloadTimer / weapon.ReloadDuration : 0f;
 
@@ -63,7 +73,48 @@ namespace Apoplexy.Weapons
             viewModelRoot.localPosition = weapon.HoldPosition;
             viewModelRoot.localRotation = Quaternion.Euler(weapon.HoldRotation);
 
-            viewModelInstance.transform.localScale = weapon.ViewModelScale;
+            if (viewModelModel != null)
+            {
+                viewModelModel.transform.localScale = weapon.ViewModelScale;
+            }
+
+            if (muzzleSocket != null)
+            {
+                muzzleSocket.localPosition = weapon.MuzzlePosition;
+            }
+        }
+
+        public void ApplyMuzzleFlashSettings()
+        {
+            if (muzzleSocket == null)
+            {
+                return;
+            }
+
+            muzzleSocket.localPosition = weapon.MuzzlePosition;
+
+            if (muzzleFlashRenderer == null)
+            {
+                return;
+            }
+
+            muzzleFlashRenderer.sprite = weapon.MuzzleFlashSprite;
+            muzzleFlashRenderer.color = weapon.MuzzleFlashColor;
+            SetMuzzleFlashScale(1f);
+            UpdateMuzzleFlash();
+        }
+
+        public void SetMuzzleFlashPreviewVisible(bool visible)
+        {
+            muzzleFlashPreviewVisible = visible;
+            UpdateMuzzleFlash();
+        }
+
+        public void PlayMuzzleFlashPreview()
+        {
+            muzzleFlashTimer = weapon.MuzzleFlashDuration;
+            muzzleFlashRotation = UnityEngine.Random.Range(-25f, 25f);
+            UpdateMuzzleFlash();
         }
 
         private void Awake()
@@ -107,6 +158,8 @@ namespace Apoplexy.Weapons
         {
             float deltaTime = Time.deltaTime;
 
+            muzzleFlashTimer = Mathf.Max(0f, muzzleFlashTimer - deltaTime);
+
             cooldown = Mathf.Max(0f, cooldown - deltaTime);
             spreadBloom = Mathf.Max(0f, spreadBloom - weapon.BloomRecovery * deltaTime);
 
@@ -132,6 +185,7 @@ namespace Apoplexy.Weapons
             }
 
             UpdateViewModelMotion(deltaTime);
+            UpdateMuzzleFlash();
         }
 
         private void TryFire()
@@ -151,6 +205,9 @@ namespace Apoplexy.Weapons
             cooldown = 1f / weapon.FireRate;
             recoilTimer = 0f;
             recoilAmount = 1f;
+
+            muzzleFlashTimer = weapon.MuzzleFlashDuration;
+            muzzleFlashRotation = UnityEngine.Random.Range(-25f, 25f);
 
             float spread = CalculateSpread();
 
@@ -339,13 +396,13 @@ namespace Apoplexy.Weapons
                     -motion.swayPositionClamp.x,
                     motion.swayPositionClamp.x),
                 Mathf.Clamp(
-                    mouseDelta.y * motion.swayPositionAmount,
+                    -mouseDelta.y * motion.swayPositionAmount,
                     -motion.swayPositionClamp.y,
                     motion.swayPositionClamp.y));
 
             Vector2 targetRotation = new(
                 Mathf.Clamp(
-                    -mouseDelta.x * motion.swayRotationAmount,
+                    mouseDelta.x * motion.swayRotationAmount,
                     -motion.swayRotationClamp.x,
                     motion.swayRotationClamp.x),
                 Mathf.Clamp(
@@ -484,6 +541,89 @@ namespace Apoplexy.Weapons
             return -(Mathf.Cos(Mathf.PI * time) - 1f) * 0.5f;
         }
 
+        private void CreateMuzzleFlash(GameObject weaponContainer)
+        {
+            muzzleSocket = new GameObject("MuzzleSocket").transform;
+            muzzleSocket.SetParent(weaponContainer.transform, false);
+            muzzleSocket.localPosition = weapon.MuzzlePosition;
+
+            if (weapon.MuzzleFlashSprite == null)
+            {
+                return;
+            }
+
+            GameObject flash = new("MuzzleFlash");
+            flash.transform.SetParent(muzzleSocket, false);
+
+            muzzleFlashTransform = flash.transform;
+            muzzleFlashRenderer = flash.AddComponent<SpriteRenderer>();
+            muzzleFlashRenderer.sprite = weapon.MuzzleFlashSprite;
+            muzzleFlashRenderer.color = new Color(weapon.MuzzleFlashColor.r, weapon.MuzzleFlashColor.g, weapon.MuzzleFlashColor.b, 0f);
+            muzzleFlashRenderer.sortingOrder = 100;
+            muzzleFlashRenderer.enabled = false;
+
+            int viewModelLayer = LayerMask.NameToLayer("ViewModel");
+
+            if (viewModelLayer >= 0)
+            {
+                flash.layer = viewModelLayer;
+                muzzleSocket.gameObject.layer = viewModelLayer;
+            }
+
+            Vector2 spriteSize = weapon.MuzzleFlashSprite.bounds.size;
+
+            muzzleFlashTransform.localScale = new Vector3(
+                weapon.MuzzleFlashSize.x / Mathf.Max(spriteSize.x, 0.001f),
+                weapon.MuzzleFlashSize.y / Mathf.Max(spriteSize.y, 0.001f), 1f);
+        }
+
+        private void UpdateMuzzleFlash()
+        {
+            if (muzzleFlashRenderer == null)
+            {
+                return;
+            }
+
+            bool timedFlashVisible = muzzleFlashTimer > 0f;
+            bool visible = muzzleFlashPreviewVisible || timedFlashVisible;
+            muzzleFlashRenderer.enabled = visible;
+
+            if (!visible)
+            {
+                return;
+            }
+
+            float progress = muzzleFlashPreviewVisible
+                ? 1f
+                : Mathf.Clamp01(muzzleFlashTimer / weapon.MuzzleFlashDuration);
+
+            float rotation = muzzleFlashPreviewVisible ? 0f : muzzleFlashRotation;
+            muzzleFlashTransform.rotation = viewCamera.transform.rotation * Quaternion.Euler(0f, 0f, rotation);
+
+            Color color = weapon.MuzzleFlashColor;
+            color.a *= muzzleFlashPreviewVisible ? 0.65f : 0.95f * progress;
+            muzzleFlashRenderer.color = color;
+
+            SetMuzzleFlashScale(progress);
+        }
+
+        private void SetMuzzleFlashScale(float progress)
+        {
+            if (muzzleFlashTransform == null || weapon.MuzzleFlashSprite == null)
+            {
+                return;
+            }
+
+            Vector2 spriteSize = weapon.MuzzleFlashSprite.bounds.size;
+
+            muzzleFlashTransform.localScale = new Vector3(
+                weapon.MuzzleFlashSize.x / Mathf.Max(spriteSize.x, 0.001f)
+                * progress,
+                weapon.MuzzleFlashSize.y / Mathf.Max(spriteSize.y, 0.001f)
+                * progress, 1f
+                );
+        }
+
         private void CreateViewModel()
         {
             if (weapon.ViewModelPrefab == null)
@@ -501,9 +641,18 @@ namespace Apoplexy.Weapons
             viewModelRoot.localPosition = weapon.HoldPosition;
             viewModelRoot.localRotation = Quaternion.Euler(weapon.HoldRotation);
 
-            viewModelInstance = Instantiate(weapon.ViewModelPrefab, viewModelRoot);
+            viewModelInstance = new GameObject(weapon.ViewModelPrefab.name);
+            viewModelInstance.transform.SetParent(viewModelRoot, false);
+
+            viewModelModel = Instantiate(weapon.ViewModelPrefab, viewModelInstance.transform);
+
+            viewModelModel.name = "Model";
+            viewModelModel.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            viewModelModel.transform.localScale = weapon.ViewModelScale;
 
             GameObject instance = viewModelInstance;
+
+            CreateMuzzleFlash(instance);
 
             int viewModelLayer = LayerMask.NameToLayer("ViewModel");
 
@@ -516,14 +665,9 @@ namespace Apoplexy.Weapons
                 SetLayerRecursively(instance, viewModelLayer);
             }
 
-            instance.name = weapon.ViewModelPrefab.name;
-            instance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-
-            instance.transform.localScale = weapon.ViewModelScale;
-
             if (weapon.ViewModelMaterial != null)
             {
-                foreach (Renderer modelRenderer in instance.GetComponentsInChildren<Renderer>())
+                foreach (Renderer modelRenderer in viewModelModel.GetComponentsInChildren<Renderer>())
                 {
                     modelRenderer.sharedMaterial = weapon.ViewModelMaterial;
                 }

@@ -11,6 +11,7 @@ namespace Apoplexy.UI
         [SerializeField] private Text weaponText;
         [SerializeField] private Text ammoText;
         [SerializeField] private Text statusText;
+        [SerializeField] private Graphic crosshair;
 
         [Header("Formatting")]
         [SerializeField] private string ammoFormat = "{0:000} / {1:000}";
@@ -58,12 +59,22 @@ namespace Apoplexy.UI
             {
                 SetText(weaponText, string.Empty);
                 SetText(ammoText, string.Empty);
+
+                if (crosshair != null)
+                {
+                    crosshair.enabled = false;
+                }
                 return;
             }
 
             SetText(weaponText, string.Format(weaponFormat, weaponController.Weapon.DisplayName));
 
             SetText(ammoText, string.Format(ammoFormat, weaponController.Ammunition, weaponController.ReserveAmmunition));
+
+            if (crosshair != null)
+            {
+                crosshair.enabled = true;
+            }
 
             RefreshStatus();
         }

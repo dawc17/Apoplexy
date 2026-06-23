@@ -1,0 +1,72 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c75d5f95489d1d5d92d03942fb4c6ea, type: 3}
+  m_Name: Shotgun
+  m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.Weapons.WeaponDefinition
+  displayName: Shotgun
+  damage: 8
+  range: 34
+  fireRate: 1.15
+  automatic: 0
+  pelletCount: 10
+  baseSpread: 4.2
+  movingSpread: 1.2
+  sprintSpread: 2.2
+  bloomPerShot: 1.1
+  maximumBloom: 3.5
+  bloomRecovery: 5.5
+  magazineSize: 6
+  reserveAmmo: 60
+  reloadDuration: 0.72
+  autoReloadWhenEmpty: 1
+  reloadOneAtATime: 1
+  viewModelPrefab: {fileID: 919132149155446097, guid: 1d652dfa72ea1a201af2af14d72af7ea, type: 3}
+  viewModelMaterial: {fileID: 0}
+  holdPosition: {x: 3.62, y: -2.44, z: 6.2}
+  holdRotation: {x: 0, y: -176.13, z: 0}
+  viewModelScale: {x: 0.9, y: 0.9, z: 0.9}
+  animation:
+    swayPositionAmount: 0.85
+    swayRotationAmount: 0.71
+    swayPositionClamp: {x: 0.035, y: 0.025}
+    swayRotationClamp: {x: 4, y: 3}
+    swayRollAmount: -0.35
+    swayFollowSpeed: 16
+    swaySettleSpeed: 10
+    walkBobSpeed: 8
+    walkBobX: 0.035
+    walkBobY: 0.018
+    walkBobEaseSpeed: 8
+    sprintBobSpeedScale: 0.75
+    sprintBobX: 0.018
+    sprintBobY: 0.02
+    sprintOffset: {x: 0.025, y: -0.09, z: -0.02}
+    sprintRotation: {x: 35, y: 10, z: 0}
+    sprintEaseSpeed: 10
+    recoilDuration: 0.36
+    recoilKickOffset: {x: 0, y: -0.03, z: -0.06}
+    recoilFollowThroughOffset: {x: -0.012, y: 0.01, z: 0.02}
+    recoilKickRotation: {x: 20, y: 0, z: 2.4}
+    recoilFollowThroughRotation: {x: 2.5, y: -1.6, z: -1.2}
+    reloadSpinDegreesPerSecond: {x: 1080, y: 0, z: 0}
+    reloadSpinEaseInSpeed: 18
+    reloadSpinEaseOutSpeed: 12
+    idleBobSpeed: 1.65
+    idleBobY: 0.006
+    idleBobEaseSpeed: 3.5
+  fireSound: {fileID: 8300000, guid: bce4db2047598db3ba3d6b56a7e34672, type: 3}
+  reloadSound: {fileID: 8300000, guid: 28c117e3f6ff7a60599d8f896d1ce94b, type: 3}
+  muzzleFlashSprite: {fileID: 21300000, guid: 88a98999fcdb0b34cbaac4a500c03789, type: 3}
+  muzzlePosition: {x: 0.14, y: 1.26, z: -14.44}
+  muzzleFlashSize: {x: 14.8, y: 8.9}
+  muzzleFlashDuration: 0.025
+  muzzleFlashColor: {r: 1, g: 1, b: 1, a: 1}

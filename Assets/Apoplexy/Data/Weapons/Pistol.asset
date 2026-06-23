@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7c75d5f95489d1d5d92d03942fb4c6ea, type: 3}
-  m_Name: WeaponDefinition
+  m_Name: Pistol
   m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.Weapons.WeaponDefinition
   displayName: USP-S
   damage: 15
@@ -28,16 +28,12 @@ MonoBehaviour:
   reserveAmmo: 48
   reloadDuration: 1.8
   autoReloadWhenEmpty: 1
+  reloadOneAtATime: 0
   viewModelPrefab: {fileID: 919132149155446097, guid: d0ea89da2f125dc0cb5daa932ca98d8a, type: 3}
   viewModelMaterial: {fileID: 2100000, guid: 5a49de3d1fce51a7d92768c7ca7bc2f5, type: 2}
   holdPosition: {x: 0.19, y: -0.15, z: 0.38}
   holdRotation: {x: 0.23, y: 2.92, z: -2}
   viewModelScale: {x: 0.104, y: 0.104, z: 0.104}
-  muzzleFlashSprite: {fileID: 21300000, guid: 88a98999fcdb0b34cbaac4a500c03789, type: 3}
-  muzzlePosition: {x: 0.015, y: 0.054, z: 0.575}
-  muzzleFlashSize: {x: 1.478, y: 0.657}
-  muzzleFlashDuration: 0.025
-  muzzleFlashColor: {r: 1, g: 1, b: 1, a: 1}
   animation:
     swayPositionAmount: 0.0008
     swayRotationAmount: 0.045
@@ -69,3 +65,8 @@ MonoBehaviour:
     idleBobEaseSpeed: 3.5
   fireSound: {fileID: 8300000, guid: 9de262619224ff2c98fabb34d99a6091, type: 3}
   reloadSound: {fileID: 8300000, guid: 28c117e3f6ff7a60599d8f896d1ce94b, type: 3}
+  muzzleFlashSprite: {fileID: 21300000, guid: 88a98999fcdb0b34cbaac4a500c03789, type: 3}
+  muzzlePosition: {x: 0, y: 0.075, z: 0.41}
+  muzzleFlashSize: {x: 0.57, y: 0.3}
+  muzzleFlashDuration: 0.025
+  muzzleFlashColor: {r: 1, g: 1, b: 1, a: 1}

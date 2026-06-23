@@ -176,6 +176,11 @@ namespace Apoplexy.Weapons
 
             if (wantsToFire && cooldown <= 0f)
             {
+                if (reloading && weapon.ReloadOneAtATime && ammunition > 0)
+                {
+                    CancelReload();
+                }
+
                 TryFire();
             }
 
@@ -186,6 +191,12 @@ namespace Apoplexy.Weapons
 
             UpdateViewModelMotion(deltaTime);
             UpdateMuzzleFlash();
+        }
+
+        private void CancelReload()
+        {
+            reloading = false;
+            reloadTimer = 0f;
         }
 
         private void TryFire()
@@ -295,13 +306,23 @@ namespace Apoplexy.Weapons
             }
 
             int needed = weapon.MagazineSize - ammunition;
-            int loaded = Mathf.Min(needed, reserveAmmunition);
+            int loaded = weapon.ReloadOneAtATime ? Mathf.Min(1, reserveAmmunition) : Mathf.Min(needed, reserveAmmunition);
 
             ammunition += loaded;
             reserveAmmunition -= loaded;
-            reloading = false;
 
             AmmunitionChanged?.Invoke();
+
+            bool shouldContinueReloading = weapon.ReloadOneAtATime && ammunition < weapon.MagazineSize && reserveAmmunition > 0;
+
+            if (shouldContinueReloading)
+            {
+                reloadTimer = weapon.ReloadDuration;
+                PlaySound(weapon.ReloadSound);
+                return;
+            }
+
+            reloading = false;
         }
 
         private void PlaySound(AudioClip clip)

@@ -1672,7 +1672,7 @@ MonoBehaviour:
   viewCamera: {fileID: 600487244}
   player: {fileID: 1470698713}
   inputActions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  weapon: {fileID: 11400000, guid: 1b69c63e3453ee11ab6fa0ea1a66c3fc, type: 2}
+  weapon: {fileID: 11400000, guid: 97a726e48a91dc0ffa003780708ba45e, type: 2}
   viewModelRoot: {fileID: 986448096}
   hitMask:
     serializedVersion: 2
@@ -6888,7 +6888,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.01
-  far clip plane: 10
+  far clip plane: 100
   field of view: 70
   orthographic: 0
   orthographic size: 5

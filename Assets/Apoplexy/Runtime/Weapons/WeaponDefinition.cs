@@ -31,6 +31,7 @@ namespace Apoplexy.Weapons
         [SerializeField, Min(0)] private int reserveAmmo = 48;
         [SerializeField, Min(0.01f)] private float reloadDuration = 1.8f;
         [SerializeField] private bool autoReloadWhenEmpty = true;
+        [SerializeField] private bool reloadOneAtATime;
 
         [Header("Presentation")]
         [SerializeField] private GameObject viewModelPrefab;
@@ -68,6 +69,7 @@ namespace Apoplexy.Weapons
         public int ReserveAmmo => reserveAmmo;
         public float ReloadDuration => reloadDuration;
         public bool AutoReloadWhenEmpty => autoReloadWhenEmpty;
+        public bool ReloadOneAtATime => reloadOneAtATime;
         public GameObject ViewModelPrefab => viewModelPrefab;
         public Material ViewModelMaterial => viewModelMaterial;
         public Vector3 HoldPosition => holdPosition;

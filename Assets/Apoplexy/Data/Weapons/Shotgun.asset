@@ -31,9 +31,9 @@ MonoBehaviour:
   reloadOneAtATime: 1
   viewModelPrefab: {fileID: 919132149155446097, guid: 1d652dfa72ea1a201af2af14d72af7ea, type: 3}
   viewModelMaterial: {fileID: 2100000, guid: eaade82727bb8a1d3a245b91a9523305, type: 2}
-  holdPosition: {x: 3.62, y: -2.44, z: 6.2}
+  holdPosition: {x: 0.48, y: -0.24, z: 0.74}
   holdRotation: {x: 0, y: -176.13, z: 0}
-  viewModelScale: {x: 0.9, y: 0.9, z: 0.9}
+  viewModelScale: {x: 0.09, y: 0.09, z: 0.09}
   animation:
     swayPositionAmount: 0.0008
     swayRotationAmount: 0.045
@@ -43,17 +43,17 @@ MonoBehaviour:
     swayFollowSpeed: 5.84
     swaySettleSpeed: 10
     walkBobSpeed: 8
-    walkBobX: 0.35
-    walkBobY: 0.35
+    walkBobX: 0.035
+    walkBobY: 0.035
     walkBobEaseSpeed: 8
     sprintBobSpeedScale: 1.2
-    sprintBobX: 0.7
-    sprintBobY: 0.7
+    sprintBobX: 0.07
+    sprintBobY: 0.07
     sprintOffset: {x: 0.025, y: -0.09, z: -0.02}
     sprintRotation: {x: 49.1, y: 10, z: 0}
     sprintEaseSpeed: 10
     recoilDuration: 0.7
-    recoilKickOffset: {x: 0, y: 0.2, z: -4.77}
+    recoilKickOffset: {x: 0, y: 0.02, z: -0.477}
     recoilFollowThroughOffset: {x: -0.012, y: 0, z: -0.03}
     recoilKickRotation: {x: 29.2, y: 2.07, z: 0}
     recoilFollowThroughRotation: {x: -0.37, y: -1.6, z: -2.97}
@@ -61,12 +61,12 @@ MonoBehaviour:
     reloadSpinEaseInSpeed: 18
     reloadSpinEaseOutSpeed: 12
     idleBobSpeed: 1.65
-    idleBobY: 0.1
+    idleBobY: 0.025
     idleBobEaseSpeed: 3.5
   fireSound: {fileID: 8300000, guid: bce4db2047598db3ba3d6b56a7e34672, type: 3}
   reloadSound: {fileID: 8300000, guid: 28c117e3f6ff7a60599d8f896d1ce94b, type: 3}
   muzzleFlashSprite: {fileID: 21300000, guid: 88a98999fcdb0b34cbaac4a500c03789, type: 3}
-  muzzlePosition: {x: 0.14, y: 1.26, z: -14.44}
-  muzzleFlashSize: {x: 14.8, y: 8.9}
+  muzzlePosition: {x: 0.010027908, y: 0.14, z: -1.4282389}
+  muzzleFlashSize: {x: 1.39, y: 0.77}
   muzzleFlashDuration: 0.025
   muzzleFlashColor: {r: 1, g: 1, b: 1, a: 1}

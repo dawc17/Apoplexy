@@ -2,6 +2,7 @@ using System;
 using Apoplexy.Combat;
 using Apoplexy.Player;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.InputSystem;
 
 namespace Apoplexy.Weapons

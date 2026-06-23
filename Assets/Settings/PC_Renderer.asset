@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34f4e44deacb472f9d151b6efc7d4db1, type: 3}
   m_Name: PSX PS2 Depth Fog
   m_EditorClassIdentifier: Borzblade.RetroRenderToolkit.Runtime::Borzblade.RetroRenderToolkit.PSXPS2DepthFogRendererFeature
-  m_Active: 0
+  m_Active: 1
   injectionPoint: 550
   fetchColorBuffer: 1
   requirements: 1
@@ -159,17 +159,17 @@ MonoBehaviour:
   bindDepthStencilAttachment: 0
   m_Version: 1
   settings:
-    enabled: 0
+    enabled: 1
     passEvent: 550
     fogColor: {r: 0.42, g: 0.46, b: 0.5, a: 1}
-    intensity: 0.45
+    intensity: 0.468
     startDistance: 18
     endDistance: 85
-    density: 0.035
+    density: 0.579
     blendMode: 0
     steps: 8
-    ditherStrength: 0.08
-    ditherScale: 1
+    ditherStrength: 0.061
+    ditherScale: 2.01
     affectSky: 0
 --- !u!114 &7833122117494664109
 MonoBehaviour:

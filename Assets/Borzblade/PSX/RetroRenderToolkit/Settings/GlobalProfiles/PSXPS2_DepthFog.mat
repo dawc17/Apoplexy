@@ -27,11 +27,11 @@ Material:
     m_Floats:
     - _AffectSky: 0
     - _BlendMode: 0
-    - _Density: 0.035
-    - _DitherScale: 1
-    - _DitherStrength: 0.08
+    - _Density: 0.579
+    - _DitherScale: 2.01
+    - _DitherStrength: 0.061
     - _EndDistance: 85
-    - _Intensity: 0.45
+    - _Intensity: 0.468
     - _StartDistance: 18
     - _Steps: 8
     m_Colors:

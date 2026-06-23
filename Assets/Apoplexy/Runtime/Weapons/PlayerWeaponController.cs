@@ -16,13 +16,24 @@ namespace Apoplexy.Weapons
         [SerializeField] private WeaponDefinition weapon;
         [SerializeField] private Transform viewModelRoot;
 
+        [Header("Inventory")]
+        [SerializeField] private WeaponDefinition[] weapons = new WeaponDefinition[0];
+        [SerializeField, Min(0)] private int startingWeaponIndex;
+        [SerializeField, Min(0.01f)] private float weaponSwitchDuration = 0.34f;
+        [SerializeField] private AudioClip weaponSwitchSound;
+        [SerializeField] private Vector3 weaponSwitchOffset = new(0.10f, -0.42f, -0.12f);
+        [SerializeField] private Vector3 weaponSwitchRotation = new(18f, 22f, -12f);
+
         [Header("Collision")]
         [SerializeField] private LayerMask hitMask = ~0;
         [SerializeField] private bool drawDebugShots = true;
 
+        private static readonly Key[] WeaponNumberKeys = { Key.Digit1, Key.Digit2, Key.Digit3, Key.Digit4, Key.Digit5, Key.Digit6, Key.Digit7, Key.Digit8, Key.Digit9 };
+
         private InputAction attackAction;
         private InputAction reloadAction;
         private AudioSource audioSource;
+        private AudioSource reloadAudioSource;
         private GameObject viewModelInstance;
 
         private int ammunition;
@@ -31,6 +42,13 @@ namespace Apoplexy.Weapons
         private float reloadTimer;
         private float spreadBloom;
         private bool reloading;
+
+        private int activeWeaponIndex;
+        private int pendingWeaponIndex;
+        private int[] weaponAmmunition;
+        private int[] weaponReserveAmmunition;
+        private float weaponSwitchTimer;
+        private bool weaponSwitchCommited;
 
         private Vector2 swayPosition;
         private Vector2 swayRotation;
@@ -58,7 +76,9 @@ namespace Apoplexy.Weapons
         public int Ammunition => ammunition;
         public int ReserveAmmunition => reserveAmmunition;
         public bool IsReloading => reloading;
+        public bool IsSwitching => weaponSwitchTimer > 0f;
         public WeaponDefinition Weapon => weapon;
+        public int ActiveWeaponIndex => activeWeaponIndex;
         public Transform MuzzleSocket => muzzleSocket;
 
         public float ReloadProgress => reloading ? 1f - reloadTimer / weapon.ReloadDuration : 0f;
@@ -122,6 +142,9 @@ namespace Apoplexy.Weapons
             audioSource = GetComponent<AudioSource>();
             audioSource.playOnAwake = false;
             audioSource.spatialBlend = 0f;
+            reloadAudioSource = gameObject.AddComponent<AudioSource>();
+            reloadAudioSource.playOnAwake = false;
+            reloadAudioSource.spatialBlend = 0f;
 
             if (viewCamera == null)
             {
@@ -132,6 +155,8 @@ namespace Apoplexy.Weapons
             {
                 player = GetComponentInParent<FirstPersonController>();
             }
+
+            InitializeWeaponInventory();
 
             if (viewCamera == null || player == null || inputActions == null || weapon == null)
             {
@@ -148,8 +173,8 @@ namespace Apoplexy.Weapons
 
             playerActions.Enable();
 
-            ammunition = weapon.MagazineSize;
-            reserveAmmunition = weapon.ReserveAmmo;
+            ammunition = weaponAmmunition[activeWeaponIndex];
+            reserveAmmunition = weaponReserveAmmunition[activeWeaponIndex];
 
             CreateViewModel();
         }
@@ -163,7 +188,17 @@ namespace Apoplexy.Weapons
             cooldown = Mathf.Max(0f, cooldown - deltaTime);
             spreadBloom = Mathf.Max(0f, spreadBloom - weapon.BloomRecovery * deltaTime);
 
+            UpdateWeaponSwitch(deltaTime);
             UpdateReload(deltaTime);
+
+            HandleWeaponSwitchInput();
+
+            if (IsSwitching)
+            {
+                UpdateViewModelMotion(deltaTime);
+                UpdateMuzzleFlash();
+                return;
+            }
 
             bool reloadPressed = reloadAction?.WasPressedThisFrame() ?? (Keyboard.current?.rKey.wasPressedThisFrame == true);
 
@@ -193,10 +228,245 @@ namespace Apoplexy.Weapons
             UpdateMuzzleFlash();
         }
 
+        private void OnDisable()
+        {
+            StopReloadSound();
+        }
+
+        private void UpdateWeaponSwitch(float deltaTime)
+        {
+            if (weaponSwitchTimer <= 0f)
+            {
+                return;
+            }
+
+            weaponSwitchTimer = Mathf.Max(0f, weaponSwitchTimer - deltaTime);
+
+            if (!weaponSwitchCommited && weaponSwitchTimer <= weaponSwitchDuration * 0.5f)
+            {
+                CommitWeaponSwitch();
+            }
+        }
+
         private void CancelReload()
         {
             reloading = false;
             reloadTimer = 0f;
+            StopReloadSound();
+        }
+
+        private void DestroyViewModel()
+        {
+            if (viewModelInstance != null)
+            {
+                Destroy(viewModelInstance);
+            }
+
+            viewModelInstance = null;
+            viewModelModel = null;
+            muzzleSocket = null;
+            muzzleFlashTransform = null;
+            muzzleFlashRenderer = null;
+            muzzleFlashTimer = 0f;
+
+            if (viewModelRoot != null)
+            {
+                viewModelRoot.localPosition = Vector3.zero;
+                viewModelRoot.localRotation = Quaternion.identity;
+            }
+        }
+
+        private void InitializeWeaponInventory()
+        {
+            if ((weapons == null || weapons.Length == 0) && weapon != null)
+            {
+                weapons = new[] { weapon };
+            }
+
+            if (weapons == null || weapons.Length == 0)
+            {
+                return;
+            }
+
+            activeWeaponIndex = Mathf.Clamp(startingWeaponIndex, 0, weapons.Length - 1);
+
+            if (weapon != null)
+            {
+                int configuredWeaponIndex = Array.IndexOf(weapons, weapon);
+
+                if (configuredWeaponIndex >= 0)
+                {
+                    activeWeaponIndex = configuredWeaponIndex;
+                }
+            }
+
+            if (weapons[activeWeaponIndex] == null)
+            {
+                activeWeaponIndex = FindFirstValidWeaponIdx();
+            }
+
+            if (activeWeaponIndex < 0)
+            {
+                weapon = null;
+                return;
+            }
+
+            weapon = weapons[activeWeaponIndex];
+            pendingWeaponIndex = activeWeaponIndex;
+            weaponAmmunition = new int[weapons.Length];
+            weaponReserveAmmunition = new int[weapons.Length];
+
+            for (int i = 0; i < weapons.Length; i++)
+            {
+                WeaponDefinition inventoryWeapon = weapons[i];
+
+                if (inventoryWeapon == null)
+                {
+                    continue;
+                }
+
+                weaponAmmunition[i] = inventoryWeapon.MagazineSize;
+                weaponReserveAmmunition[i] = inventoryWeapon.ReserveAmmo;
+            }
+        }
+
+        private int FindFirstValidWeaponIdx()
+        {
+            if (weapons == null)
+            {
+                return -1;
+            }
+
+            for (int i = 0; i < weapons.Length; i++)
+            {
+                if (weapons[i] != null)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        private void HandleWeaponSwitchInput()
+        {
+            if (IsSwitching || weapons == null || weapons.Length <= 1 || Keyboard.current == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < weapons.Length && i < WeaponNumberKeys.Length; i++)
+            {
+                if (Keyboard.current[WeaponNumberKeys[i]].wasPressedThisFrame)
+                {
+                    RequestWeaponSwitch(i);
+                    return;
+                }
+            }
+
+            if (Mouse.current == null)
+            {
+                return;
+            }
+
+            float scrollY = Mouse.current.scroll.ReadValue().y;
+
+            if (scrollY > 0f)
+            {
+                SwitchWeaponOffset(-1);
+            }
+            else if (scrollY < 0f)
+            {
+                SwitchWeaponOffset(1);
+            }
+        }
+
+        private void SwitchWeaponOffset(int offset)
+        {
+            if (weapons == null || weapons.Length == 0)
+            {
+                return;
+            }
+
+            for (int step = 1; step <= weapons.Length; step++)
+            {
+                int index = (activeWeaponIndex + offset * step + weapons.Length) % weapons.Length;
+
+                if (weapons[index] != null)
+                {
+                    RequestWeaponSwitch(index);
+                    return;
+                }
+            }
+        }
+
+        private void RequestWeaponSwitch(int index)
+        {
+            if (weapons == null
+                || index < 0
+                || index >= weapons.Length
+                || weapons[index] == null
+                || index == activeWeaponIndex)
+            {
+                return;
+            }
+
+            SaveActiveWeaponState();
+            CancelReload();
+            pendingWeaponIndex = index;
+            weaponSwitchTimer = weaponSwitchDuration;
+            weaponSwitchCommited = false;
+            muzzleFlashTimer = 0f;
+            muzzleFlashPreviewVisible = false;
+
+            PlaySound(weaponSwitchSound);
+        }
+
+        private void CommitWeaponSwitch()
+        {
+            if (weapons == null
+                || pendingWeaponIndex < 0
+                || pendingWeaponIndex >= weapons.Length
+                || weapons[pendingWeaponIndex] == null
+                )
+            {
+                weaponSwitchCommited = true;
+                return;
+            }
+
+            DestroyViewModel();
+
+            activeWeaponIndex = pendingWeaponIndex;
+            weapon = weapons[activeWeaponIndex];
+            ammunition = weaponAmmunition[activeWeaponIndex];
+            reserveAmmunition = weaponReserveAmmunition[activeWeaponIndex];
+
+            cooldown = 0f;
+            reloadTimer = 0f;
+            spreadBloom = 0f;
+            recoilTimer = weapon.Animation.recoilDuration;
+            recoilAmount = 0f;
+            reloadAmount = 0f;
+            reloadSpinRotation = Vector3.zero;
+
+            CreateViewModel();
+            weaponSwitchCommited = true;
+            AmmunitionChanged?.Invoke();
+
+        }
+
+        private void SaveActiveWeaponState()
+        {
+            if (weaponAmmunition == null
+                || weaponReserveAmmunition == null
+                || activeWeaponIndex < 0
+                || activeWeaponIndex >= weaponAmmunition.Length)
+            {
+                return;
+            }
+
+            weaponAmmunition[activeWeaponIndex] = ammunition;
+            weaponReserveAmmunition[activeWeaponIndex] = reserveAmmunition;
         }
 
         private void TryFire()
@@ -288,7 +558,7 @@ namespace Apoplexy.Weapons
             reloading = true;
             reloadTimer = weapon.ReloadDuration;
 
-            PlaySound(weapon.ReloadSound);
+            PlayReloadSound();
         }
 
         private void UpdateReload(float deltaTime)
@@ -318,11 +588,12 @@ namespace Apoplexy.Weapons
             if (shouldContinueReloading)
             {
                 reloadTimer = weapon.ReloadDuration;
-                PlaySound(weapon.ReloadSound);
+                PlayReloadSound();
                 return;
             }
 
             reloading = false;
+            StopReloadSound();
         }
 
         private void PlaySound(AudioClip clip)
@@ -335,6 +606,32 @@ namespace Apoplexy.Weapons
             audioSource.pitch = UnityEngine.Random.Range(0.96f, 1.04f);
 
             audioSource.PlayOneShot(clip);
+        }
+
+        private void PlayReloadSound()
+        {
+            AudioClip clip = weapon.ReloadSound;
+
+            if (clip == null)
+            {
+                return;
+            }
+
+            reloadAudioSource.Stop();
+            reloadAudioSource.clip = clip;
+            reloadAudioSource.pitch = UnityEngine.Random.Range(0.96f, 1.04f);
+            reloadAudioSource.Play();
+        }
+
+        private void StopReloadSound()
+        {
+            if (reloadAudioSource == null)
+            {
+                return;
+            }
+
+            reloadAudioSource.Stop();
+            reloadAudioSource.clip = null;
         }
 
         private static void SetLayerRecursively(GameObject target, int layer)
@@ -378,7 +675,12 @@ namespace Apoplexy.Weapons
             bobY += Mathf.Abs(Mathf.Cos(walkBobTimer * motion.sprintBobSpeedScale))
                 * motion.sprintBobY * sprintAmount;
 
+            float switchPose = EaseInOutCubic(GetWeaponSwitchAmount());
+            Vector3 switchOffset = weaponSwitchOffset * switchPose;
+            Vector3 switchRotation = weaponSwitchRotation * switchPose;
+
             Vector3 position = weapon.HoldPosition + motion.sprintOffset * sprintAmount;
+            position += switchOffset;
             position.x += swayPosition.x + bobX;
             position.y += swayPosition.y - bobY - idleBobY;
             position.x += -recoilKick * motion.recoilKickOffset.x
@@ -395,11 +697,29 @@ namespace Apoplexy.Weapons
                 swayRotation.x * motion.swayRollAmount);
             rotation += motion.recoilKickRotation * recoilKick
                 + motion.recoilFollowThroughRotation * recoilFollowThrough;
+            rotation += switchRotation;
             rotation += reloadSpinRotation * EaseInOutCubic(reloadAmount);
             rotation += motion.sprintRotation * sprintAmount;
 
             viewModelRoot.localPosition = position;
             viewModelRoot.localRotation = Quaternion.Euler(rotation);
+        }
+
+        private float GetWeaponSwitchAmount()
+        {
+            if (weaponSwitchTimer <= 0f || weaponSwitchDuration <= 0f)
+            {
+                return 0f;
+            }
+
+            float time = 1f - weaponSwitchTimer / weaponSwitchDuration;
+
+            if (time < 0.5f)
+            {
+                return time / 0.5f;
+            }
+
+            return 1f - (time - 0.5f) / 0.5f;
         }
 
         private void UpdateSway(ProceduralWeaponAnimationSettings motion, float deltaTime)

@@ -41,12 +41,12 @@ Material:
     - _DitherScale: 1
     - _DitherStrength: 0.61
     - _DitherThreshold: 0.5
-    - _FixedVerticalResolution: 451
+    - _FixedVerticalResolution: 320
     - _Gamma: 1
     - _GlobalFogEnabled: 0
     - _GlobalFogIntensity: 0
     - _HorizontalJitter: 0.02
-    - _Intensity: 0.731
+    - _Intensity: 0.724
     - _NoiseStrength: 0.025
     - _PixelScale: 1
     - _PixelationMode: 1

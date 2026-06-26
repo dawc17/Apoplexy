@@ -1,6 +1,7 @@
 using Apoplexy.Core;
 using Apoplexy.Player;
 using Apoplexy.Weapons;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,90 +14,65 @@ namespace Apoplexy.UI
         [SerializeField] private PlayerHealth playerHealth;
         [SerializeField] private FirstPersonController playerController;
         [SerializeField] private GameSession gameSession;
-        [SerializeField] private Text weaponText;
-        [SerializeField] private Text ammoText;
-        [SerializeField] private Text statusText;
-        [SerializeField] private Text healthText;
+        [SerializeField] private TMP_Text weaponModelText;
+        [SerializeField] private TMP_Text ammoText;
+        [SerializeField] private TMP_Text weaponStatusText;
+        [SerializeField] private Image reloadProgressFill;
+        [SerializeField] private TMP_Text healthText;
         [SerializeField] private Image healthFill;
-        [SerializeField] private Text awarenessText;
+        [SerializeField] private TMP_Text awarenessAccentText;
+        [SerializeField] private TMP_Text awarenessText;
         [SerializeField] private Graphic awarenessPanel;
         [SerializeField] private Graphic damageVignette;
         [SerializeField] private Graphic crouchVignette;
         [SerializeField] private GameObject stateOverlay;
-        [SerializeField] private Text stateTitleText;
-        [SerializeField] private Text statePromptText;
-        [SerializeField] private Graphic crosshair;
+        [SerializeField] private TMP_Text stateTitleText;
+        [SerializeField] private TMP_Text statePromptText;
 
         [Header("Formatting")]
-        [SerializeField] private string ammoFormat = "{0:000} / {1:000}";
-        [SerializeField] private string weaponFormat = "{0}";
+        [SerializeField] private string ammoFormat = "{0:00} / {1:000}";
         [SerializeField] private string healthFormat = "{0:000}";
         [SerializeField] private string reloadText = "RELOADING";
+        [SerializeField] private string weaponReadyText = "SLOT {0}/{1}";
         [SerializeField] private string deadTitle = "SIGNAL LOST";
         [SerializeField] private string winTitle = "you! !!won";
         [SerializeField] private string restartPrompt = "r to reboot or sum";
 
         [Header("Colors")]
-        [SerializeField] private Color normalColor = new(0.92f, 0.92f, 0.88f, 1f);
+        [SerializeField] private Color textColor = new(0.92f, 0.92f, 0.88f, 1f);
+        [SerializeField] private Color dimTextColor = new(0.52f, 0.52f, 0.49f, 1f);
+        [SerializeField] private Color panelColor = new(0f, 0f, 0f, 0.77f);
         [SerializeField] private Color dangerColor = new(0.82f, 0.09f, 0.11f, 1f);
         [SerializeField] private Color damageVignetteColor = new(0.38f, 0f, 0f, 0.42f);
         [SerializeField] private Color crouchVignetteColor = new(0f, 0f, 0f, 0.14f);
 
+        private bool subscribedToWeapon;
+        private bool subscribedToHealth;
+
         private void Awake()
         {
-            if (weaponController == null)
-            {
-                weaponController = FindAnyObjectByType<PlayerWeaponController>();
-            }
-
-            if (playerHealth == null)
-            {
-                playerHealth = FindAnyObjectByType<PlayerHealth>();
-            }
-
-            if (playerController == null)
-            {
-                playerController = FindAnyObjectByType<FirstPersonController>();
-            }
-
-            if (gameSession == null)
-            {
-                gameSession = FindAnyObjectByType<GameSession>();
-            }
+            BindMissingReferences();
         }
 
         private void OnEnable()
         {
-            if (weaponController != null)
-            {
-                weaponController.AmmunitionChanged += Refresh;
-            }
-
-            if (playerHealth != null)
-            {
-                playerHealth.HealthChanged += OnHealthChanged;
-            }
-
+            BindMissingReferences();
+            Subscribe();
             Refresh();
             RefreshHealth();
+            RefreshSessionUi();
         }
 
         private void OnDisable()
         {
-            if (weaponController != null)
-            {
-                weaponController.AmmunitionChanged -= Refresh;
-            }
-
-            if (playerHealth != null)
-            {
-                playerHealth.HealthChanged -= OnHealthChanged;
-            }
+            Unsubscribe();
         }
 
         private void Update()
         {
             BindMissingReferences();
+            Subscribe();
+            RefreshHealth();
             RefreshStatus();
             RefreshSessionUi();
         }
@@ -106,23 +82,11 @@ namespace Apoplexy.UI
             if (weaponController == null)
             {
                 weaponController = FindAnyObjectByType<PlayerWeaponController>();
-
-                if (weaponController != null)
-                {
-                    weaponController.AmmunitionChanged += Refresh;
-                    Refresh();
-                }
             }
 
             if (playerHealth == null)
             {
                 playerHealth = FindAnyObjectByType<PlayerHealth>();
-
-                if (playerHealth != null)
-                {
-                    playerHealth.HealthChanged += OnHealthChanged;
-                    RefreshHealth();
-                }
             }
 
             if (playerController == null)
@@ -136,29 +100,50 @@ namespace Apoplexy.UI
             }
         }
 
+        private void Subscribe()
+        {
+            if (!subscribedToWeapon && weaponController != null)
+            {
+                weaponController.AmmunitionChanged += Refresh;
+                subscribedToWeapon = true;
+            }
+
+            if (!subscribedToHealth && playerHealth != null)
+            {
+                playerHealth.HealthChanged += OnHealthChanged;
+                subscribedToHealth = true;
+            }
+        }
+
+        private void Unsubscribe()
+        {
+            if (subscribedToWeapon && weaponController != null)
+            {
+                weaponController.AmmunitionChanged -= Refresh;
+            }
+
+            if (subscribedToHealth && playerHealth != null)
+            {
+                playerHealth.HealthChanged -= OnHealthChanged;
+            }
+
+            subscribedToWeapon = false;
+            subscribedToHealth = false;
+        }
+
         private void Refresh()
         {
             if (weaponController == null || weaponController.Weapon == null)
             {
-                SetText(weaponText, string.Empty);
+                SetText(weaponModelText, string.Empty);
                 SetText(ammoText, string.Empty);
-
-                if (crosshair != null)
-                {
-                    crosshair.enabled = false;
-                }
+                SetText(weaponStatusText, string.Empty);
+                SetFill(reloadProgressFill, 0f);
                 return;
             }
 
-            SetText(weaponText, string.Format(weaponFormat, weaponController.Weapon.DisplayName));
-
+            SetText(weaponModelText, weaponController.Weapon.DisplayName);
             SetText(ammoText, string.Format(ammoFormat, weaponController.Ammunition, weaponController.ReserveAmmunition));
-
-            if (crosshair != null)
-            {
-                crosshair.enabled = true;
-            }
-
             RefreshStatus();
         }
 
@@ -181,7 +166,10 @@ namespace Apoplexy.UI
 
             if (healthFill != null)
             {
-                healthFill.color = playerHealth.Health <= 30 ? dangerColor : normalColor;
+                float pulse = Mathf.PingPong(Time.unscaledTime * 32f, 1f);
+                healthFill.color = playerHealth.Health <= 30
+                    ? Color.Lerp(new Color(dangerColor.r, dangerColor.g, dangerColor.b, 0.72f), dangerColor, pulse)
+                    : new Color(textColor.r, textColor.g, textColor.b, 0.88f);
             }
         }
 
@@ -194,17 +182,23 @@ namespace Apoplexy.UI
         {
             if (weaponController == null)
             {
-                SetText(statusText, string.Empty);
+                SetText(weaponStatusText, string.Empty);
+                SetFill(reloadProgressFill, 0f);
                 return;
             }
 
             if (weaponController.IsReloading)
             {
-                SetText(statusText, reloadText);
+                SetText(weaponStatusText, reloadText);
+                SetFill(reloadProgressFill, weaponController.ReloadProgress);
                 return;
             }
 
-            SetText(statusText, string.Empty);
+            SetFill(reloadProgressFill, 0f);
+            SetText(weaponStatusText, string.Format(
+                weaponReadyText,
+                Mathf.Max(1, weaponController.ActiveWeaponIndex + 1),
+                Mathf.Max(1, weaponController.WeaponCount)));
         }
 
         private void RefreshSessionUi()
@@ -212,6 +206,8 @@ namespace Apoplexy.UI
             if (gameSession == null)
             {
                 SetAlpha(damageVignette, 0f);
+                SetAlpha(crouchVignette, 0f);
+                SetActive(awarenessPanel != null ? awarenessPanel.gameObject : null, false);
                 SetActive(stateOverlay, false);
                 return;
             }
@@ -228,22 +224,23 @@ namespace Apoplexy.UI
                 crouchVignetteColor);
 
             bool hasAwareness = !string.IsNullOrEmpty(gameSession.AwarenessText);
-            SetText(awarenessText, gameSession.AwarenessText);
-            SetActive(awarenessText != null ? awarenessText.gameObject : null, hasAwareness);
+            SetActive(awarenessPanel != null ? awarenessPanel.gameObject : null, hasAwareness);
 
-            if (awarenessText != null)
+            if (hasAwareness)
             {
-                awarenessText.color = gameSession.AwarenessColor;
-            }
+                Color awarenessColor = gameSession.AwarenessText == "DISCOVERED"
+                    ? Color.Lerp(new Color(dangerColor.r, dangerColor.g, dangerColor.b, 0.7f), dangerColor, Mathf.PingPong(Time.unscaledTime * 12f, 1f))
+                    : gameSession.AwarenessColor;
 
-            if (awarenessPanel != null)
-            {
-                awarenessPanel.gameObject.SetActive(hasAwareness);
-                awarenessPanel.color = new Color(
-                    gameSession.AwarenessColor.r,
-                    gameSession.AwarenessColor.g,
-                    gameSession.AwarenessColor.b,
-                    awarenessPanel.color.a);
+                SetText(awarenessText, gameSession.AwarenessText);
+                SetText(awarenessAccentText, AwarenessAccent(gameSession.AwarenessText));
+                SetTextColor(awarenessText, awarenessColor);
+                SetTextColor(awarenessAccentText, new Color(awarenessColor.r, awarenessColor.g, awarenessColor.b, 0.72f));
+
+                if (awarenessPanel != null)
+                {
+                    awarenessPanel.color = panelColor;
+                }
             }
 
             bool showState = gameSession.State is GameState.Dead or GameState.Win;
@@ -254,10 +251,22 @@ namespace Apoplexy.UI
                 bool dead = gameSession.State == GameState.Dead;
                 SetText(stateTitleText, dead ? deadTitle : winTitle);
                 SetText(statePromptText, restartPrompt);
+                SetTextColor(stateTitleText, dead ? dangerColor : textColor);
             }
         }
 
-        private static void SetText(Text text, string value)
+        private static string AwarenessAccent(string label)
+        {
+            return label switch
+            {
+                "DISCOVERED" => "ALERT",
+                "SPOTTED" => "SEEN",
+                "SEEN?" => "TRACE",
+                _ => "SOUND",
+            };
+        }
+
+        private static void SetText(TMP_Text text, string value)
         {
             if (text != null)
             {
@@ -265,11 +274,25 @@ namespace Apoplexy.UI
             }
         }
 
+        private static void SetTextColor(TMP_Text text, Color color)
+        {
+            if (text != null)
+            {
+                text.color = color;
+            }
+        }
+
         private static void SetFill(Image image, float value)
         {
             if (image != null)
             {
-                image.fillAmount = value;
+                float fill = Mathf.Clamp01(value);
+                image.fillAmount = fill;
+
+                RectTransform rectTransform = image.rectTransform;
+                Vector3 scale = rectTransform.localScale;
+                scale.x = fill;
+                rectTransform.localScale = scale;
             }
         }
 

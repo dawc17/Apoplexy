@@ -33,7 +33,7 @@ Material:
     - _LineHeight: 1
     - _LineSpacing: 3
     - _SweepHeight: 2
-    - _SweepSpeed: 46
+    - _SweepSpeed: 0
     m_Colors:
     - _LineColor: {r: 0, g: 0, b: 0, a: 0.26}
     - _SweepColor: {r: 1, g: 1, b: 1, a: 0}

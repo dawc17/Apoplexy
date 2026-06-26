@@ -22,10 +22,10 @@ MonoBehaviour:
   m_Version: 1
   settings:
     enabled: 1
-    intensity: 0.731
+    intensity: 0.724
     pixelScale: 1
     pixelationMode: 1
-    fixedVerticalResolution: 451
+    fixedVerticalResolution: 320
     colorSteps: 64
     ditherStrength: 0.61
     ditherPatternMode: 0

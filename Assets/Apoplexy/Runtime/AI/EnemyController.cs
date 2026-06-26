@@ -17,6 +17,11 @@ namespace Apoplexy.AI
         [SerializeField, Min(0.5f)] private float height = 1.88f;
         [SerializeField] private Vector3 eyeOffset = new(0f, 1.45f, 0f);
 
+        [Header("Grounding")]
+        [SerializeField] private bool alignVisualBottomToGroundOnStart = true;
+        [SerializeField] private LayerMask groundMask = ~0;
+        [SerializeField, Min(0f)] private float groundLift = 0.03f;
+
         [Header("Movement")]
         [SerializeField, Min(0f)] private float speed = 2.5f;
         [SerializeField, Min(0f)] private float searchSpeed = 1.8f;
@@ -54,6 +59,11 @@ namespace Apoplexy.AI
         [SerializeField] private Color deadColor = new(0.25f, 0.25f, 0.25f);
         [SerializeField, Min(0f)] private float hitFlashDuration = 0.1f;
 
+        [Header("Particles")]
+        [SerializeField] private ParticleSystem hitParticlesPrefab;
+        [SerializeField] private ParticleSystem deathParticlesPrefab;
+        [SerializeField, Min(0f)] private float particleFallbackLifetime = 2f;
+
         private CharacterController controller;
         private Renderer[] bodyRenderers;
         private MaterialPropertyBlock materialProperties;
@@ -75,6 +85,14 @@ namespace Apoplexy.AI
             player = playerTransform;
         }
 
+        public void SnapToGround(float groundY)
+        {
+            CacheBodyRenderers();
+            ConfigureController();
+            AlignVisualBottomToY(groundY);
+            verticalVelocity = -2f;
+        }
+
         public void TakeDamage(DamageInfo damageInfo)
         {
             if (!IsAlive)
@@ -83,6 +101,8 @@ namespace Apoplexy.AI
             }
 
             health -= damageInfo.Damage;
+
+            SpawnHitParticles(damageInfo);
 
             Vector3 threatPosition = damageInfo.Source != null
                 ? damageInfo.Source.transform.position
@@ -102,15 +122,16 @@ namespace Apoplexy.AI
         private void Awake()
         {
             controller = GetComponent<CharacterController>();
-            controller.height = height;
-            controller.radius = radius;
-            controller.center = Vector3.up * (height * 0.5f);
-            controller.stepOffset = 0.25f;
-            controller.slopeLimit = 50f;
 
             health = maxHealth;
             materialProperties = new MaterialPropertyBlock();
 
+            CacheBodyRenderers();
+            ConfigureController();
+        }
+
+        private void CacheBodyRenderers()
+        {
             if (bodyRenderer == null)
             {
                 bodyRenderer = GetComponentInChildren<Renderer>();
@@ -132,6 +153,7 @@ namespace Apoplexy.AI
         private void Start()
         {
             FindPlayerIfNeeded();
+            AlignVisualBottomToGround();
             UpdateVisualState();
         }
 
@@ -428,7 +450,55 @@ namespace Apoplexy.AI
 
         private void Die()
         {
+            SpawnDeathParticles();
             Destroy(gameObject);
+        }
+
+        private void SpawnHitParticles(DamageInfo damageInfo)
+        {
+            if (hitParticlesPrefab == null)
+            {
+                return;
+            }
+
+            Quaternion rotation = RotationFromDamage(damageInfo);
+            ParticleSystem particles = Instantiate(hitParticlesPrefab, damageInfo.Point, rotation);
+            DestroyParticlesWhenFinished(particles);
+        }
+
+        private void SpawnDeathParticles()
+        {
+            if (deathParticlesPrefab == null)
+            {
+                return;
+            }
+
+            ParticleSystem particles = Instantiate(deathParticlesPrefab, transform.position + Vector3.up * (height * 0.5f), Quaternion.identity);
+
+            DestroyParticlesWhenFinished(particles);
+        }
+
+        private static Quaternion RotationFromDamage(DamageInfo damageInfo)
+        {
+            if (damageInfo.Direction.sqrMagnitude <= 0.001f)
+            {
+                return Quaternion.identity;
+            }
+
+            return Quaternion.LookRotation(-damageInfo.Direction.normalized, Vector3.up);
+        }
+
+        private void DestroyParticlesWhenFinished(ParticleSystem particles)
+        {
+            if (particles == null)
+            {
+                return;
+            }
+
+            ParticleSystem.MainModule main = particles.main;
+            float lifetime = main.duration + main.startLifetime.constantMax;
+
+            Destroy(particles.gameObject, Mathf.Max(lifetime, particleFallbackLifetime));
         }
 
         private void SetState(EnemyState newState, float timer = 0f)
@@ -496,6 +566,198 @@ namespace Apoplexy.AI
 
             FirstPersonController controller = FindAnyObjectByType<FirstPersonController>();
             player = controller != null ? controller.transform : null;
+        }
+
+        private void AlignVisualBottomToGround()
+        {
+            if (!alignVisualBottomToGroundOnStart || bodyRenderers == null || bodyRenderers.Length == 0)
+            {
+                return;
+            }
+
+            if (!TryGetVisualBounds(out Bounds visualBounds))
+            {
+                return;
+            }
+
+            if (!TryFindGroundBelow(visualBounds, groundMask, out float groundY)
+                && !TryFindGroundBelow(visualBounds, ~0, out groundY))
+            {
+                return;
+            }
+
+            AlignVisualBottomToY(groundY);
+        }
+
+        private void AlignVisualBottomToY(float groundY)
+        {
+            if (!TryGetVisualBounds(out Bounds visualBounds))
+            {
+                return;
+            }
+
+            float lift = groundY + groundLift - visualBounds.min.y;
+
+            if (Mathf.Abs(lift) <= 0.001f)
+            {
+                return;
+            }
+
+            transform.position += Vector3.up * lift;
+        }
+
+        private bool TryGetVisualBounds(out Bounds visualBounds)
+        {
+            visualBounds = default;
+
+            if (bodyRenderers == null || bodyRenderers.Length == 0)
+            {
+                return false;
+            }
+
+            bool found = false;
+
+            foreach (Renderer renderer in bodyRenderers)
+            {
+                if (renderer == null)
+                {
+                    continue;
+                }
+
+                if (!found)
+                {
+                    visualBounds = renderer.bounds;
+                    found = true;
+                    continue;
+                }
+
+                visualBounds.Encapsulate(renderer.bounds);
+            }
+
+            return found;
+        }
+
+        private bool TryFindGroundBelow(
+            Bounds visualBounds,
+            LayerMask mask,
+            out float groundY)
+        {
+            Vector3 origin = new(
+                visualBounds.center.x,
+                visualBounds.max.y + 2f,
+                visualBounds.center.z);
+
+            RaycastHit[] hits = Physics.RaycastAll(
+                origin,
+                Vector3.down,
+                visualBounds.size.y + 6f,
+                mask,
+                QueryTriggerInteraction.Ignore);
+
+            groundY = 0f;
+            float closestDistance = float.PositiveInfinity;
+            bool found = false;
+
+            for (int i = 0; i < hits.Length; i++)
+            {
+                RaycastHit hit = hits[i];
+
+                if (hit.collider == null || hit.collider.transform.IsChildOf(transform))
+                {
+                    continue;
+                }
+
+                if (hit.distance >= closestDistance)
+                {
+                    continue;
+                }
+
+                closestDistance = hit.distance;
+                groundY = hit.point.y;
+                found = true;
+            }
+
+            return found;
+        }
+
+        private void ConfigureController()
+        {
+            if (controller == null)
+            {
+                return;
+            }
+
+            if (TryGetBodyLocalBounds(out Bounds localBounds))
+            {
+                controller.center = localBounds.center;
+                controller.height = Mathf.Max(0.1f, localBounds.size.y);
+                controller.radius = Mathf.Max(0.05f, Mathf.Max(localBounds.extents.x, localBounds.extents.z));
+            }
+            else
+            {
+                controller.height = height;
+                controller.radius = radius;
+                controller.center = Vector3.up * (height * 0.5f);
+            }
+
+            controller.stepOffset = 0.25f;
+            controller.slopeLimit = 50f;
+            controller.skinWidth = 0.03f;
+            controller.minMoveDistance = 0f;
+        }
+
+        private bool TryGetBodyLocalBounds(out Bounds localBounds)
+        {
+            localBounds = default;
+
+            if (bodyRenderers == null || bodyRenderers.Length == 0)
+            {
+                return false;
+            }
+
+            bool hasBounds = false;
+
+            foreach (Renderer renderer in bodyRenderers)
+            {
+                if (renderer == null)
+                {
+                    continue;
+                }
+
+                renderer.enabled = true;
+
+                Bounds worldBounds = renderer.bounds;
+                Vector3 min = worldBounds.min;
+                Vector3 max = worldBounds.max;
+
+                EncapsulateLocalPoint(new Vector3(min.x, min.y, min.z), ref localBounds, ref hasBounds);
+                EncapsulateLocalPoint(new Vector3(min.x, min.y, max.z), ref localBounds, ref hasBounds);
+                EncapsulateLocalPoint(new Vector3(min.x, max.y, min.z), ref localBounds, ref hasBounds);
+                EncapsulateLocalPoint(new Vector3(min.x, max.y, max.z), ref localBounds, ref hasBounds);
+                EncapsulateLocalPoint(new Vector3(max.x, min.y, min.z), ref localBounds, ref hasBounds);
+                EncapsulateLocalPoint(new Vector3(max.x, min.y, max.z), ref localBounds, ref hasBounds);
+                EncapsulateLocalPoint(new Vector3(max.x, max.y, min.z), ref localBounds, ref hasBounds);
+                EncapsulateLocalPoint(new Vector3(max.x, max.y, max.z), ref localBounds, ref hasBounds);
+            }
+
+            return hasBounds;
+        }
+
+        private void EncapsulateLocalPoint(
+            Vector3 worldPoint,
+            ref Bounds localBounds,
+            ref bool hasBounds)
+        {
+            Vector3 localPoint = transform.InverseTransformPoint(worldPoint);
+
+            if (!hasBounds)
+            {
+                localBounds = new Bounds(localPoint, Vector3.zero);
+                hasBounds = true;
+                return;
+            }
+
+            localBounds.Encapsulate(localPoint);
         }
     }
 }

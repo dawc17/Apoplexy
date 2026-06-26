@@ -129,7 +129,6 @@ GameObject:
   m_Component:
   - component: {fileID: 62904689}
   - component: {fileID: 62904690}
-  - component: {fileID: 62904691}
   m_Layer: 0
   m_Name: Enemy Spawn 06
   m_TagString: Untagged
@@ -162,25 +161,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0c69631e9cf582574a8fab123736a74c, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.Levels.SpawnPoint
   <Type>k__BackingField: 1
---- !u!114 &62904691
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 62904688}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e30b8347409cfce15aef04ba5a09c24b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.AI.EnemySpawner
-  enemyPrefab: {fileID: 0}
-  player: {fileID: 1470698714}
-  spawnOnStart: 1
-  destroySpawnMarkers: 0
 --- !u!1 &69689775
 GameObject:
   m_ObjectHideFlags: 0
@@ -1418,7 +1401,6 @@ GameObject:
   m_Component:
   - component: {fileID: 548947808}
   - component: {fileID: 548947809}
-  - component: {fileID: 548947810}
   m_Layer: 0
   m_Name: Enemy Spawn 02
   m_TagString: Untagged
@@ -1454,22 +1436,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.Levels.SpawnPoint
   <Type>k__BackingField: 1
---- !u!114 &548947810
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 548947807}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e30b8347409cfce15aef04ba5a09c24b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.AI.EnemySpawner
-  enemyPrefab: {fileID: 0}
-  player: {fileID: 1470698714}
-  spawnOnStart: 1
-  destroySpawnMarkers: 0
 --- !u!1 &561846412
 GameObject:
   m_ObjectHideFlags: 0
@@ -3551,7 +3517,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1012184176}
   - component: {fileID: 1012184177}
-  - component: {fileID: 1012184178}
   m_Layer: 0
   m_Name: Enemy Spawn 04
   m_TagString: Untagged
@@ -3587,22 +3552,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.Levels.SpawnPoint
   <Type>k__BackingField: 1
---- !u!114 &1012184178
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1012184175}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e30b8347409cfce15aef04ba5a09c24b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.AI.EnemySpawner
-  enemyPrefab: {fileID: 0}
-  player: {fileID: 1470698714}
-  spawnOnStart: 1
-  destroySpawnMarkers: 0
 --- !u!1 &1032270705
 GameObject:
   m_ObjectHideFlags: 0
@@ -5012,7 +4961,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1283664119}
   - component: {fileID: 1283664120}
-  - component: {fileID: 1283664121}
   m_Layer: 0
   m_Name: Enemy Spawn 08
   m_TagString: Untagged
@@ -5048,22 +4996,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.Levels.SpawnPoint
   <Type>k__BackingField: 1
---- !u!114 &1283664121
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1283664118}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e30b8347409cfce15aef04ba5a09c24b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.AI.EnemySpawner
-  enemyPrefab: {fileID: 0}
-  player: {fileID: 1470698714}
-  spawnOnStart: 1
-  destroySpawnMarkers: 0
 --- !u!1 &1333050498
 GameObject:
   m_ObjectHideFlags: 0
@@ -5074,7 +5006,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1333050499}
   - component: {fileID: 1333050500}
-  - component: {fileID: 1333050501}
   m_Layer: 0
   m_Name: Enemy Spawn 09
   m_TagString: Untagged
@@ -5110,22 +5041,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.Levels.SpawnPoint
   <Type>k__BackingField: 1
---- !u!114 &1333050501
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1333050498}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e30b8347409cfce15aef04ba5a09c24b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.AI.EnemySpawner
-  enemyPrefab: {fileID: 0}
-  player: {fileID: 1470698714}
-  spawnOnStart: 1
-  destroySpawnMarkers: 0
 --- !u!1 &1339025816
 GameObject:
   m_ObjectHideFlags: 0
@@ -6112,7 +6027,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1571905985}
   - component: {fileID: 1571905986}
-  - component: {fileID: 1571905987}
   m_Layer: 0
   m_Name: Enemy Spawn 03
   m_TagString: Untagged
@@ -6148,22 +6062,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.Levels.SpawnPoint
   <Type>k__BackingField: 1
---- !u!114 &1571905987
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1571905984}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e30b8347409cfce15aef04ba5a09c24b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.AI.EnemySpawner
-  enemyPrefab: {fileID: 0}
-  player: {fileID: 1470698714}
-  spawnOnStart: 1
-  destroySpawnMarkers: 0
 --- !u!1 &1610075763
 GameObject:
   m_ObjectHideFlags: 0
@@ -6174,7 +6072,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1610075764}
   - component: {fileID: 1610075765}
-  - component: {fileID: 1610075766}
   m_Layer: 0
   m_Name: Enemy Spawn 07
   m_TagString: Untagged
@@ -6210,22 +6107,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.Levels.SpawnPoint
   <Type>k__BackingField: 1
---- !u!114 &1610075766
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1610075763}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e30b8347409cfce15aef04ba5a09c24b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.AI.EnemySpawner
-  enemyPrefab: {fileID: 0}
-  player: {fileID: 1470698714}
-  spawnOnStart: 1
-  destroySpawnMarkers: 0
 --- !u!1 &1621671900
 GameObject:
   m_ObjectHideFlags: 0
@@ -7178,7 +7059,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1720849117}
   - component: {fileID: 1720849118}
-  - component: {fileID: 1720849119}
   m_Layer: 0
   m_Name: Enemy Spawn 01
   m_TagString: Untagged
@@ -7214,22 +7094,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.Levels.SpawnPoint
   <Type>k__BackingField: 1
---- !u!114 &1720849119
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1720849116}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e30b8347409cfce15aef04ba5a09c24b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.AI.EnemySpawner
-  enemyPrefab: {fileID: 0}
-  player: {fileID: 1470698714}
-  spawnOnStart: 1
-  destroySpawnMarkers: 0
 --- !u!1 &1761632518
 GameObject:
   m_ObjectHideFlags: 0
@@ -7315,7 +7179,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1766192426}
   - component: {fileID: 1766192427}
-  - component: {fileID: 1766192428}
   m_Layer: 0
   m_Name: Enemy Spawn 05
   m_TagString: Untagged
@@ -7351,22 +7214,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.Levels.SpawnPoint
   <Type>k__BackingField: 1
---- !u!114 &1766192428
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1766192425}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e30b8347409cfce15aef04ba5a09c24b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.AI.EnemySpawner
-  enemyPrefab: {fileID: 0}
-  player: {fileID: 1470698714}
-  spawnOnStart: 1
-  destroySpawnMarkers: 0
 --- !u!1 &1836156408
 GameObject:
   m_ObjectHideFlags: 0
@@ -7832,6 +7679,54 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1929120428}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &2063737643
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2063737645}
+  - component: {fileID: 2063737644}
+  m_Layer: 0
+  m_Name: EnemySpawnManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2063737644
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2063737643}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e30b8347409cfce15aef04ba5a09c24b, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.AI.EnemySpawner
+  enemyPrefab: {fileID: 1398629226141947553, guid: 0e0f29ea1a1e05f64940befeeef93143, type: 3}
+  player: {fileID: 1470698714}
+  spawnOnStart: 1
+  destroySpawnMarkers: 0
+--- !u!4 &2063737645
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2063737643}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 10.5, y: 0.30216, z: -0.97506}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2085099098
 GameObject:
   m_ObjectHideFlags: 0
@@ -8326,3 +8221,4 @@ SceneRoots:
   - {fileID: 683663827}
   - {fileID: 2085099102}
   - {fileID: 1699379474}
+  - {fileID: 2063737645}

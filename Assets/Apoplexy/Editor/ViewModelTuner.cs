@@ -140,7 +140,7 @@ namespace Apoplexy.Editor
 
         private void FindRuntimeController()
         {
-            runtimeController = Object.FindFirstObjectByType<PlayerWeaponController>();
+            runtimeController = Object.FindAnyObjectByType<PlayerWeaponController>();
 
             if (runtimeController != null && weapon == null)
             {

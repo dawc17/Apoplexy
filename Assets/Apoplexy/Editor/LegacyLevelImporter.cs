@@ -150,8 +150,7 @@ namespace Apoplexy.Editor
                     StaticEditorFlags.BatchingStatic |
                     StaticEditorFlags.OccluderStatic |
                     StaticEditorFlags.OccludeeStatic |
-                    StaticEditorFlags.ContributeGI |
-                    StaticEditorFlags.NavigationStatic);
+                    StaticEditorFlags.ContributeGI);
 
                 Bounds wallBounds = new(position, size);
 
@@ -200,11 +199,10 @@ namespace Apoplexy.Editor
 
             GameObjectUtility.SetStaticEditorFlags(
                 floor,
-                StaticEditorFlags.BatchingStatic |
-                StaticEditorFlags.OccluderStatic |
-                StaticEditorFlags.OccludeeStatic |
-                StaticEditorFlags.ContributeGI |
-                StaticEditorFlags.NavigationStatic);
+                    StaticEditorFlags.BatchingStatic |
+                    StaticEditorFlags.OccluderStatic |
+                    StaticEditorFlags.OccludeeStatic |
+                    StaticEditorFlags.ContributeGI);
         }
 
         private static void ImportSpawn(

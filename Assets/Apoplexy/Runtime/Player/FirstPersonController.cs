@@ -1,9 +1,11 @@
+using Apoplexy.AI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Apoplexy.Player
 {
     [RequireComponent(typeof(CharacterController))]
+    [RequireComponent(typeof(AudioSource))]
     public sealed class FirstPersonController : MonoBehaviour
     {
         [Header("References")]
@@ -44,7 +46,25 @@ namespace Apoplexy.Player
         [SerializeField] private float crouchBobScale = 0.35f;
         [SerializeField] private float sprintBobBoost = 0.18f;
 
+        [Header("Footstep Audio")]
+        [SerializeField] private AudioClip[] footstepSounds = new AudioClip[0];
+        [SerializeField, Range(0f, 1f)] private float walkFootstepVolume = 0.68f;
+        [SerializeField, Range(0f, 1f)] private float sprintFootstepVolume = 0.85f;
+        [SerializeField, Range(0f, 1f)] private float crouchFootstepVolume = 0.32f;
+        [SerializeField] private Vector2 footstepPitchJitter = new(-0.04f, 0.04f);
+        [SerializeField] private Vector2 footstepPanJitter = new(-0.1f, 0.1f);
+
+        [Header("Footstep Noise")]
+        [SerializeField, Min(0f)] private float minimumFootstepSpeed = 1.2f;
+        [SerializeField, Min(0.01f)] private float walkStepDistance = 1.72f;
+        [SerializeField, Min(0.01f)] private float sprintStepDistance = 1.92f;
+        [SerializeField, Min(0.01f)] private float crouchStepDistance = 1.42f;
+        [SerializeField, Min(0f)] private float walkNoiseRadius = 4.5f;
+        [SerializeField, Min(0f)] private float sprintNoiseRadius = 8f;
+        [SerializeField, Min(0f)] private float crouchNoiseRadius = 1.35f;
+
         private CharacterController controller;
+        private AudioSource footstepAudioSource;
         private InputActionMap playerActions;
         private InputAction moveAction;
         private InputAction lookAction;
@@ -61,7 +81,9 @@ namespace Apoplexy.Player
         private float crouchAmount;
         private float sprintFovAmount;
         private float headBobTimer;
+        private float footstepDistance;
         private float headBobAmount;
+        private int lastFootstepIndex = -1;
 
         private bool sprintBlockedByAttack;
 
@@ -74,6 +96,10 @@ namespace Apoplexy.Player
         private void Awake()
         {
             controller = GetComponent<CharacterController>();
+            footstepAudioSource = GetComponent<AudioSource>();
+            footstepAudioSource.playOnAwake = false;
+            footstepAudioSource.loop = false;
+            footstepAudioSource.spatialBlend = 0f;
 
             if (viewCamera == null)
             {
@@ -241,6 +267,8 @@ namespace Apoplexy.Player
             {
                 verticalVelocity = 0f;
             }
+
+            UpdateFootstepNoise(deltaTime);
         }
 
         private void UpdatePresentation(float deltaTime)
@@ -299,6 +327,80 @@ namespace Apoplexy.Player
             viewCamera.transform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
 
             viewCamera.fieldOfView = baseFieldOfView + sprintFieldOfViewIncrease * sprintFovAmount;
+        }
+
+        private void UpdateFootstepNoise(float deltaTime)
+        {
+            float speed = HorizontalSpeed;
+
+            if (!IsGrounded || speed < minimumFootstepSpeed)
+            {
+                footstepDistance = 0f;
+                return;
+            }
+
+            float stepDistance = walkStepDistance;
+            float noiseRadius = walkNoiseRadius;
+            float pitch = 1f;
+            float volume = walkFootstepVolume;
+
+            if (IsSprinting)
+            {
+                stepDistance = sprintStepDistance;
+                noiseRadius = sprintNoiseRadius;
+                pitch = 1.08f;
+                volume = sprintFootstepVolume;
+            }
+            else if (IsCrouching)
+            {
+                stepDistance = crouchStepDistance;
+                noiseRadius = crouchNoiseRadius;
+                pitch = 0.92f;
+                volume = crouchFootstepVolume;
+            }
+
+            footstepDistance += speed * deltaTime;
+
+            while (footstepDistance >= stepDistance)
+            {
+                footstepDistance -= stepDistance;
+                PlayFootstep(volume, pitch);
+                NoiseSystem.Emit(transform.position, noiseRadius, gameObject);
+            }
+        }
+
+        private void PlayFootstep(float volume, float pitch)
+        {
+            if (footstepAudioSource == null || footstepSounds == null || footstepSounds.Length == 0)
+            {
+                return;
+            }
+
+            int footstepIndex = Random.Range(0, footstepSounds.Length);
+
+            if (footstepSounds.Length > 1)
+            {
+                int guard = 0;
+
+                while (footstepIndex == lastFootstepIndex && guard < 8)
+                {
+                    footstepIndex = Random.Range(0, footstepSounds.Length);
+                    guard++;
+                }
+            }
+
+            AudioClip footstep = footstepSounds[footstepIndex];
+
+            if (footstep == null)
+            {
+                return;
+            }
+
+            lastFootstepIndex = footstepIndex;
+
+            footstepAudioSource.pitch = pitch + Random.Range(footstepPitchJitter.x, footstepPitchJitter.y);
+            footstepAudioSource.panStereo = Random.Range(footstepPanJitter.x, footstepPanJitter.y);
+            footstepAudioSource.PlayOneShot(footstep, volume);
         }
 
         private static void SetCursorLocked(bool locked)

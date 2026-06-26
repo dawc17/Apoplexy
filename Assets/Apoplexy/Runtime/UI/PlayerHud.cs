@@ -22,7 +22,7 @@ namespace Apoplexy.UI
         {
             if (weaponController == null)
             {
-                weaponController = FindFirstObjectByType<PlayerWeaponController>();
+                weaponController = FindAnyObjectByType<PlayerWeaponController>();
             }
         }
 

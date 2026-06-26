@@ -1,4 +1,5 @@
 using System;
+using Apoplexy.AI;
 using Apoplexy.Combat;
 using Apoplexy.Player;
 using UnityEngine;
@@ -28,6 +29,10 @@ namespace Apoplexy.Weapons
         [Header("Collision")]
         [SerializeField] private LayerMask hitMask = ~0;
         [SerializeField] private bool drawDebugShots = true;
+
+        [Header("Noise")]
+        [SerializeField, Min(0f)] private float quietShotNoiseRadius = 7f;
+        [SerializeField, Min(0f)] private float loudShotNoiseRadius = 28f;
 
         private static readonly Key[] WeaponNumberKeys = { Key.Digit1, Key.Digit2, Key.Digit3, Key.Digit4, Key.Digit5, Key.Digit6, Key.Digit7, Key.Digit8, Key.Digit9 };
 
@@ -501,6 +506,10 @@ namespace Apoplexy.Weapons
             spreadBloom = Mathf.Min(weapon.MaximumBloom, spreadBloom + weapon.BloomPerShot);
 
             PlaySound(weapon.FireSound);
+            NoiseSystem.Emit(
+                viewCamera.transform.position,
+                weapon.PelletCount > 1 ? loudShotNoiseRadius : quietShotNoiseRadius,
+                gameObject);
             AmmunitionChanged?.Invoke();
         }
 

@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.Weapons.WeaponDefinition
   displayName: Shotgun
   damage: 8
-  range: 7.74
+  range: 34
   fireRate: 1.15
   automatic: 0
   pelletCount: 10
   baseSpread: 4.2
-  movingSpread: 4.99
-  sprintSpread: 6
+  movingSpread: 1.2
+  sprintSpread: 2.2
   bloomPerShot: 1.1
   maximumBloom: 3.5
   bloomRecovery: 5.5
@@ -29,6 +29,15 @@ MonoBehaviour:
   reloadDuration: 0.72
   autoReloadWhenEmpty: 1
   reloadOneAtATime: 1
+  meleeDamage: 5
+  meleeRange: 1.65
+  meleeRadius: 0.45
+  meleeKnockbackImpulse: 7
+  meleeKnockbackLift: 1.2
+  reloadSpinKnockbackMultiplier: 1.8
+  meleeWindupDuration: 0.1
+  meleeActiveDuration: 0.08
+  meleeRecoveryDuration: 0.32
   viewModelPrefab: {fileID: 919132149155446097, guid: 1d652dfa72ea1a201af2af14d72af7ea, type: 3}
   viewModelMaterial: {fileID: 2100000, guid: eaade82727bb8a1d3a245b91a9523305, type: 2}
   holdPosition: {x: 0.48, y: -0.24, z: 0.74}

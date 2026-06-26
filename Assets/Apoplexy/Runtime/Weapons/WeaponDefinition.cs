@@ -33,6 +33,17 @@ namespace Apoplexy.Weapons
         [SerializeField] private bool autoReloadWhenEmpty = true;
         [SerializeField] private bool reloadOneAtATime;
 
+        [Header("Melee")]
+        [SerializeField, Min(1)] private int meleeDamage = 5;
+        [SerializeField, Min(0.1f)] private float meleeRange = 1.65f;
+        [SerializeField, Min(0f)] private float meleeRadius = 0.45f;
+        [SerializeField, Min(0f)] private float meleeKnockbackImpulse = 7f;
+        [SerializeField, Min(0f)] private float meleeKnockbackLift = 1.2f;
+        [SerializeField, Min(0f)] private float reloadSpinKnockbackMultiplier = 1.8f;
+        [SerializeField, Min(0f)] private float meleeWindupDuration = 0.10f;
+        [SerializeField, Min(0f)] private float meleeActiveDuration = 0.08f;
+        [SerializeField, Min(0f)] private float meleeRecoveryDuration = 0.32f;
+
         [Header("Presentation")]
         [SerializeField] private GameObject viewModelPrefab;
         [SerializeField] private Material viewModelMaterial;
@@ -70,6 +81,15 @@ namespace Apoplexy.Weapons
         public float ReloadDuration => reloadDuration;
         public bool AutoReloadWhenEmpty => autoReloadWhenEmpty;
         public bool ReloadOneAtATime => reloadOneAtATime;
+        public int MeleeDamage => meleeDamage;
+        public float MeleeRange => meleeRange;
+        public float MeleeRadius => meleeRadius;
+        public float MeleeKnockbackImpulse => meleeKnockbackImpulse;
+        public float MeleeKnockbackLift => meleeKnockbackLift;
+        public float ReloadSpinKnockbackMultiplier => reloadSpinKnockbackMultiplier;
+        public float MeleeWindupDuration => meleeWindupDuration;
+        public float MeleeActiveDuration => meleeActiveDuration;
+        public float MeleeRecoveryDuration => meleeRecoveryDuration;
         public GameObject ViewModelPrefab => viewModelPrefab;
         public Material ViewModelMaterial => viewModelMaterial;
         public Vector3 HoldPosition => holdPosition;

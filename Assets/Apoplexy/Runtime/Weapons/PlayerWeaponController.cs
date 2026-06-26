@@ -34,6 +34,9 @@ namespace Apoplexy.Weapons
         [SerializeField, Min(0f)] private float quietShotNoiseRadius = 7f;
         [SerializeField, Min(0f)] private float loudShotNoiseRadius = 28f;
 
+        [Header("Hit Feedback")]
+        [SerializeField] private AudioClip enemyHitSound;
+
         private static readonly Key[] WeaponNumberKeys = { Key.Digit1, Key.Digit2, Key.Digit3, Key.Digit4, Key.Digit5, Key.Digit6, Key.Digit7, Key.Digit8, Key.Digit9 };
 
         private InputAction attackAction;
@@ -67,6 +70,10 @@ namespace Apoplexy.Weapons
         private float recoilAmount;
         private float reloadAmount;
         private Vector3 reloadSpinRotation;
+        // private float meleeTimer;
+        // private float meleeDuration;
+        // private bool meleeHasHit;
+        // private bool reloadSpinHasHit;
 
         private GameObject viewModelModel;
         private Transform muzzleSocket;
@@ -78,6 +85,7 @@ namespace Apoplexy.Weapons
         private bool muzzleFlashPreviewVisible;
 
         public event Action AmmunitionChanged;
+        public event Action<WeaponDefinition> ShotFired;
 
         public int Ammunition => ammunition;
         public int ReserveAmmunition => reserveAmmunition;
@@ -85,7 +93,10 @@ namespace Apoplexy.Weapons
         public bool IsSwitching => weaponSwitchTimer > 0f;
         public WeaponDefinition Weapon => weapon;
         public int ActiveWeaponIndex => activeWeaponIndex;
+        public int WeaponCount => weapons != null ? weapons.Length : 0;
         public Transform MuzzleSocket => muzzleSocket;
+        public float CurrentSpreadDegrees => weapon != null ? CalculateSpread() : 0f;
+        // public bool IsMeleeing => meleeTimer > 0f;
 
         public float ReloadProgress => reloading ? 1f - reloadTimer / weapon.ReloadDuration : 0f;
 
@@ -196,6 +207,7 @@ namespace Apoplexy.Weapons
 
             UpdateWeaponSwitch(deltaTime);
             UpdateReload(deltaTime);
+            // UpdateMelee(deltaTime);
 
             HandleWeaponSwitchInput();
 
@@ -205,6 +217,18 @@ namespace Apoplexy.Weapons
                 UpdateMuzzleFlash();
                 return;
             }
+
+            // if ((Keyboard.current?.vKey.wasPressedThisFrame == true) && !IsMeleeing)
+            // {
+            //     StartMelee();
+            // }
+            //
+            // if (IsMeleeing)
+            // {
+            //     UpdateViewModelMotion(deltaTime);
+            //     UpdateMuzzleFlash();
+            //     return;
+            // }
 
             bool reloadPressed = reloadAction?.WasPressedThisFrame() ?? (Keyboard.current?.rKey.wasPressedThisFrame == true);
 
@@ -258,6 +282,7 @@ namespace Apoplexy.Weapons
         {
             reloading = false;
             reloadTimer = 0f;
+            // reloadSpinHasHit = false;
             StopReloadSound();
         }
 
@@ -454,6 +479,10 @@ namespace Apoplexy.Weapons
             recoilAmount = 0f;
             reloadAmount = 0f;
             reloadSpinRotation = Vector3.zero;
+            // meleeTimer = 0f;
+            // meleeDuration = 0f;
+            // meleeHasHit = false;
+            // reloadSpinHasHit = false;
 
             CreateViewModel();
             weaponSwitchCommited = true;
@@ -510,6 +539,7 @@ namespace Apoplexy.Weapons
                 viewCamera.transform.position,
                 weapon.PelletCount > 1 ? loudShotNoiseRadius : quietShotNoiseRadius,
                 gameObject);
+            ShotFired?.Invoke(weapon);
             AmmunitionChanged?.Invoke();
         }
 
@@ -525,7 +555,11 @@ namespace Apoplexy.Weapons
             {
                 IDamageable damageable = hit.collider.GetComponentInParent<IDamageable>();
 
-                damageable?.TakeDamage(new DamageInfo(weapon.Damage, hit.point, direction, gameObject));
+                if (damageable != null)
+                {
+                    damageable.TakeDamage(new DamageInfo(weapon.Damage, hit.point, direction, gameObject));
+                    PlaySound(enemyHitSound);
+                }
             }
 
             if (drawDebugShots)
@@ -567,6 +601,7 @@ namespace Apoplexy.Weapons
             }
             reloading = true;
             reloadTimer = weapon.ReloadDuration;
+            // reloadSpinHasHit = false;
 
             PlayReloadSound();
         }
@@ -578,7 +613,11 @@ namespace Apoplexy.Weapons
                 return;
             }
 
+            float previousElapsed = weapon.ReloadDuration - reloadTimer;
             reloadTimer = Mathf.Max(0f, reloadTimer - deltaTime);
+            float currentElapsed = weapon.ReloadDuration - reloadTimer;
+
+            // UpdateReloadSpinHit(previousElapsed, currentElapsed);
 
             if (reloadTimer > 0f)
             {
@@ -598,14 +637,122 @@ namespace Apoplexy.Weapons
             if (shouldContinueReloading)
             {
                 reloadTimer = weapon.ReloadDuration;
+                // reloadSpinHasHit = false;
                 PlayReloadSound();
                 return;
             }
 
             reloading = false;
+            // reloadSpinHasHit = false;
             StopReloadSound();
         }
 
+        // private void StartMelee()
+        // {
+        //     CancelReload();
+        //
+        //     meleeDuration = weapon.MeleeWindupDuration + weapon.MeleeActiveDuration + weapon.MeleeRecoveryDuration;
+        //     meleeTimer = meleeDuration;
+        //     meleeHasHit = false;
+        // }
+        //
+        // private void UpdateMelee(float deltaTime)
+        // {
+        //     if (!IsMeleeing)
+        //     {
+        //         return;
+        //     }
+        //
+        //     float previousElapsed = meleeDuration - meleeTimer;
+        //     meleeTimer = Mathf.Max(0f, meleeTimer - deltaTime);
+        //     float elapsed = meleeDuration - meleeTimer;
+        //     float activeStart = weapon.MeleeWindupDuration;
+        //     float activeEnd = activeStart + weapon.MeleeActiveDuration;
+        //
+        //     if (!meleeHasHit && previousElapsed <= activeEnd && elapsed >= activeStart)
+        //     {
+        //         PerformMeleeHit(1f);
+        //         meleeHasHit = true;
+        //     }
+        //
+        //     if (meleeTimer <= 0f)
+        //     {
+        //         meleeDuration = 0f;
+        //         meleeHasHit = false;
+        //     }
+        // }
+        //
+        // private void UpdateReloadSpinHit(float previousElapsed, float currentElapsed)
+        // {
+        //     if (!weapon.ReloadOneAtATime || reloadSpinHasHit)
+        //     {
+        //         return;
+        //     }
+        //
+        //     float activeStart = weapon.MeleeWindupDuration;
+        //     float activeEnd = activeStart + weapon.MeleeActiveDuration;
+        //
+        //     if (previousElapsed > activeEnd || currentElapsed < activeStart)
+        //     {
+        //         return;
+        //     }
+        //
+        //     PerformMeleeHit(weapon.ReloadSpinKnockbackMultiplier);
+        //     reloadSpinHasHit = true;
+        // }
+        //
+        // private void PerformMeleeHit(float knockbackMultiplier)
+        // {
+        //     Vector3 origin = viewCamera.transform.position;
+        //     Vector3 direction = viewCamera.transform.forward;
+        //
+        //     bool hitSomething = Physics.SphereCast(
+        //         origin,
+        //         weapon.MeleeRadius,
+        //         direction,
+        //         out RaycastHit hit,
+        //         weapon.MeleeRange,
+        //         hitMask,
+        //         QueryTriggerInteraction.Ignore);
+        //
+        //     if (!hitSomething)
+        //     {
+        //         if (drawDebugShots)
+        //         {
+        //             Debug.DrawLine(origin, origin + direction * weapon.MeleeRange, Color.red, 0.35f);
+        //         }
+        //
+        //         return;
+        //     }
+        //
+        //     IDamageable damageable = hit.collider.GetComponentInParent<IDamageable>();
+        //
+        //     if (damageable == null)
+        //     {
+        //         return;
+        //     }
+        //
+        //     damageable.TakeDamage(new DamageInfo(weapon.MeleeDamage, hit.point, direction, gameObject));
+        //
+        //     EnemyController enemy = hit.collider.GetComponentInParent<EnemyController>();
+        //
+        //     if (enemy != null)
+        //     {
+        //         Vector3 knockbackDirection = enemy.transform.position - origin;
+        //         enemy.ApplyKnockback(
+        //             knockbackDirection,
+        //             weapon.MeleeKnockbackImpulse * knockbackMultiplier,
+        //             weapon.MeleeKnockbackLift);
+        //     }
+        //
+        //     PlaySound(enemyHitSound);
+        //
+        //     if (drawDebugShots)
+        //     {
+        //         Debug.DrawLine(origin, hit.point, Color.green, 0.35f);
+        //     }
+        // }
+        //
         private void PlaySound(AudioClip clip)
         {
             if (clip == null)
@@ -685,12 +832,15 @@ namespace Apoplexy.Weapons
             bobY += Mathf.Abs(Mathf.Cos(walkBobTimer * motion.sprintBobSpeedScale))
                 * motion.sprintBobY * sprintAmount;
 
+            // float meleeProgress = meleeDuration > 0f ? Mathf.Clamp01(1f - meleeTimer / meleeDuration) : 1f;
+            // float meleePose = IsMeleeing ? Mathf.Sin(meleeProgress * Mathf.PI) : 0f;
             float switchPose = EaseInOutCubic(GetWeaponSwitchAmount());
             Vector3 switchOffset = weaponSwitchOffset * switchPose;
             Vector3 switchRotation = weaponSwitchRotation * switchPose;
 
             Vector3 position = weapon.HoldPosition + motion.sprintOffset * sprintAmount;
             position += switchOffset;
+            // position += new Vector3(0.04f, -0.08f, -0.18f) * meleePose;
             position.x += swayPosition.x + bobX;
             position.y += swayPosition.y - bobY - idleBobY;
             position.x += -recoilKick * motion.recoilKickOffset.x
@@ -708,6 +858,7 @@ namespace Apoplexy.Weapons
             rotation += motion.recoilKickRotation * recoilKick
                 + motion.recoilFollowThroughRotation * recoilFollowThrough;
             rotation += switchRotation;
+            // rotation += new Vector3(-26f, 18f, -10f) * meleePose;
             rotation += reloadSpinRotation * EaseInOutCubic(reloadAmount);
             rotation += motion.sprintRotation * sprintAmount;
 

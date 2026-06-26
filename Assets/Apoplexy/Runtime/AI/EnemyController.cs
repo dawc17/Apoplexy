@@ -93,6 +93,30 @@ namespace Apoplexy.AI
             verticalVelocity = -2f;
         }
 
+        public void ApplyKnockback(Vector3 direction, float impulse, float lift)
+        {
+            if (!IsAlive)
+            {
+                return;
+            }
+
+            direction.y = 0f;
+
+            if (direction.sqrMagnitude <= 0.0001f)
+            {
+                direction = -transform.forward;
+            }
+
+            direction.Normalize();
+            knockbackVelocity += direction * impulse;
+            verticalVelocity = Mathf.Max(verticalVelocity, lift);
+
+            if (State == EnemyState.AttackWindup)
+            {
+                SetState(EnemyState.AttackRecovery, attackRecoveryDuration);
+            }
+        }
+
         public void TakeDamage(DamageInfo damageInfo)
         {
             if (!IsAlive)

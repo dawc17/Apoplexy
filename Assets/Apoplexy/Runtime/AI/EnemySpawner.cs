@@ -26,6 +26,11 @@ namespace Apoplexy.AI
             hasSpawnedThisScene = false;
         }
 
+        private void Awake()
+        {
+            hasSpawnedThisScene = false;
+        }
+
         private void Start()
         {
             if (spawnOnStart)

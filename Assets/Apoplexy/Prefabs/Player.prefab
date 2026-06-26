@@ -234,3 +234,21 @@ MonoBehaviour:
   headBobEaseSpeed: 10
   crouchBobScale: 0.35
   sprintBobBoost: 0.18
+  footstepSounds:
+  - {fileID: 8300000, guid: cde6402bd833790cd83e8c17a43625db, type: 3}
+  - {fileID: 8300000, guid: 2b881bc22fdd3c55c8a8323611df54d4, type: 3}
+  - {fileID: 8300000, guid: 318111dee046676a6a9ea79dd6a25bbb, type: 3}
+  - {fileID: 8300000, guid: 88c610ed255324bc586cf75c54a7b87d, type: 3}
+  - {fileID: 8300000, guid: 0192b3200a46908da88db73e2ffceaf6, type: 3}
+  walkFootstepVolume: 0.68
+  sprintFootstepVolume: 0.85
+  crouchFootstepVolume: 0.32
+  footstepPitchJitter: {x: -0.04, y: 0.04}
+  footstepPanJitter: {x: -0.1, y: 0.1}
+  minimumFootstepSpeed: 1.2
+  walkStepDistance: 1.72
+  sprintStepDistance: 1.92
+  crouchStepDistance: 1.42
+  walkNoiseRadius: 4.5
+  sprintNoiseRadius: 8
+  crouchNoiseRadius: 1.35

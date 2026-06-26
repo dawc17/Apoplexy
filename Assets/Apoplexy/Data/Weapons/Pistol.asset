@@ -29,6 +29,15 @@ MonoBehaviour:
   reloadDuration: 1.8
   autoReloadWhenEmpty: 1
   reloadOneAtATime: 0
+  meleeDamage: 5
+  meleeRange: 1.65
+  meleeRadius: 0.45
+  meleeKnockbackImpulse: 7
+  meleeKnockbackLift: 1.2
+  reloadSpinKnockbackMultiplier: 1.8
+  meleeWindupDuration: 0.1
+  meleeActiveDuration: 0.08
+  meleeRecoveryDuration: 0.32
   viewModelPrefab: {fileID: 919132149155446097, guid: d0ea89da2f125dc0cb5daa932ca98d8a, type: 3}
   viewModelMaterial: {fileID: 2100000, guid: 5a49de3d1fce51a7d92768c7ca7bc2f5, type: 2}
   holdPosition: {x: 0.19, y: -0.15, z: 0.38}

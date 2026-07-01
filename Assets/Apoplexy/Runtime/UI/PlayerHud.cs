@@ -3,6 +3,7 @@ using Apoplexy.Player;
 using Apoplexy.Weapons;
 using TMPro;
 using UnityEngine;
+using UnityEngine.TextCore.LowLevel;
 using UnityEngine.UI;
 
 namespace Apoplexy.UI
@@ -18,8 +19,7 @@ namespace Apoplexy.UI
         [SerializeField] private TMP_Text ammoText;
         [SerializeField] private TMP_Text weaponStatusText;
         [SerializeField] private Image reloadProgressFill;
-        [SerializeField] private TMP_Text healthText;
-        [SerializeField] private Image healthFill;
+        [SerializeField] private TMP_Text healthLabelText;
         [SerializeField] private TMP_Text awarenessAccentText;
         [SerializeField] private TMP_Text awarenessText;
         [SerializeField] private Graphic awarenessPanel;
@@ -28,15 +28,25 @@ namespace Apoplexy.UI
         [SerializeField] private GameObject stateOverlay;
         [SerializeField] private TMP_Text stateTitleText;
         [SerializeField] private TMP_Text statePromptText;
+        [SerializeField] private HealthHud healthHud;
+
+        [Header("Typography")]
+        [SerializeField] private Font terminalSourceFont;
+        [SerializeField] private Font japaneseSourceFont;
 
         [Header("Formatting")]
         [SerializeField] private string ammoFormat = "{0:00} / {1:000}";
-        [SerializeField] private string healthFormat = "{0:000}";
+        [SerializeField] private string healthLabel = "生命";
         [SerializeField] private string reloadText = "RELOADING";
         [SerializeField] private string weaponReadyText = "SLOT {0}/{1}";
         [SerializeField] private string deadTitle = "SIGNAL LOST";
         [SerializeField] private string winTitle = "you! !!won";
         [SerializeField] private string restartPrompt = "r to reboot or sum";
+
+        [Header("Layout")]
+        [SerializeField] private float awarenessHorizontalPadding = 36f;
+        [SerializeField] private float awarenessTextGap = 34f;
+        [SerializeField] private float awarenessMinWidth = 220f;
 
         [Header("Colors")]
         [SerializeField] private Color textColor = new(0.92f, 0.92f, 0.88f, 1f);
@@ -46,20 +56,27 @@ namespace Apoplexy.UI
         [SerializeField] private Color damageVignetteColor = new(0.38f, 0f, 0f, 0.42f);
         [SerializeField] private Color crouchVignetteColor = new(0f, 0f, 0f, 0.14f);
 
+        private const string TerminalFontResourcePath = "Fonts/AdwaitaMono-Regular";
+        private const string JapaneseFontResourcePath = "Fonts/NotoSansJP-Regular";
+
+        private TMP_FontAsset terminalFontAsset;
+        private TMP_FontAsset japaneseFontAsset;
+        private bool typographyApplied;
         private bool subscribedToWeapon;
-        private bool subscribedToHealth;
 
         private void Awake()
         {
+            ApplyTypography();
             BindMissingReferences();
         }
 
         private void OnEnable()
         {
+            ApplyTypography();
             BindMissingReferences();
             Subscribe();
             Refresh();
-            RefreshHealth();
+            BindChildHuds();
             RefreshSessionUi();
         }
 
@@ -72,9 +89,16 @@ namespace Apoplexy.UI
         {
             BindMissingReferences();
             Subscribe();
-            RefreshHealth();
             RefreshStatus();
             RefreshSessionUi();
+        }
+
+        private void BindChildHuds()
+        {
+            if (healthHud != null)
+            {
+                healthHud.Bind(playerHealth);
+            }
         }
 
         private void BindMissingReferences()
@@ -107,12 +131,6 @@ namespace Apoplexy.UI
                 weaponController.AmmunitionChanged += Refresh;
                 subscribedToWeapon = true;
             }
-
-            if (!subscribedToHealth && playerHealth != null)
-            {
-                playerHealth.HealthChanged += OnHealthChanged;
-                subscribedToHealth = true;
-            }
         }
 
         private void Unsubscribe()
@@ -122,13 +140,7 @@ namespace Apoplexy.UI
                 weaponController.AmmunitionChanged -= Refresh;
             }
 
-            if (subscribedToHealth && playerHealth != null)
-            {
-                playerHealth.HealthChanged -= OnHealthChanged;
-            }
-
             subscribedToWeapon = false;
-            subscribedToHealth = false;
         }
 
         private void Refresh()
@@ -145,37 +157,6 @@ namespace Apoplexy.UI
             SetText(weaponModelText, weaponController.Weapon.DisplayName);
             SetText(ammoText, string.Format(ammoFormat, weaponController.Ammunition, weaponController.ReserveAmmunition));
             RefreshStatus();
-        }
-
-        private void RefreshHealth()
-        {
-            if (playerHealth == null)
-            {
-                SetText(healthText, string.Empty);
-                SetFill(healthFill, 0f);
-                return;
-            }
-
-            SetText(healthText, string.Format(healthFormat, playerHealth.Health));
-
-            float healthPercent = playerHealth.MaxHealth > 0
-                ? Mathf.Clamp01((float)playerHealth.Health / playerHealth.MaxHealth)
-                : 0f;
-
-            SetFill(healthFill, healthPercent);
-
-            if (healthFill != null)
-            {
-                float pulse = Mathf.PingPong(Time.unscaledTime * 32f, 1f);
-                healthFill.color = playerHealth.Health <= 30
-                    ? Color.Lerp(new Color(dangerColor.r, dangerColor.g, dangerColor.b, 0.72f), dangerColor, pulse)
-                    : new Color(textColor.r, textColor.g, textColor.b, 0.88f);
-            }
-        }
-
-        private void OnHealthChanged(int currentHealth, int maxHealth)
-        {
-            RefreshHealth();
         }
 
         private void RefreshStatus()
@@ -236,6 +217,7 @@ namespace Apoplexy.UI
                 SetText(awarenessAccentText, AwarenessAccent(gameSession.AwarenessText));
                 SetTextColor(awarenessText, awarenessColor);
                 SetTextColor(awarenessAccentText, new Color(awarenessColor.r, awarenessColor.g, awarenessColor.b, 0.72f));
+                ResizeAwarenessPanel();
 
                 if (awarenessPanel != null)
                 {
@@ -255,15 +237,137 @@ namespace Apoplexy.UI
             }
         }
 
+        private void ResizeAwarenessPanel()
+        {
+            if (awarenessPanel == null || awarenessAccentText == null || awarenessText == null)
+            {
+                return;
+            }
+
+            RectTransform panelRect = awarenessPanel.rectTransform;
+            RectTransform accentRect = awarenessAccentText.rectTransform;
+            RectTransform textRect = awarenessText.rectTransform;
+
+            awarenessAccentText.ForceMeshUpdate();
+            awarenessText.ForceMeshUpdate();
+
+            float accentWidth = Mathf.Ceil(awarenessAccentText.GetPreferredValues().x);
+            float textWidth = Mathf.Ceil(awarenessText.GetPreferredValues().x);
+            float contentWidth = accentWidth + awarenessTextGap + textWidth;
+            float panelWidth = Mathf.Max(awarenessMinWidth, contentWidth + awarenessHorizontalPadding * 2f);
+
+            Vector2 panelSize = panelRect.sizeDelta;
+            panelSize.x = panelWidth;
+            panelRect.sizeDelta = panelSize;
+
+            accentRect.anchorMin = new Vector2(0f, 0.5f);
+            accentRect.anchorMax = new Vector2(0f, 0.5f);
+            accentRect.pivot = new Vector2(0f, 0.5f);
+            accentRect.anchoredPosition = new Vector2(awarenessHorizontalPadding, 0f);
+            accentRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, accentWidth);
+
+            textRect.anchorMin = new Vector2(0f, 0.5f);
+            textRect.anchorMax = new Vector2(0f, 0.5f);
+            textRect.pivot = new Vector2(0f, 0.5f);
+            textRect.anchoredPosition = new Vector2(awarenessHorizontalPadding + accentWidth + awarenessTextGap, 0f);
+            textRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, textWidth);
+        }
+
         private static string AwarenessAccent(string label)
         {
             return label switch
             {
-                "DISCOVERED" => "ALERT",
-                "SPOTTED" => "SEEN",
-                "SEEN?" => "TRACE",
-                _ => "SOUND",
+                "DISCOVERED" => "警告",
+                "SPOTTED" => "視認",
+                "SEEN?" => "検知",
+                _ => "聴音",
             };
+        }
+
+        private void ApplyTypography()
+        {
+            if (typographyApplied)
+            {
+                return;
+            }
+
+            terminalSourceFont ??= Resources.Load<Font>(TerminalFontResourcePath);
+            japaneseSourceFont ??= Resources.Load<Font>(JapaneseFontResourcePath);
+
+            terminalFontAsset ??= CreateRuntimeFontAsset(terminalSourceFont);
+            japaneseFontAsset ??= CreateRuntimeFontAsset(japaneseSourceFont);
+
+            if (terminalFontAsset == null && japaneseFontAsset == null)
+            {
+                return;
+            }
+
+            foreach (TMP_Text text in GetComponentsInChildren<TMP_Text>(true))
+            {
+                TMP_FontAsset targetFont = ContainsCjk(text.text) && japaneseFontAsset != null
+                    ? japaneseFontAsset
+                    : terminalFontAsset;
+
+                SetFont(text, targetFont);
+            }
+
+            SetFont(weaponModelText, terminalFontAsset);
+            SetFont(ammoText, terminalFontAsset);
+            SetFont(weaponStatusText, terminalFontAsset);
+            SetFont(awarenessText, terminalFontAsset);
+            SetFont(stateTitleText, terminalFontAsset);
+            SetFont(statePromptText, terminalFontAsset);
+            SetFont(healthLabelText, japaneseFontAsset != null ? japaneseFontAsset : terminalFontAsset);
+            SetFont(awarenessAccentText, japaneseFontAsset != null ? japaneseFontAsset : terminalFontAsset);
+
+            if (japaneseFontAsset != null)
+            {
+                SetText(healthLabelText, healthLabel);
+            }
+
+            typographyApplied = true;
+        }
+
+        private static TMP_FontAsset CreateRuntimeFontAsset(Font sourceFont)
+        {
+            if (sourceFont == null)
+            {
+                return null;
+            }
+
+            TMP_FontAsset fontAsset = TMP_FontAsset.CreateFontAsset(
+                sourceFont,
+                96,
+                9,
+                GlyphRenderMode.SDFAA,
+                2048,
+                2048,
+                AtlasPopulationMode.Dynamic,
+                true);
+
+            fontAsset.name = sourceFont.name + " TMP Runtime";
+            fontAsset.atlasPopulationMode = AtlasPopulationMode.Dynamic;
+            fontAsset.hideFlags = HideFlags.DontSave;
+            return fontAsset;
+        }
+
+        private static bool ContainsCjk(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return false;
+            }
+
+            foreach (char character in value)
+            {
+                if (character is >= '\u3040' and <= '\u30ff'
+                    or >= '\u3400' and <= '\u9fff')
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static void SetText(TMP_Text text, string value)
@@ -271,6 +375,14 @@ namespace Apoplexy.UI
             if (text != null)
             {
                 text.text = value;
+            }
+        }
+
+        private static void SetFont(TMP_Text text, TMP_FontAsset fontAsset)
+        {
+            if (text != null && fontAsset != null && text.font != fontAsset)
+            {
+                text.font = fontAsset;
             }
         }
 

@@ -161,7 +161,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0c69631e9cf582574a8fab123736a74c, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.Levels.SpawnPoint
   <Type>k__BackingField: 1
 --- !u!1 &70657541
@@ -496,7 +496,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
@@ -562,7 +562,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.6509434, g: 0.064909644, b: 0, a: 1}
@@ -839,6 +839,7 @@ GameObject:
   m_Component:
   - component: {fileID: 210040002}
   - component: {fileID: 974936719}
+  - component: {fileID: 974936720}
   m_Layer: 5
   m_Name: Apoplexy TMP HUD
   m_TagString: Untagged
@@ -1058,7 +1059,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 85b90bb0e96eb5faa8b00f94b5a0f6cd, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.UI.HealthHud
   healthText: {fileID: 210040303}
   currentFill: {fileID: 210040308}
@@ -1127,6 +1128,7 @@ GameObject:
   - component: {fileID: 210040071}
   - component: {fileID: 210040072}
   - component: {fileID: 210040501}
+  - component: {fileID: 705599964}
   m_Layer: 5
   m_Name: WeaponPanel
   m_TagString: Untagged
@@ -4634,6 +4636,25 @@ Transform:
   - {fileID: 1333050499}
   m_Father: {fileID: 1363289263}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &705599964
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 210040070}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ab9cbbaa1d748ff4960005cb655ea7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.UI.WeaponHud
+  weaponModelText: {fileID: 210040503}
+  ammoText: {fileID: 210040506}
+  weaponStatusText: {fileID: 0}
+  reloadProgressFill: {fileID: 0}
+  ammoFormat: '{0:00} / {1:000}'
+  reloadText: RELOADING
+  weaponReadyText: SLOT {0}/{1}
 --- !u!1 &715312424
 GameObject:
   m_ObjectHideFlags: 0
@@ -4964,38 +4985,46 @@ MonoBehaviour:
   playerHealth: {fileID: 1470698716}
   playerController: {fileID: 1470698713}
   gameSession: {fileID: 0}
-  weaponModelText: {fileID: 210040503}
-  ammoText: {fileID: 210040506}
-  weaponStatusText: {fileID: 0}
-  reloadProgressFill: {fileID: 0}
   healthLabelText: {fileID: 0}
-  awarenessAccentText: {fileID: 210040404}
-  awarenessText: {fileID: 210040407}
-  awarenessPanel: {fileID: 210040401}
   damageVignette: {fileID: 210040201}
   crouchVignette: {fileID: 210040211}
   stateOverlay: {fileID: 210040080}
   stateTitleText: {fileID: 210040705}
   statePromptText: {fileID: 210040708}
+  weaponHud: {fileID: 705599964}
   healthHud: {fileID: 210040052}
+  awarenessHud: {fileID: 974936720}
   terminalSourceFont: {fileID: 12800000, guid: 1e70dc2b14ce4d2f8c7f5e590897c298, type: 3}
   japaneseSourceFont: {fileID: 12800000, guid: 90f9839338bc447dbaa3d80f1dc0a8be, type: 3}
-  ammoFormat: '{0:00} / {1:000}'
   healthLabel: "\u751F\u547D"
-  reloadText: RELOADING
-  weaponReadyText: SLOT {0}/{1}
   deadTitle: SIGNAL LOST
   winTitle: you! !!won
   restartPrompt: r to reboot or sum
-  awarenessHorizontalPadding: 36
-  awarenessTextGap: 34
-  awarenessMinWidth: 220
   textColor: {r: 0.92, g: 0.92, b: 0.88, a: 1}
   dimTextColor: {r: 0.52, g: 0.52, b: 0.49, a: 1}
-  panelColor: {r: 0, g: 0, b: 0, a: 0.77}
   dangerColor: {r: 0.82, g: 0.09, b: 0.11, a: 1}
   damageVignetteColor: {r: 0.38, g: 0, b: 0, a: 0.42}
   crouchVignetteColor: {r: 0, g: 0, b: 0, a: 0.14}
+--- !u!114 &974936720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 210040001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f00925e005de03aebbe7fef73bca7567, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.UI.AwarenessHud
+  awarenessPanel: {fileID: 210040401}
+  awarenessAccentText: {fileID: 210040404}
+  awarenessText: {fileID: 210040407}
+  horizontalPadding: 36
+  textGap: 38
+  minWidth: 220
+  panelColor: {r: 0, g: 0, b: 0, a: 0.77}
+  dangerColor: {r: 0.82, g: 0.09, b: 0.11, a: 1}
 --- !u!1 &986448095
 GameObject:
   m_ObjectHideFlags: 0

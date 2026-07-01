@@ -126,8 +126,6 @@ namespace Apoplexy.AI
 
             health -= damageInfo.Damage;
 
-            SpawnHitParticles(damageInfo);
-
             Vector3 threatPosition = damageInfo.Source != null
                 ? damageInfo.Source.transform.position
                 : damageInfo.Point;
@@ -137,6 +135,8 @@ namespace Apoplexy.AI
                 Die();
                 return;
             }
+
+            SpawnHitParticles(damageInfo);
 
             hitFlashTimer = hitFlashDuration;
             UpdateVisualState();

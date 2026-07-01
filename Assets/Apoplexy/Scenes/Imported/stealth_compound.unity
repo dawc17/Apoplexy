@@ -840,6 +840,7 @@ GameObject:
   - component: {fileID: 210040002}
   - component: {fileID: 974936719}
   - component: {fileID: 974936720}
+  - component: {fileID: 974936721}
   m_Layer: 5
   m_Name: Apoplexy TMP HUD
   m_TagString: Untagged
@@ -4985,26 +4986,12 @@ MonoBehaviour:
   playerHealth: {fileID: 1470698716}
   playerController: {fileID: 1470698713}
   gameSession: {fileID: 0}
-  healthLabelText: {fileID: 0}
-  damageVignette: {fileID: 210040201}
-  crouchVignette: {fileID: 210040211}
-  stateOverlay: {fileID: 210040080}
-  stateTitleText: {fileID: 210040705}
-  statePromptText: {fileID: 210040708}
   weaponHud: {fileID: 705599964}
   healthHud: {fileID: 210040052}
   awarenessHud: {fileID: 974936720}
+  sessionStateHud: {fileID: 974936721}
   terminalSourceFont: {fileID: 12800000, guid: 1e70dc2b14ce4d2f8c7f5e590897c298, type: 3}
   japaneseSourceFont: {fileID: 12800000, guid: 90f9839338bc447dbaa3d80f1dc0a8be, type: 3}
-  healthLabel: "\u751F\u547D"
-  deadTitle: SIGNAL LOST
-  winTitle: you! !!won
-  restartPrompt: r to reboot or sum
-  textColor: {r: 0.92, g: 0.92, b: 0.88, a: 1}
-  dimTextColor: {r: 0.52, g: 0.52, b: 0.49, a: 1}
-  dangerColor: {r: 0.82, g: 0.09, b: 0.11, a: 1}
-  damageVignetteColor: {r: 0.38, g: 0, b: 0, a: 0.42}
-  crouchVignetteColor: {r: 0, g: 0, b: 0, a: 0.14}
 --- !u!114 &974936720
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5025,6 +5012,30 @@ MonoBehaviour:
   minWidth: 220
   panelColor: {r: 0, g: 0, b: 0, a: 0.77}
   dangerColor: {r: 0.82, g: 0.09, b: 0.11, a: 1}
+--- !u!114 &974936721
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 210040001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6049ea2b54b2eebbbb246436c6df0efa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.UI.SessionStateHud
+  damageVignette: {fileID: 210040201}
+  crouchVignette: {fileID: 210040211}
+  stateOverlay: {fileID: 210040080}
+  stateTitleText: {fileID: 210040705}
+  statePromptText: {fileID: 210040708}
+  deadTitle: SIGNAL LOST
+  winTitle: MISSION COMPLETE
+  restartPrompt: R TO REBOOT
+  textColor: {r: 0.92, g: 0.92, b: 0.88, a: 1}
+  dangerColor: {r: 0.82, g: 0.09, b: 0.11, a: 1}
+  damageVignetteColor: {r: 0.38, g: 0, b: 0, a: 0.42}
+  crouchVignetteColor: {r: 0, g: 0, b: 0, a: 0.14}
 --- !u!1 &986448095
 GameObject:
   m_ObjectHideFlags: 0

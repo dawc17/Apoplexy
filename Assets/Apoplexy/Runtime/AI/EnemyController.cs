@@ -1,5 +1,6 @@
 using Apoplexy.Combat;
 using Apoplexy.Player;
+using UnityEngine.AI;
 using UnityEngine;
 
 namespace Apoplexy.AI
@@ -25,10 +26,30 @@ namespace Apoplexy.AI
         [Header("Movement")]
         [SerializeField, Min(0f)] private float speed = 2.5f;
         [SerializeField, Min(0f)] private float searchSpeed = 1.8f;
+        [SerializeField, Min(0f)] private float patrolSpeed = 1.45f;
         [SerializeField, Min(0f)] private float acceleration = 14f;
         [SerializeField, Min(0f)] private float gravity = 24f;
         [SerializeField, Min(0f)] private float turnSpeed = 14f;
         [SerializeField, Min(0f)] private float stoppingDistance = 0.55f;
+
+        [Header("Navigation")]
+        [SerializeField] private bool useNavMeshPathing = true;
+        [SerializeField, Min(0.05f)] private float navMeshSampleDistance = 1.2f;
+        [SerializeField, Min(0.05f)] private float navPathRefreshInterval = 0.2f;
+        [SerializeField, Min(0.05f)] private float navCornerReachDistance = 0.35f;
+        [SerializeField, Min(0.1f)] private float stuckTimeout = 1.2f;
+        [SerializeField, Min(0.001f)] private float stuckMoveThreshold = 0.03f;
+
+        [Header("Patrol")]
+        [SerializeField] private GameObject[] patrolPoints;
+        [SerializeField] private bool startOnPatrol = true;
+        [SerializeField] private bool randomizeInitialPatrolPoint = true;
+        [SerializeField, Min(0f)] private float patrolWaitDuration = 0.65f;
+
+        [Header("Group Behavior")]
+        [SerializeField, Range(0f, 0.5f)] private float patrolSpeedVariance = 0.12f;
+        [SerializeField, Range(0f, 0.75f)] private float patrolWaitVariance = 0.35f;
+        [SerializeField, Min(0f)] private float investigationScatterRadius = 1.25f;
 
         [Header("Combat")]
         [SerializeField, Min(1)] private int maxHealth = 30;
@@ -45,6 +66,9 @@ namespace Apoplexy.AI
         [SerializeField, Min(0f)] private float alertDuration = 0.22f;
         [SerializeField, Min(0f)] private float loseSightGrace = 0.45f;
         [SerializeField, Min(0f)] private float searchDuration = 2.2f;
+        [SerializeField, Min(0f)] private float searchPointWaitDuration = 0.35f;
+        [SerializeField, Min(0f)] private float searchSweepRadius = 2.2f;
+        [SerializeField, Range(1, 8)] private int searchSweepPointCount = 4;
         [SerializeField] private LayerMask sightBlockers = ~0;
         [SerializeField] private LayerMask obstacleMask = ~0;
 
@@ -71,6 +95,17 @@ namespace Apoplexy.AI
         private Vector3 knockbackVelocity;
         private Vector3 lastKnownPlayerPosition;
         private Vector3 investigationTarget;
+        private NavMeshPath navPath;
+        private Vector3 navPathTarget;
+        private Vector3 sampledNavTarget;
+        private Vector3 lastStuckCheckPosition;
+        private float navPathRefreshTimer;
+        private float stuckTimer;
+        private int patrolIndex;
+        private int searchSweepIndex;
+        private float pointWaitTimer;
+        private float patrolSpeedMultiplier = 1f;
+        private float patrolWaitMultiplier = 1f;
         private float verticalVelocity;
         private float stateTimer;
         private float timeSinceSeenPlayer = 999f;
@@ -83,6 +118,12 @@ namespace Apoplexy.AI
         public void Configure(Transform playerTransform)
         {
             player = playerTransform;
+        }
+
+        public void ConfigurePatrolRoute(GameObject[] routePoints)
+        {
+            patrolPoints = routePoints;
+            patrolIndex = FindInitialPatrolPointIndex();
         }
 
         public void SnapToGround(float groundY)
@@ -149,6 +190,9 @@ namespace Apoplexy.AI
 
             health = maxHealth;
             materialProperties = new MaterialPropertyBlock();
+            navPath = new NavMeshPath();
+            lastStuckCheckPosition = transform.position;
+            InitializeIndividualVariation();
 
             CacheBodyRenderers();
             ConfigureController();
@@ -179,6 +223,12 @@ namespace Apoplexy.AI
             FindPlayerIfNeeded();
             AlignVisualBottomToGround();
             UpdateVisualState();
+
+            if (startOnPatrol && HasPatrolRoute())
+            {
+                patrolIndex = FindInitialPatrolPointIndex();
+                SetState(EnemyState.Patrol);
+            }
         }
 
         private void OnDisable()
@@ -224,6 +274,20 @@ namespace Apoplexy.AI
                     {
                         SetState(EnemyState.Suspicious, suspicionDuration);
                     }
+                    else if (HasPatrolRoute())
+                    {
+                        SetState(EnemyState.Patrol);
+                    }
+                    break;
+
+                case EnemyState.Patrol:
+                    if (seesPlayer)
+                    {
+                        SetState(EnemyState.Suspicious, suspicionDuration);
+                        break;
+                    }
+
+                    UpdatePatrol(deltaTime);
                     break;
 
                 case EnemyState.Suspicious:
@@ -232,8 +296,7 @@ namespace Apoplexy.AI
 
                     if (!seesPlayer)
                     {
-                        investigationTarget = lastKnownPlayerPosition;
-                        SetState(EnemyState.Search, searchDuration);
+                        BeginSearch(lastKnownPlayerPosition);
                     }
                     else if (stateTimer <= 0f)
                     {
@@ -247,8 +310,7 @@ namespace Apoplexy.AI
 
                     if (!seesPlayer)
                     {
-                        investigationTarget = lastKnownPlayerPosition;
-                        SetState(EnemyState.Search, searchDuration);
+                        BeginSearch(lastKnownPlayerPosition);
                     }
                     else if (stateTimer <= 0f)
                     {
@@ -261,18 +323,7 @@ namespace Apoplexy.AI
                     break;
 
                 case EnemyState.Search:
-                    if (seesPlayer)
-                    {
-                        SetState(EnemyState.Suspicious, suspicionDuration);
-                        break;
-                    }
-
-                    MoveToward(investigationTarget, searchSpeed, deltaTime);
-
-                    if (stateTimer <= 0f)
-                    {
-                        SetState(EnemyState.Idle);
-                    }
+                    UpdateSearch(seesPlayer, deltaTime);
                     break;
 
                 case EnemyState.AttackWindup:
@@ -291,7 +342,14 @@ namespace Apoplexy.AI
 
                     if (stateTimer <= 0f)
                     {
-                        SetState(timeSinceSeenPlayer <= loseSightGrace ? EnemyState.Chase : EnemyState.Search, searchDuration);
+                        if (timeSinceSeenPlayer <= loseSightGrace)
+                        {
+                            SetState(EnemyState.Chase);
+                        }
+                        else
+                        {
+                            BeginSearch(lastKnownPlayerPosition);
+                        }
                     }
                     break;
             }
@@ -317,17 +375,230 @@ namespace Apoplexy.AI
 
             if (timeSinceSeenPlayer > loseSightGrace)
             {
-                investigationTarget = lastKnownPlayerPosition;
-                SetState(EnemyState.Search, searchDuration);
+                BeginSearch(lastKnownPlayerPosition);
                 return;
             }
 
             MoveToward(player.position, speed, deltaTime);
         }
 
+        private void UpdatePatrol(float deltaTime)
+        {
+            if (!HasPatrolRoute())
+            {
+                SetState(EnemyState.Idle);
+                return;
+            }
+
+            Transform point = GetPatrolPoint(patrolIndex);
+
+            if (point == null)
+            {
+                AdvancePatrolPoint();
+                return;
+            }
+
+            if (pointWaitTimer > 0f)
+            {
+                pointWaitTimer = Mathf.Max(0f, pointWaitTimer - deltaTime);
+                StopHorizontalMovement(deltaTime);
+                FaceTowards(point.position, deltaTime);
+                return;
+            }
+
+            MoveToward(point.position, patrolSpeed * patrolSpeedMultiplier, deltaTime);
+
+            if (HasReached(point.position))
+            {
+                AdvancePatrolPoint();
+                pointWaitTimer = GetPatrolWaitDuration();
+            }
+            else if (IsStuck(deltaTime))
+            {
+                AdvancePatrolPoint();
+                pointWaitTimer = GetPatrolWaitDuration();
+                ResetStuckCheck();
+                ResetNavPath();
+            }
+        }
+
+        private void UpdateSearch(bool seesPlayer, float deltaTime)
+        {
+            if (seesPlayer)
+            {
+                SetState(EnemyState.Suspicious, suspicionDuration);
+                return;
+            }
+
+            Vector3 target = GetSearchTarget();
+
+            if (pointWaitTimer > 0f)
+            {
+                pointWaitTimer = Mathf.Max(0f, pointWaitTimer - deltaTime);
+                StopHorizontalMovement(deltaTime);
+                FaceTowards(target, deltaTime);
+                return;
+            }
+
+            MoveToward(target, searchSpeed, deltaTime);
+
+            if (HasReached(target))
+            {
+                searchSweepIndex++;
+                pointWaitTimer = searchPointWaitDuration;
+            }
+            else if (IsStuck(deltaTime))
+            {
+                searchSweepIndex++;
+                pointWaitTimer = searchPointWaitDuration;
+                ResetStuckCheck();
+                ResetNavPath();
+            }
+        }
+
+        private void BeginSearch(Vector3 target)
+        {
+            investigationTarget = ScatterInvestigationTarget(target);
+            searchSweepIndex = 0;
+            pointWaitTimer = 0f;
+            SetState(EnemyState.Search, searchDuration);
+        }
+
+        private void InitializeIndividualVariation()
+        {
+            patrolSpeedMultiplier = Random.Range(1f - patrolSpeedVariance, 1f + patrolSpeedVariance);
+            patrolWaitMultiplier = Random.Range(1f - patrolWaitVariance, 1f + patrolWaitVariance);
+        }
+
+        private float GetPatrolWaitDuration()
+        {
+            return patrolWaitDuration * patrolWaitMultiplier;
+        }
+
+        private Vector3 ScatterInvestigationTarget(Vector3 target)
+        {
+            if (investigationScatterRadius <= 0f)
+            {
+                return target;
+            }
+
+            Vector2 scatter = Random.insideUnitCircle * investigationScatterRadius;
+            Vector3 scatteredTarget = target + new Vector3(scatter.x, 0f, scatter.y);
+
+            if (!useNavMeshPathing)
+            {
+                return scatteredTarget;
+            }
+
+            return NavMesh.SamplePosition(scatteredTarget, out NavMeshHit hit, navMeshSampleDistance, NavMesh.AllAreas)
+                ? hit.position
+                : target;
+        }
+
+        private bool HasReached(Vector3 target)
+        {
+            Vector3 reachableTarget = GetReachableTarget(target);
+            Vector3 toTarget = reachableTarget - transform.position;
+            toTarget.y = 0f;
+            return toTarget.sqrMagnitude <= stoppingDistance * stoppingDistance;
+        }
+
+        private Vector3 GetReachableTarget(Vector3 target)
+        {
+            if (!useNavMeshPathing)
+            {
+                return target;
+            }
+
+            return NavMesh.SamplePosition(target, out NavMeshHit hit, navMeshSampleDistance, NavMesh.AllAreas)
+                ? hit.position
+                : target;
+        }
+
+        private Vector3 GetSearchTarget()
+        {
+            if (searchSweepIndex <= 0 || searchSweepRadius <= 0f || searchSweepPointCount <= 1)
+            {
+                return investigationTarget;
+            }
+
+            int sweepIndex = (searchSweepIndex - 1) % searchSweepPointCount;
+            float angle = sweepIndex * Mathf.PI * 2f / searchSweepPointCount;
+            Vector3 offset = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * searchSweepRadius;
+            return investigationTarget + offset;
+        }
+
+        private bool HasPatrolRoute()
+        {
+            return patrolPoints != null && patrolPoints.Length > 0;
+        }
+
+        private int FindInitialPatrolPointIndex()
+        {
+            if (!HasPatrolRoute())
+            {
+                return 0;
+            }
+
+            if (randomizeInitialPatrolPoint && patrolPoints.Length > 1)
+            {
+                return Random.Range(0, patrolPoints.Length);
+            }
+
+            return FindClosestPatrolPointIndex();
+        }
+
+        private int FindClosestPatrolPointIndex()
+        {
+            int closestIndex = 0;
+            float closestDistance = float.PositiveInfinity;
+
+            for (int i = 0; i < patrolPoints.Length; i++)
+            {
+                Transform point = GetPatrolPoint(i);
+
+                if (point == null)
+                {
+                    continue;
+                }
+
+                float distance = (point.position - transform.position).sqrMagnitude;
+
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestIndex = i;
+                }
+            }
+
+            return closestIndex;
+        }
+
+        private Transform GetPatrolPoint(int index)
+        {
+            if (patrolPoints == null || index < 0 || index >= patrolPoints.Length)
+            {
+                return null;
+            }
+
+            GameObject point = patrolPoints[index];
+            return point != null ? point.transform : null;
+        }
+
+        private void AdvancePatrolPoint()
+        {
+            if (!HasPatrolRoute())
+            {
+                return;
+            }
+
+            patrolIndex = (patrolIndex + 1) % patrolPoints.Length;
+        }
+
         private void MoveToward(Vector3 target, float targetSpeed, float deltaTime)
         {
-            Vector3 toTarget = target - transform.position;
+            Vector3 movementTarget = ResolveMovementTarget(target, deltaTime);
+            Vector3 toTarget = movementTarget - transform.position;
             toTarget.y = 0f;
 
             if (toTarget.magnitude <= stoppingDistance)
@@ -336,12 +607,116 @@ namespace Apoplexy.AI
                 return;
             }
 
-            Vector3 desiredDirection = SteerAroundObstacles(toTarget.normalized);
+            Vector3 desiredDirection = useNavMeshPathing
+                ? toTarget.normalized
+                : SteerAroundObstacles(toTarget.normalized);
             Vector3 desiredVelocity = desiredDirection * targetSpeed;
             float ease = 1f - Mathf.Exp(-acceleration * deltaTime);
 
             horizontalVelocity = Vector3.Lerp(horizontalVelocity, desiredVelocity, ease);
             FaceDirection(desiredDirection, deltaTime);
+        }
+
+        private Vector3 ResolveMovementTarget(Vector3 target, float deltaTime)
+        {
+            if (!useNavMeshPathing)
+            {
+                return target;
+            }
+
+            navPathRefreshTimer -= deltaTime;
+
+            bool targetChanged = (target - navPathTarget).sqrMagnitude > 0.25f;
+
+            if (navPathRefreshTimer <= 0f || targetChanged)
+            {
+                navPathRefreshTimer = navPathRefreshInterval;
+                navPathTarget = target;
+                RebuildNavPath(target);
+            }
+
+            if (navPath == null || navPath.status == NavMeshPathStatus.PathInvalid || navPath.corners.Length <= 1)
+            {
+                return sampledNavTarget;
+            }
+
+            for (int i = 1; i < navPath.corners.Length; i++)
+            {
+                Vector3 corner = navPath.corners[i];
+                Vector3 toCorner = corner - transform.position;
+                toCorner.y = 0f;
+
+                float cornerReachDistance = Mathf.Max(navCornerReachDistance, radius + 0.2f);
+
+                if (toCorner.sqrMagnitude > cornerReachDistance * cornerReachDistance)
+                {
+                    return corner;
+                }
+            }
+
+            return sampledNavTarget;
+        }
+
+        private void RebuildNavPath(Vector3 target)
+        {
+            if (navPath == null)
+            {
+                navPath = new NavMeshPath();
+            }
+
+            bool hasStart = NavMesh.SamplePosition(transform.position,
+                                                   out NavMeshHit startHit,
+                                                   navMeshSampleDistance,
+                                                   NavMesh.AllAreas);
+
+            bool hasEnd = NavMesh.SamplePosition(
+                target,
+                out NavMeshHit endHit,
+                navMeshSampleDistance,
+                NavMesh.AllAreas);
+
+            if (!hasStart || !hasEnd)
+            {
+                navPath.ClearCorners();
+                sampledNavTarget = target;
+                return;
+            }
+
+            sampledNavTarget = endHit.position;
+
+            if (!NavMesh.CalculatePath(startHit.position, endHit.position, NavMesh.AllAreas, navPath))
+            {
+                navPath.ClearCorners();
+            }
+        }
+
+        private void ResetNavPath()
+        {
+            navPath?.ClearCorners();
+            navPathRefreshTimer = 0f;
+            navPathTarget = new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
+            sampledNavTarget = transform.position;
+        }
+
+        private bool IsStuck(float deltaTime)
+        {
+            Vector3 moved = transform.position - lastStuckCheckPosition;
+            moved.y = 0f;
+
+            if (moved.magnitude > stuckMoveThreshold)
+            {
+                ResetStuckCheck();
+                return false;
+            }
+
+            stuckTimer += deltaTime;
+            return stuckTimer >= stuckTimeout;
+        }
+
+        private void ResetStuckCheck()
+        {
+            stuckTimer = 0f;
+            lastStuckCheckPosition = transform.position;
         }
 
         private Vector3 SteerAroundObstacles(Vector3 desiredDirection)
@@ -457,11 +832,11 @@ namespace Apoplexy.AI
 
             if (State is EnemyState.Idle or EnemyState.Search)
             {
-                SetState(EnemyState.Search, searchDuration);
+                BeginSearch(noiseEvent.Position);
             }
             else if (State is EnemyState.Suspicious)
             {
-                SetState(EnemyState.Search, searchDuration);
+                BeginSearch(noiseEvent.Position);
             }
         }
 
@@ -534,6 +909,8 @@ namespace Apoplexy.AI
 
             State = newState;
             stateTimer = timer;
+            ResetStuckCheck();
+            ResetNavPath();
             UpdateVisualState();
         }
 
@@ -547,6 +924,7 @@ namespace Apoplexy.AI
             Color color = hitFlashTimer > 0f ? hitFlashColor : State switch
             {
                 EnemyState.Search => searchColor,
+                EnemyState.Patrol => idleColor,
                 EnemyState.Suspicious => suspiciousColor,
                 EnemyState.AttackWindup => attackWindupColor,
                 EnemyState.AttackRecovery => attackRecoveryColor,

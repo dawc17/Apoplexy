@@ -69,7 +69,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f8c4adc7525f0016beb9c8f068003f9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Apoplexy.Runtime::Apoplexy.AI.EnemyController
   player: {fileID: 0}
   bodyRenderer: {fileID: 9055303382563772872}
@@ -83,10 +83,20 @@ MonoBehaviour:
   groundLift: 0.03
   speed: 2.5
   searchSpeed: 1.8
+  patrolSpeed: 1.45
   acceleration: 14
   gravity: 24
   turnSpeed: 14
   stoppingDistance: 0.55
+  useNavMeshPathing: 1
+  navMeshSampleDistance: 1.2
+  navPathRefreshInterval: 0.2
+  navCornerReachDistance: 0.35
+  stuckTimeout: 1.2
+  stuckMoveThreshold: 0.03
+  patrolPoints: []
+  startOnPatrol: 1
+  patrolWaitDuration: 0.65
   maxHealth: 30
   attackDamage: 18
   attackRange: 1.4
@@ -99,6 +109,9 @@ MonoBehaviour:
   alertDuration: 0.22
   loseSightGrace: 0.45
   searchDuration: 2.2
+  searchPointWaitDuration: 0.35
+  searchSweepRadius: 2.2
+  searchSweepPointCount: 4
   sightBlockers:
     serializedVersion: 2
     m_Bits: 4294967295

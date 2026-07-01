@@ -61,6 +61,7 @@ namespace Apoplexy.AI
                 Vector3 groundPosition = ResolveGroundPosition(spawnPoint.transform.position);
                 EnemyController enemy = SpawnEnemy(groundPosition, spawnPoint.transform.rotation);
                 enemy.Configure(player);
+                enemy.ConfigurePatrolRoute(spawnPoint.EnemyPatrolPoints);
 
                 if (destroySpawnMarkers)
                 {

@@ -14,6 +14,9 @@ namespace Apoplexy.Levels
         [field: SerializeField]
         public SpawnPointType Type { get; private set; }
 
+        [field: SerializeField]
+        public GameObject[] EnemyPatrolPoints { get; private set; }
+
         public void Configure(SpawnPointType type)
         {
             Type = type;

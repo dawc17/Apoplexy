@@ -21,19 +21,20 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: ParticleMaterial
-  m_Shader: {fileID: 211, guid: 0000000000000000f000000000000000, type: 0}
+  m_Shader: {fileID: 4800000, guid: 650dd9526735d5b46b79224bc6e94025, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _ALPHATEST_ON
   m_InvalidKeywords: []
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
+  m_DoubleSidedGI: 1
+  m_CustomRenderQueue: 2450
+  stringTagMap:
+    RenderType: TransparentCutout
   disabledShaderPasses:
   - MOTIONVECTORS
-  - GRABPASS
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
@@ -97,26 +98,41 @@ Material:
     m_Ints: []
     m_Floats:
     - _AddPrecomputedVelocity: 0
-    - _AlphaClip: 0
-    - _AlphaToMask: 0
+    - _AffineEnabled: 0
+    - _AffineMode: 0
+    - _AffineStrength: 0.18
+    - _AlphaClip: 1
+    - _AlphaToMask: 1
+    - _BackfaceTintEnabled: 0
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BlendOp: 0
     - _BumpScale: 1
+    - _CameraFadeDistance: 0.4
+    - _CameraFadeEnabled: 0
     - _CameraFadingEnabled: 0
     - _CameraFarFadeDistance: 2
     - _CameraNearFadeDistance: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _ColorMode: 0
-    - _Cull: 2
-    - _Cutoff: 0.5
+    - _Cull: 0
+    - _CullMode: 2
+    - _Cutoff: 0.45
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
+    - _DistanceFadeEnabled: 0
     - _DistortionBlend: 0.5
     - _DistortionEnabled: 0
     - _DistortionStrength: 1
     - _DistortionStrengthScaled: 0
+    - _DitherCutoutFadeEnabled: 0
+    - _DitherEnabled: 1
+    - _DitherFadeAmount: 0
+    - _DitherFadeEnd: 60
+    - _DitherFadeStart: 25
+    - _DitherScale: 1
+    - _DitherStrength: 0.12
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EmissionEnabled: 0
@@ -125,32 +141,86 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
+    - _LightBands: 0
     - _LightingEnabled: 0
+    - _LineHeight: 1
+    - _LineSpacing: 3
     - _Metallic: 0
+    - _MipBias: 0
     - _Mode: 0
     - _OcclusionStrength: 1
+    - _PaletteSteps: 32
+    - _PaletteStrength: 0.15
     - _Parallax: 0.005
+    - _PosterizeEnabled: 1
+    - _PosterizeSteps: 24
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _Smoothness: 0.5
+    - _RetroFogBlendMode: 0
+    - _RetroFogDensity: 0.035
+    - _RetroFogEnabled: 0
+    - _RetroFogEnd: 70
+    - _RetroFogStart: 18
+    - _RetroFogSteps: 6
+    - _RetroLightingModel: 0
+    - _RetroSpecularMode: 0
+    - _RimEnabled: 1
+    - _RimIntensity: 0.18
+    - _RimPower: 2.5
+    - _SampleGI: 0
+    - _ShadowBandStrength: 0.25
+    - _ShadowCutoff: 0.45
+    - _Smoothness: 0.35
     - _SmoothnessTextureChannel: 0
     - _SoftParticlesEnabled: 0
     - _SoftParticlesFarFadeDistance: 1
     - _SoftParticlesNearFadeDistance: 0
     - _SpecularHighlights: 1
+    - _SpecularIntensity: 0.45
+    - _SpecularPower: 28
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _Surface: 0
+    - _SweepHeight: 2
+    - _SweepSpeed: 46
+    - _TwoSidedEnabled: 1
+    - _UvPixelAspect: 1
+    - _UvPixelEnabled: 1
+    - _UvPixelResolution: 384
+    - _UvPixelStrength: 0.16
+    - _VertexDrawDistance: 0
+    - _VertexDrawDistanceEnabled: 0
+    - _VertexDrawDistanceFade: 0
+    - _VertexSnapDistanceFade: 0.6
+    - _VertexSnapEnabled: 0
+    - _VertexSnapFadeEnd: 45
+    - _VertexSnapFadeStart: 5
+    - _VertexSnapResolution: 320
+    - _VertexSnapSeamReduction: 0
+    - _VertexSnapSpace: 0
+    - _VertexSnapStrength: 0.08
+    - _VertexSnapUseAnchors: 0
+    - _VertexWobbleEnabled: 0
+    - _VertexWobbleScale: 4
+    - _VertexWobbleSpeed: 1.5
+    - _VertexWobbleStrength: 0.04
     - _WorkflowMode: 1
     - _XRMotionVectorsPass: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _BackfaceTint: {r: 0.68, g: 0.75, b: 0.62, a: 1}
+    - _BaseColor: {r: 0.7169812, g: 0, b: 0, a: 1}
     - _CameraFadeParams: {r: 0, g: Infinity, b: 0, a: 0}
-    - _Color: {r: 0.6509434, g: 0, b: 0, a: 1}
+    - _Color: {r: 0.7169812, g: 0, b: 0, a: 1}
     - _ColorAddSubDiff: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _Flip: {r: 1, g: 1, b: 1, a: 1}
+    - _LineColor: {r: 0, g: 0, b: 0, a: 0.26}
+    - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
+    - _RetroFogColor: {r: 0.41999996, g: 0.45999992, b: 0.5, a: 1}
+    - _RimColor: {r: 0.45, g: 0.55, b: 0.8, a: 1}
     - _SoftParticleFadeParams: {r: 0, g: 0, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+    - _SweepColor: {r: 1, g: 1, b: 1, a: 0.08}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
